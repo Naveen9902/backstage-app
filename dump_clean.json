@@ -1,0 +1,14 @@
+[
+  {
+    "id": "admin-1234",
+    "email": "admin@backstage.com",
+    "role": "ADMIN",
+    "name": "Sys Admin"
+  },
+  {
+    "id": "manager-1234",
+    "email": "manager@backstage.com",
+    "role": "MANAGER",
+    "name": "John Doe (Manager)"
+  }
+]

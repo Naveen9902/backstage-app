@@ -1,0 +1,29 @@
+[
+  {
+    "id": "7ea8db7c-4aeb-406b-bee8-2683027b9968",
+    "managerId": "manager-1234",
+    "title": "Test Event",
+    "description": "Test",
+    "date": "2026-10-10T00:00:00.000+00:00",
+    "location": "NYC",
+    "createdAt": "2026-07-17T04:29:17.982+00:00"
+  },
+  {
+    "id": "66e4c542-72db-429a-85c2-c67de8da4a3d",
+    "managerId": "manager-1234",
+    "title": "wedding",
+    "description": "wedding event",
+    "date": "2026-12-20T00:00:00.000+00:00",
+    "location": "banglore",
+    "createdAt": "2026-07-17T04:32:24.952+00:00"
+  },
+  {
+    "id": "3f0a9b13-949d-4e7a-81cd-f9e31b00fd93",
+    "managerId": "admin-1234",
+    "title": "wedding",
+    "description": "vvhyvhjvkvkgkugukcgfxfcghjvj",
+    "date": "2026-08-12T00:00:00.000+00:00",
+    "location": "banglore",
+    "createdAt": "2026-07-17T05:36:05.390+00:00"
+  }
+]
