@@ -32,6 +32,9 @@ jobs:
           # Update IPHONEOS_DEPLOYMENT_TARGET in the Xcode project
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' App.xcodeproj/project.pbxproj
 
+      - name: Sync web assets to iOS (cap sync)
+        run: npx cap sync ios
+
       - name: Install iOS pods
         run: |
           cd ios/App
