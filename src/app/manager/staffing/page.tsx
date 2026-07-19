@@ -143,11 +143,11 @@ function StaffingContent() {
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700">Quantity Needed</label>
-                <input required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value === '' ? '' : parseInt(e.target.value, 10)})} type="number" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                <input required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10)})} type="number" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700">Pay Rate (Total or Hourly)</label>
-                <input required value={formData.payRate} onChange={e=>setFormData({...formData, payRate: e.target.value})} type="number" step="0.01" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" placeholder="$" />
+                <input required value={formData.payRate} onChange={e=>setFormData({...formData, payRate: e.target.value})} type="number" step="0.01" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" placeholder="₹" />
               </div>
                 <button type="submit" className="w-full bg-[#CD7F32] text-white py-2.5 rounded-lg font-bold hover:bg-[#a06227] transition-colors mt-2">
                   Add Role
@@ -175,7 +175,7 @@ function StaffingContent() {
                     >
                       <div>
                         <h4 className="font-bold text-lg">{req.roleName}</h4>
-                        <p className="text-sm text-gray-600">Need: {req.quantity} person(s) &bull; Pay: ${req.payRate}</p>
+                        <p className="text-sm text-gray-600">Need: {req.quantity} person(s) &bull; Pay: ₹{req.payRate}</p>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">

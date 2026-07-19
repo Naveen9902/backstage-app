@@ -16,6 +16,7 @@ enum Role {
   WORKER
   MANAGER
   ADMIN
+  USER
 }
 
 enum ApplicationStatus {
@@ -25,72 +26,77 @@ enum ApplicationStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  avatarUrl String?
-  role      Role     @default(WORKER)
-  notificationsEnabled Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  password             String
+  name                 String
+  mobile               String?
+  avatarUrl            String?
+  role                 Role     @default(WORKER)
+  notificationsEnabled Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  workerProfile WorkerProfile?
-  managerProfile ManagerProfile?
-  events        Event[] // For Managers
-  sentMessages    EventChatMessage[] // Messages sent by this user
-  reviewsGiven    Review[] @relation("ReviewsGiven")
-  reviewsReceived Review[] @relation("ReviewsReceived")
-  disputesReported Dispute[] @relation("DisputesReported")
-  disputesTargeted Dispute[] @relation("DisputesTargeted")
-  notifications   Notification[]
+  workerProfile    WorkerProfile?
+  managerProfile   ManagerProfile?
+  events           Event[] // For Managers
+  sentMessages     EventChatMessage[] // Messages sent by this user
+  reviewsGiven     Review[]           @relation("ReviewsGiven")
+  reviewsReceived  Review[]           @relation("ReviewsReceived")
+  disputesReported Dispute[]          @relation("DisputesReported")
+  disputesTargeted Dispute[]          @relation("DisputesTargeted")
+  notifications    Notification[]
+  fanEvents        Event[]            @relation("EventFans")
+  likedMessages    MessageLike[]
 }
 
 model ManagerProfile {
-  id             String   @id @default(uuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id])
-  company        String?
-  bio            String?
+  id      String  @id @default(uuid())
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id])
+  company String?
+  bio     String?
 }
 
 model WorkerProfile {
-  id             String        @id @default(uuid())
-  userId         String        @unique
-  user           User          @relation(fields: [userId], references: [id])
-  skills            String
-  experience        String
-  isVerified        Boolean       @default(false)
-  verificationStatus String       @default("PENDING") // PENDING | APPROVED | REJECTED
-  rating            Float         @default(0.0)
-  
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  user               User    @relation(fields: [userId], references: [id])
+  skills             String
+  experience         String
+  isVerified         Boolean @default(false)
+  verificationStatus String  @default("PENDING") // PENDING | APPROVED | REJECTED
+  rating             Float   @default(0.0)
+
   // New extended profile fields
   category          String?
   specialization    String?
   pastWork          String?
   rates             String?
   portfolioLinks    String?
-  isRunnerAvailable Boolean       @default(false)
-  
-  applications      Application[]
+  isRunnerAvailable Boolean @default(false)
+
+  applications Application[]
 }
 
 model Event {
-  id               String            @id @default(uuid())
+  id               String             @id @default(uuid())
   managerId        String
-  manager          User              @relation(fields: [managerId], references: [id])
+  manager          User               @relation(fields: [managerId], references: [id])
   title            String
   description      String
   date             DateTime
-  startTime        String?           // e.g. "14:30" (24-hour format)
-  status           String            @default("UPCOMING")  // UPCOMING | ONGOING | COMPLETED
+  startTime        String? // e.g. "14:30" (24-hour format)
+  status           String             @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
   location         String
-  createdAt        DateTime          @default(now())
+  createdAt        DateTime           @default(now())
   staffingRequests StaffingRequest[]
   runnerDispatches RunnerDispatch[]
   messages         EventChatMessage[]
   reviews          Review[]
   disputes         Dispute[]
+  bands            String?
+  fans             User[]             @relation("EventFans")
 }
 
 model StaffingRequest {
@@ -114,15 +120,15 @@ model Application {
 }
 
 model RunnerDispatch {
-  id          String   @id @default(uuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id])
-  managerId   String
-  task        String
-  urgency     String
-  status      String   @default("Pending")
-  runner      String?  
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  managerId String
+  task      String
+  urgency   String
+  status    String   @default("Pending")
+  runner    String?
+  createdAt DateTime @default(now())
 }
 
 model EventChatMessage {
@@ -133,19 +139,35 @@ model EventChatMessage {
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   text      String
   createdAt DateTime @default(now())
+  
+  parentId  String?
+  parent    EventChatMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   EventChatMessage[] @relation("MessageReplies")
+  likes     MessageLike[]
+}
+
+model MessageLike {
+  id        String   @id @default(uuid())
+  messageId String
+  message   EventChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId])
 }
 
 model Review {
-  id          String   @id @default(uuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  reviewerId  String
-  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
-  revieweeId  String
-  reviewee    User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
-  rating      Int
-  comment     String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  revieweeId String
+  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
 
   @@unique([eventId, reviewerId, revieweeId]) // Prevent duplicate reviews for same pair in same event
 }

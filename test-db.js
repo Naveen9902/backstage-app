@@ -1,7 +1,11 @@
-require('dotenv').config();
-const { Pool } = require('pg');
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-pool.query('SELECT email, role FROM "User"').then(res => {
-  console.log(res.rows);
-  process.exit(0);
-});
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function main() {
+  const users = await prisma.user.findMany();
+  console.log("Users:", users.length);
+  const manager = await prisma.user.findUnique({ where: { email: 'manager@backstage.com' } });
+  console.log("Manager:", manager ? manager.email : "Not found");
+}
+
+main().catch(console.error).finally(() => prisma.$disconnect());

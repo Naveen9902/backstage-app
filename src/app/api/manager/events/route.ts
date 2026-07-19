@@ -58,7 +58,11 @@ export async function POST(req: Request) {
       }
     });
 
-    await sendNotification(userId, `Event '${title}' created successfully.`);
+    // Notify all users about the new event
+    const allUsers = await prisma.user.findMany({ select: { id: true } });
+    for (const user of allUsers) {
+      await sendNotification(user.id, `New Event Announced: ${title} in ${location}!`);
+    }
 
     return NextResponse.json(event, { status: 201 });
   } catch (error) {

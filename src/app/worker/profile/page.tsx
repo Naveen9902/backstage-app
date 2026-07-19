@@ -1,11 +1,13 @@
 'use client';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
 
 export default function WorkerProfile() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    mobile: '',
     avatarUrl: '',
     skills: '',
     experience: '',
@@ -32,6 +34,7 @@ export default function WorkerProfile() {
           setFormData({
             name: data.name || '',
             email: data.email || '',
+            mobile: data.mobile || '',
             avatarUrl: data.avatarUrl || '',
             skills: data.workerProfile?.skills || '',
             experience: data.workerProfile?.experience || '',
@@ -110,29 +113,24 @@ export default function WorkerProfile() {
         <p className="text-lg text-gray-700">Manage your skills, experience, and verification status</p>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-8 border border-gray-100"
-        style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
-      >
+      <div className="bg-white rounded-2xl shadow-sm border border-[#EAE6DF] overflow-hidden">
         {loading ? (
-          <div className="text-gray-500">Loading profile...</div>
+          <div className="p-8 text-gray-500">Loading profile...</div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {message && (
-              <div className={`p-4 rounded-lg font-bold text-sm ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                {message}
-              </div>
-            )}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 pb-6 border-b border-gray-100">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-lg overflow-hidden bg-cover bg-center" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none' }}>
+          <>
+            {/* Profile Header */}
+            <div className="h-32 bg-gradient-to-r from-[#242424] to-[#CD7F32]/80 relative">
+              <div className="absolute -bottom-12 left-8">
+                <div className="relative w-24 h-24 rounded-full border-4 border-white bg-[#CD7F32] flex items-center justify-center shadow-md overflow-hidden bg-cover bg-center group" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none' }}>
                   {!formData.avatarUrl && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span className="text-3xl font-bold text-white">
+                      {formData.name ? formData.name.substring(0, 2).toUpperCase() : 'T'}
+                    </span>
                   )}
-                </div>
-                <div>
+                  <label htmlFor="avatarUpload" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer text-white">
+                    <Camera size={20} className="mb-1" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider">Change</span>
+                  </label>
                   <input 
                     type="file" 
                     id="avatarUpload" 
@@ -149,13 +147,13 @@ export default function WorkerProfile() {
                       }
                     }}
                   />
-                  <label htmlFor="avatarUpload" className="text-sm font-bold text-[#CD7F32] hover:underline cursor-pointer">
-                    Change Photo
-                  </label>
                 </div>
               </div>
-              
-              <div className="flex-1 space-y-4">
+            </div>
+
+            {/* Form Section */}
+            <div className="pt-16 pb-8 px-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="text-sm font-bold text-gray-700">Full Name</label>
                   <input required type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
@@ -163,6 +161,10 @@ export default function WorkerProfile() {
                 <div>
                   <label className="text-sm font-bold text-gray-700">Email Address</label>
                   <input required type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700">Mobile Number</label>
+                  <input type="text" value={formData.mobile} onChange={e=>setFormData({...formData, mobile: e.target.value})} placeholder="+1 (555) 000-0000" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
                 <div className="flex gap-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${formData.isVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
@@ -175,8 +177,6 @@ export default function WorkerProfile() {
                     </span>
                   )}
                 </div>
-              </div>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               <div>
@@ -212,7 +212,7 @@ export default function WorkerProfile() {
 
               <div>
                 <label className="text-sm font-bold text-gray-700">Standard Rates</label>
-                <input type="text" value={formData.rates} onChange={e=>setFormData({...formData, rates: e.target.value})} placeholder="e.g. $30/hr or $250/day" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                <input type="text" value={formData.rates} onChange={e=>setFormData({...formData, rates: e.target.value})} placeholder="e.g. ₹30/hr or ₹250/day" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700">Portfolio / Social Links</label>
@@ -247,9 +247,11 @@ export default function WorkerProfile() {
                 {saving ? 'Saving...' : 'Save Profile'}
               </button>
             </div>
-          </form>
+              </form>
+            </div>
+          </>
         )}
-      </motion.div>
+      </div>
 
       {/* Reviews Section */}
       <div className="mt-12">

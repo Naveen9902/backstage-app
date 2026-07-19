@@ -6,7 +6,10 @@ import prisma from '@/lib/prisma'; // force recompile
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    let userId = cookieStore.get('workerUserId')?.value;
+    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,14 +41,14 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     const { 
-      name, email, avatarUrl, 
+      name, email, mobile, avatarUrl, 
       category, specialization, pastWork, rates, portfolioLinks, isRunnerAvailable 
     } = body;
 
     // Update user details
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, avatarUrl }
+      data: { name, email, mobile, avatarUrl }
     });
 
     // Upsert worker profile

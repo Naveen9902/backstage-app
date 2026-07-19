@@ -24,7 +24,15 @@ export async function GET() {
           select: { name: true, email: true, managerProfile: true }
         },
         staffingRequests: {
-          include: { applications: true }
+          include: { 
+            applications: {
+              include: {
+                workerProfile: {
+                  include: { user: true }
+                }
+              }
+            } 
+          }
         }
       },
       orderBy: { createdAt: 'desc' }

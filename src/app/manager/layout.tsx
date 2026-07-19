@@ -109,34 +109,41 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t-2 border-[#CD7F32] z-50 flex items-center justify-around pb-safe h-16 px-1 shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
-        {menuItems.slice(0, 4).map((item) => {
-          const isActive = pathname === item.path || (item.path !== '/manager' && pathname?.startsWith(item.path));
-          return (
-            <Link key={item.name} href={item.path} className={`flex flex-col items-center justify-center w-full h-full ${isActive ? 'text-[#CD7F32]' : 'text-white/60 hover:text-white'}`}>
-              <div className="mb-1">{item.icon}</div>
-              <span className="text-[10px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full px-1">{item.name}</span>
-            </Link>
-          );
-        })}
-        {/* Overflow Menu */}
-        <Link href="/manager/settings" className={`flex flex-col items-center justify-center w-full h-full ${pathname?.startsWith('/manager/settings') ? 'text-[#CD7F32]' : 'text-white/60 hover:text-white'}`}>
-          <div className="mb-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-          </div>
-          <span className="text-[10px] font-medium leading-none">More</span>
-        </Link>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t-2 border-[#CD7F32] z-50 overflow-x-auto no-scrollbar pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
+        <div className="flex items-center h-16 px-2 gap-2 min-w-max">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.path || (item.path !== '/manager' && pathname?.startsWith(item.path));
+            return (
+              <Link key={item.name} href={item.path} className={`flex flex-col items-center justify-center w-16 h-full flex-shrink-0 ${isActive ? 'text-[#CD7F32]' : 'text-white/60 hover:text-white'}`}>
+                <div className="mb-1">{item.icon}</div>
+                <span className="text-[10px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full px-1">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Main Content Area */}
       <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
         <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
           {/* Mobile Header Logo */}
-          <div className="md:hidden flex items-center gap-2">
+          <Link href="/" className="md:hidden flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-sm" />
             <span className="font-serif font-bold tracking-wide">Back<span className="text-[#CD7F32]">Stage</span></span>
+          </Link>
+          
+          <div className="flex items-center gap-2 md:gap-4">
+            <NotificationBell />
+            <button
+              onClick={async () => {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+              }}
+              className="md:hidden text-gray-500 hover:text-red-500 p-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            </button>
           </div>
-          <NotificationBell />
         </header>
         <div className="p-4 md:p-10 md:pt-0 flex-1">
           {children}

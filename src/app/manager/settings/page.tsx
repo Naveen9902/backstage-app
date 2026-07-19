@@ -1,5 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
@@ -33,6 +34,46 @@ export default function SettingsPage() {
     }
   };
 
+  // Password State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) {
+      setPasswordStatus({ type: 'error', message: 'Both fields are required' });
+      return;
+    }
+    
+    setUpdatingPassword(true);
+    setPasswordStatus(null);
+    
+    try {
+      const res = await fetch('/api/user/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setPasswordStatus({ type: 'error', message: data.error || 'Update failed' });
+      } else {
+        setPasswordStatus({ type: 'success', message: 'Password updated successfully!' });
+        setCurrentPassword('');
+        setNewPassword('');
+      }
+    } catch (err) {
+      setPasswordStatus({ type: 'error', message: 'An unexpected error occurred' });
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   return (
     <div className="text-[#242424] max-w-4xl">
       <div className="mb-8">
@@ -62,6 +103,7 @@ export default function SettingsPage() {
                 <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${inAppNotifs ? 'translate-x-7' : 'translate-x-1'}`} />
               </button>
             </div>
+            <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-bold">Email Notifications</h4>
                 <p className="text-sm text-gray-500">Receive application updates via email</p>
@@ -91,17 +133,56 @@ export default function SettingsPage() {
         {/* Security */}
         <div>
           <h2 className="text-2xl font-bold font-serif mb-4 pb-2 border-b border-gray-100">Security</h2>
-          <form className="space-y-4 max-w-md">
+          <form className="space-y-4 max-w-md" onSubmit={handleUpdatePassword}>
+            {passwordStatus && (
+              <div className={`p-3 rounded-lg text-sm font-semibold ${passwordStatus.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {passwordStatus.message}
+              </div>
+            )}
             <div>
               <label className="text-sm font-bold text-gray-700">Current Password</label>
-              <input type="password" placeholder="••••••••" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+              <div className="relative mt-1">
+                <input 
+                  type={showCurrentPassword ? "text" : "password"} 
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none pr-10" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="text-sm font-bold text-gray-700">New Password</label>
-              <input type="password" placeholder="••••••••" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+              <div className="relative mt-1">
+                <input 
+                  type={showNewPassword ? "text" : "password"} 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••" 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none pr-10" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-            <button type="button" className="bg-[#242424] text-white px-6 py-2 rounded-lg font-bold hover:bg-black transition-colors">
-              Update Password
+            <button 
+              type="submit" 
+              disabled={updatingPassword}
+              className={`bg-[#242424] text-white px-6 py-2 rounded-lg font-bold transition-colors ${updatingPassword ? 'opacity-50' : 'hover:bg-black'}`}
+            >
+              {updatingPassword ? 'Updating...' : 'Update Password'}
             </button>
           </form>
         </div>

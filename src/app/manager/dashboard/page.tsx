@@ -183,7 +183,7 @@ export default function ManagerDashboard() {
                       <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${event.status === 'ONGOING' ? 'bg-green-500 animate-pulse' : 'bg-[#CD7F32]'}`}></div>
                       <div>
                         <h4 className="font-bold text-sm">{event.title}</h4>
-                        <p className="text-xs text-gray-500">{event.location} · {new Date(event.date).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500">{event.location} · {new Date(event.date).toISOString().split('T')[0]}</p>
                       </div>
                     </div>
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase ${event.status === 'ONGOING' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>

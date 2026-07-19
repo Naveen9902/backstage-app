@@ -6,7 +6,10 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('managerUserId')?.value || cookieStore.get('userId')?.value;
+    let userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('workerUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  console.log("METRICS ROUTE HIT");
   try {
     const cookieStore = await cookies();
     const userId = cookieStore.get('adminUserId')?.value || cookieStore.get('userId')?.value;

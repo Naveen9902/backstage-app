@@ -39,7 +39,10 @@ export async function PATCH(
           select: { userId: true }
         },
         staffingRequest: {
-          select: { roleName: true }
+          select: { 
+            roleName: true,
+            event: { select: { title: true } }
+          }
         }
       }
     });
@@ -55,7 +58,7 @@ export async function PATCH(
 
     await sendNotification(
       application.workerProfile.userId,
-      `Your application for '${application.staffingRequest.roleName}' was ${status}.`
+      `Your application for '${application.staffingRequest.roleName}' at ${application.staffingRequest.event.title} was ${status}.`
     );
 
     return NextResponse.json(updated, { status: 200 });

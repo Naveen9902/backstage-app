@@ -44,7 +44,7 @@ export default function MyApplications() {
                 <p className="text-sm text-gray-600 font-medium">{app.staffingRequest?.event?.title} • {app.staffingRequest?.event?.manager?.managerProfile?.company || 'Manager'}</p>
                 <div className="flex items-center gap-4 mt-2">
                   <p className="text-xs text-gray-400">Applied on {new Date(app.createdAt).toLocaleDateString()}</p>
-                  <p className="text-xs font-bold text-[#CD7F32]">${app.staffingRequest?.payRate}</p>
+                  <p className="text-xs font-bold text-[#CD7F32]">₹{app.staffingRequest?.payRate}</p>
                 </div>
               </div>
 

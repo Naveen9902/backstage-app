@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
@@ -69,51 +70,47 @@ export default function ProfilePage() {
         <p className="text-lg text-gray-700">Manage your personal and company information</p>
       </div>
       
-      <motion.div 
-        initial={{ opacity: 0, y: 15 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        className="bg-white rounded-xl p-8 border border-gray-100" 
-        style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
-      >
+      <div className="bg-white rounded-2xl shadow-sm border border-[#EAE6DF] overflow-hidden">
         {loading ? (
-          <div className="text-gray-500">Loading profile...</div>
+          <div className="p-8 text-gray-500">Loading profile...</div>
         ) : (
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Avatar Section */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-lg overflow-hidden bg-cover bg-center" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none' }}>
-                {!formData.avatarUrl && (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                )}
-              </div>
-              <div>
-                <input 
-                  type="file" 
-                  id="avatarUpload" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData({ ...formData, avatarUrl: reader.result as string });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-                <label 
-                  htmlFor="avatarUpload" 
-                  className="text-sm font-bold text-[#CD7F32] hover:underline cursor-pointer"
-                >
-                  Change Photo
-                </label>
+          <>
+            {/* Profile Header */}
+            <div className="h-32 bg-gradient-to-r from-[#242424] to-[#CD7F32]/80 relative">
+              <div className="absolute -bottom-12 left-8">
+                <div className="relative w-24 h-24 rounded-full border-4 border-white bg-[#CD7F32] flex items-center justify-center shadow-md overflow-hidden bg-cover bg-center group" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none' }}>
+                  {!formData.avatarUrl && (
+                    <span className="text-3xl font-bold text-white">
+                      {formData.name ? formData.name.substring(0, 2).toUpperCase() : 'M'}
+                    </span>
+                  )}
+                  <label htmlFor="avatarUpload" className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer text-white">
+                    <Camera size={20} className="mb-1" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider">Change</span>
+                  </label>
+                  <input 
+                    type="file" 
+                    id="avatarUpload" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({ ...formData, avatarUrl: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Form Section */}
-            <form onSubmit={handleSubmit} className="flex-1 space-y-6 w-full">
+            <div className="pt-16 pb-8 px-8">
+              <form onSubmit={handleSubmit} className="flex-1 space-y-6 w-full">
               {message && (
                 <div className={`p-4 rounded-lg font-bold text-sm ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                   {message}
@@ -144,10 +141,11 @@ export default function ProfilePage() {
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
-            </form>
-          </div>
+              </form>
+            </div>
+          </>
         )}
-      </motion.div>
+      </div>
 
       {/* Reviews Section */}
       <div className="mt-12">

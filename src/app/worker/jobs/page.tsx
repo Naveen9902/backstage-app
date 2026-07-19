@@ -100,7 +100,7 @@ export default function FindJobs() {
                       <p className="text-sm text-gray-500 mt-1">by {job.event?.manager?.managerProfile?.company || 'Event Manager'}</p>
                     </div>
                     <div className="md:text-right mt-2 md:mt-0 bg-gray-50 md:bg-transparent p-3 md:p-0 rounded-lg">
-                      <p className="text-2xl font-bold font-serif text-gray-800">${job.payRate}</p>
+                      <p className="text-2xl font-bold font-serif text-gray-800">₹{job.payRate}</p>
                       <p className="text-sm text-gray-500 font-medium">Need {job.quantity} people</p>
                     </div>
                   </div>

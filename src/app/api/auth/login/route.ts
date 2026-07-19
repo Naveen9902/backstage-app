@@ -15,7 +15,15 @@ export async function POST(req: Request) {
     }
 
     const response = NextResponse.json(user, { status: 200 });
-    const cookieName = user.role === 'ADMIN' ? 'adminUserId' : user.role === 'MANAGER' ? 'managerUserId' : 'workerUserId';
+    const cookieName = user.role === 'ADMIN' ? 'adminUserId' : user.role === 'MANAGER' ? 'managerUserId' : user.role === 'USER' ? 'fanUserId' : 'workerUserId';
+    
+    // Clear old cookies to prevent split-brain if user switches roles in another tab
+    response.cookies.delete('adminUserId');
+    response.cookies.delete('managerUserId');
+    response.cookies.delete('workerUserId');
+    response.cookies.delete('fanUserId');
+    response.cookies.delete('userId');
+
     response.cookies.set(cookieName, user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

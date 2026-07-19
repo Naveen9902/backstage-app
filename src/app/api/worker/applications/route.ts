@@ -91,10 +91,27 @@ export async function POST(req: Request) {
         workerProfileId: workerProfile.id,
         staffingRequestId,
         status: 'PENDING'
+      },
+      include: {
+        staffingRequest: {
+          include: {
+            event: true
+          }
+        }
       }
     });
 
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
+
     await sendNotification(userId, `You have successfully applied for the role.`);
+    
+    // Notify Manager
+    if (application.staffingRequest?.event?.managerId) {
+      await sendNotification(
+        application.staffingRequest.event.managerId, 
+        `${user?.name || 'A worker'} has applied for ${application.staffingRequest.roleName} at ${application.staffingRequest.event.title}.`
+      );
+    }
 
     return NextResponse.json(application, { status: 201 });
   } catch (error) {

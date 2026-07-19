@@ -13,15 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BackStage",
+  title: "Back Stage",
   description: "Connecting talent and creating memorable events.",
   manifest: "/manifest.json",
-  themeColor: "#CD7F32",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "BackStage",
   },
+};
+
+export const viewport = {
+  themeColor: "#CD7F32",
 };
 
 export default function RootLayout({
@@ -33,8 +36,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning={true}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
