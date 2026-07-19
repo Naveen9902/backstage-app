@@ -15,7 +15,7 @@
 
 # next.js
 /.next/
-/out/
+# /out/ - committed so GitHub Actions skips the build step
 
 # production
 /build

@@ -7,7 +7,7 @@ jobs:
   build:
     name: Build iOS App (IPA)
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -17,58 +17,45 @@ jobs:
         with:
           node-version: 20
 
-      - name: Patch next.config.ts to fix TypeScript errors
-        run: |
-          cat > next.config.ts << 'EOF'
-          import type { NextConfig } from "next";
-          const nextConfig: NextConfig = {
-            typescript: { ignoreBuildErrors: true },
-            eslint: { ignoreDuringBuilds: true },
-          };
-          export default nextConfig;
-          EOF
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Web App
-        run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-
-      - name: Sync Capacitor
-        run: npx cap sync ios
+      - name: Install Capacitor CLI
+        run: npm install -g @capacitor/cli
 
       - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Install iOS pods
         run: |
-          sudo gem install cocoapods
           cd ios/App
           pod install
 
-      - name: Build iOS App
+      - name: Build iOS App (no signing)
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
-            -destination generic/platform=iOS \
-            build \
+            -destination "generic/platform=iOS" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" \
-            -derivedDataPath build
+            -derivedDataPath DerivedData
 
-      - name: Package into IPA
+      - name: Package IPA
         run: |
-          cd ios/App/build/Build/Products/Release-iphoneos
-          mkdir Payload
-          cp -r App.app Payload/
+          BUILD_DIR="ios/App/DerivedData/Build/Products/Release-iphoneos"
+          mkdir -p "$BUILD_DIR/Payload"
+          cp -r "$BUILD_DIR/App.app" "$BUILD_DIR/Payload/"
+          cd "$BUILD_DIR"
           zip -r app.ipa Payload
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: iOS-App
-          path: ios/App/build/Build/Products/Release-iphoneos/app.ipa
+          path: ios/App/DerivedData/Build/Products/Release-iphoneos/app.ipa
+          retention-days: 7
