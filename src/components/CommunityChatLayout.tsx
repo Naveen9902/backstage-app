@@ -103,9 +103,23 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     return () => clearInterval(interval);
   }, [eventId, activeChannel]);
 
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView();
+    if (shouldAutoScroll) {
+      messagesEndRef.current?.scrollIntoView();
+    }
   }, [messages]);
+
+  useEffect(() => {
+    setShouldAutoScroll(true);
+  }, [activeChannel]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setShouldAutoScroll(isNearBottom);
+  };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +161,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   };
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden text-[#242424] relative">
+    <div className="flex h-[100dvh] bg-white overflow-hidden text-[#242424] relative">
       
       {/* Mobile Overlay */}
       {mobileSidebarOpen && (
@@ -349,7 +363,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6" onScroll={handleScroll}>
           <div className="text-center py-4">
              <span className="bg-white/40 text-gray-400 text-xs font-bold px-3 py-1 rounded-full">{new Date(event.date || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
