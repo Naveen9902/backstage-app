@@ -82,10 +82,10 @@ export default function CreateEvent() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
+        <div className="flex flex-col-reverse xl:grid xl:grid-cols-12 gap-10 items-start">
           
           {/* Left Form (7 cols) */}
-          <div className="xl:col-span-7">
+          <div className="xl:col-span-7 w-full">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -302,7 +302,7 @@ export default function CreateEvent() {
           </div>
 
           {/* Right Preview Card (5 cols) */}
-          <div className="xl:col-span-5 sticky top-8 space-y-4">
+          <div className="xl:col-span-5 sticky top-8 space-y-4 w-full">
             
             <motion.div
               initial={{ opacity: 0, scale: 0.95, x: 20 }}

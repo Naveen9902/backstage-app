@@ -161,7 +161,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   };
 
   return (
-    <div className="flex h-[100dvh] bg-white overflow-hidden text-[#242424] relative">
+    <div className="flex h-[calc(100dvh-160px)] md:h-[calc(100vh-120px)] w-full bg-white overflow-hidden text-[#242424] relative rounded-xl shadow-sm border border-gray-200">
       
       {/* Mobile Overlay */}
       {mobileSidebarOpen && (
