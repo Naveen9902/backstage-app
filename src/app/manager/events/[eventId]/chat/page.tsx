@@ -61,7 +61,7 @@ export default async function ManagerEventChatPage({ params }: { params: Promise
   const eventData = JSON.parse(JSON.stringify(event));
 
   return (
-    <div className="w-full h-full min-h-screen bg-[#f3efe5]">
+    <div className="w-full h-full bg-[#f3efe5] rounded-xl overflow-hidden">
       <CommunityChatLayout 
         eventId={eventId}
         event={eventData}

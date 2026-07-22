@@ -91,7 +91,7 @@ export default function WorkerDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 bg-green-50 border border-green-300 rounded-xl p-4 flex items-center justify-between gap-4"
+          className="mb-8 bg-green-50 border border-green-300 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
@@ -104,15 +104,15 @@ export default function WorkerDashboard() {
               <p className="text-green-600 text-sm">Check for runner tasks and communicate with your team.</p>
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <Link href="/worker/runners">
-              <button className="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+          <div className="flex flex-wrap gap-2 flex-shrink-0 w-full sm:w-auto">
+            <Link href="/worker/runners" className="flex-1 sm:flex-none">
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 Runner Tasks
               </button>
             </Link>
-            <Link href={`/worker/events/${liveShifts[0]?.staffingRequest?.eventId}/chat`}>
-              <button className="bg-white border border-green-400 text-green-700 hover:bg-green-50 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+            <Link href={`/worker/events/${liveShifts[0]?.staffingRequest?.eventId}/chat`} className="flex-1 sm:flex-none">
+              <button className="w-full bg-white border border-green-400 text-green-700 hover:bg-green-50 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 Event Chat
               </button>
@@ -147,7 +147,7 @@ export default function WorkerDashboard() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-gray-50 border border-gray-200 rounded-2xl p-5 flex items-center justify-between mb-10"
+        className="bg-gray-50 border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10"
       >
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0">
@@ -159,8 +159,8 @@ export default function WorkerDashboard() {
             <p className="text-gray-400 text-xs">Events you have successfully worked</p>
           </div>
         </div>
-        <Link href="/worker/schedule">
-          <button className="text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <Link href="/worker/schedule" className="w-full sm:w-auto">
+          <button className="w-full sm:w-auto text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
             View Schedule
           </button>
         </Link>

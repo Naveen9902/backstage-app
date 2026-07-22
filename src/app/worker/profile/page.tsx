@@ -258,7 +258,7 @@ export default function WorkerProfile() {
               <button 
                 onClick={handleSubmit} 
                 disabled={saving || loading || isUnderage} 
-                className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(205,127,50,0.3)] hover:-translate-y-1 disabled:opacity-50 disabled:hover:transform-none flex items-center gap-2"
+                className="w-full sm:w-auto justify-center bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(205,127,50,0.3)] hover:-translate-y-1 disabled:opacity-50 disabled:hover:transform-none flex items-center gap-2"
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
@@ -281,7 +281,7 @@ export default function WorkerProfile() {
                   <label className="text-sm font-bold text-gray-700">Mobile Number</label>
                   <input type="text" value={formData.mobile} onChange={e=>setFormData({...formData, mobile: e.target.value})} placeholder="+1 (555) 000-0000" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${formData.isVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                     {formData.isVerified ? 'Verified Talent' : 'Unverified'}
                   </span>
@@ -343,9 +343,9 @@ export default function WorkerProfile() {
                   </div>
                   <div className="md:col-span-2">
                     <label className="text-sm font-bold text-gray-700">Phone Verification</label>
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
                       <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
-                      <button type="button" onClick={() => { if(formData.mobile) setFormData({...formData, isPhoneVerified: true}); else alert("Enter mobile number above first!"); }} className={`px-4 py-2 rounded-lg font-bold text-sm ${formData.isPhoneVerified ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-[#242424] text-white hover:bg-black transition-colors'}`}>
+                      <button type="button" onClick={() => { if(formData.mobile) setFormData({...formData, isPhoneVerified: true}); else alert("Enter mobile number above first!"); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${formData.isPhoneVerified ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-[#242424] text-white hover:bg-black transition-colors'}`}>
                         {formData.isPhoneVerified ? 'Verified ✓' : 'Verify via OTP'}
                       </button>
                     </div>
