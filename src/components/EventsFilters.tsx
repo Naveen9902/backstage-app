@@ -13,6 +13,7 @@ export default function EventsFilters({ events }: { events: any[] }) {
     Categories: true,
     Date: false,
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const locations = ['All', 'Bangalore', 'Hyderabad', 'Delhi', 'Mumbai', 'Chennai'];
   
@@ -59,16 +60,24 @@ export default function EventsFilters({ events }: { events: any[] }) {
               className="w-full bg-gray-100 border-none rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#CD7F32] outline-none transition-all"
             />
           </div>
-          <div className="flex items-center gap-2 w-full md:w-auto shrink-0 relative group cursor-pointer">
-            <MapPin className="w-4 h-4 text-gray-500" />
-            <select 
-              value={selectedLocation} 
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="appearance-none bg-transparent font-medium text-gray-700 pr-8 py-2 cursor-pointer outline-none hover:text-[#CD7F32] transition-colors text-sm"
+          <div className="flex items-center justify-between gap-4 w-full md:w-auto shrink-0">
+            <div className="flex items-center gap-2 relative group cursor-pointer flex-1 md:flex-none">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <select 
+                value={selectedLocation} 
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="appearance-none w-full bg-transparent font-medium text-gray-700 pr-8 py-2 cursor-pointer outline-none hover:text-[#CD7F32] transition-colors text-sm"
+              >
+                {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <button 
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className={`md:hidden flex items-center justify-center p-2 rounded-lg transition-colors ${showMobileFilters ? 'bg-[#CD7F32] text-white' : 'bg-gray-100 text-gray-600 hover:text-[#CD7F32] hover:bg-[#CD7F32]/10'}`}
             >
-              {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-            </select>
-            <ChevronDown className="w-4 h-4 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Filter className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
@@ -76,8 +85,15 @@ export default function EventsFilters({ events }: { events: any[] }) {
       <div className="max-w-7xl mx-auto px-4 mt-8 flex flex-col md:flex-row gap-8">
         
         {/* Left Sidebar Filters */}
-        <div className="w-full md:w-[300px] shrink-0 space-y-4 hidden md:block">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 font-serif">Filters</h2>
+        <div className={`w-full md:w-[300px] shrink-0 space-y-4 ${showMobileFilters ? 'block' : 'hidden'} md:block`}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 font-serif">Filters</h2>
+            {showMobileFilters && (
+               <button onClick={() => setShowMobileFilters(false)} className="md:hidden text-gray-400 hover:text-gray-600">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+               </button>
+            )}
+          </div>
 
           {/* Categories Accordion */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
