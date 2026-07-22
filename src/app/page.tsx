@@ -9,6 +9,10 @@ export default function Home() {
   const [topEvents, setTopEvents] = useState<any[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filtering
+  const [showFilters, setShowFilters] = useState(false);
+  const [locationFilter, setLocationFilter] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -242,8 +246,46 @@ export default function Home() {
               <h2 className="text-[26px] font-bold text-gray-900 mb-1">Live & Upcoming Events</h2>
               <p className="text-gray-500 text-sm">Join these active events happening right now.</p>
             </div>
-            <Link href="/events" className="text-[#CD7F32] font-semibold text-sm hover:underline">View All Events &rarr;</Link>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`md:hidden p-2 rounded-lg border flex items-center gap-2 text-sm font-bold transition-all ${showFilters ? 'bg-[#CD7F32] border-[#CD7F32] text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-[#CD7F32] hover:text-[#CD7F32]'}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                Filters
+              </button>
+              <Link href="/events" className="text-[#CD7F32] font-semibold text-sm hover:underline hidden md:inline-block">View All Events &rarr;</Link>
+            </div>
           </div>
+
+          {showFilters && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="md:hidden bg-white border border-gray-200 rounded-2xl p-4 shadow-sm overflow-hidden mb-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900">Filters</h3>
+                <button onClick={() => setLocationFilter('')} className="text-xs font-bold text-[#CD7F32] uppercase tracking-wider hover:underline">Clear Filters</button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Location</label>
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <input 
+                      type="text" 
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      placeholder="Filter by city, venue..." 
+                      className="w-full bg-[#f8f6f0] border-transparent rounded-xl pl-9 pr-4 py-2 text-sm focus:border-[#CD7F32] focus:bg-white focus:ring-1 focus:ring-[#CD7F32] transition-all outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           <div className="grid grid-cols-1 gap-8">
             {/* Main Area: Event Grid */}
@@ -254,13 +296,13 @@ export default function Home() {
                     <div key={i} className="aspect-[4/5] bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse"></div>
                   ))}
                 </div>
-              ) : topEvents.length === 0 ? (
+              ) : topEvents.filter(e => !locationFilter || e.location?.toLowerCase().includes(locationFilter.toLowerCase())).length === 0 ? (
                 <div className="bg-white p-12 rounded-xl border border-gray-100 shadow-sm text-center text-gray-500">
-                  No upcoming events at the moment.
+                  No events found matching your filters.
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {topEvents.map(event => (
+                  {topEvents.filter(e => !locationFilter || e.location?.toLowerCase().includes(locationFilter.toLowerCase())).map(event => (
                     <Link href={`/events/${event.id}`} key={event.id} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgba(205,127,50,0.15)] hover:-translate-y-1 border border-gray-100 hover:border-[#CD7F32]/30 transition-all duration-300">
                       <div className="aspect-[4/5] rounded-t-2xl overflow-hidden bg-gray-100 mb-0 relative border-b border-gray-100">
                         <img 
