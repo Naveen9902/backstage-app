@@ -1,24 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-
-type DispatchTask = {
-  id: string;
-  task: string;
-  urgency: string;
-  status: string;
-  runner: string | null;
-  createdAt: string;
-  event: {
-    title: string;
-    location: string;
-  };
-};
+import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
 
 export default function LiveRunnersBoard() {
-  const [pendingTasks, setPendingTasks] = useState<DispatchTask[]>([]);
-  const [myTasks, setMyTasks] = useState<DispatchTask[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pendingTasks, setPendingTasks] = useState<any[]>([]);
+  const [myTasks, setMyTasks] = useState<any[]>([]);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const fetchTasks = async () => {
     try {
@@ -30,135 +18,196 @@ export default function LiveRunnersBoard() {
       }
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchTasks();
-    const interval = setInterval(fetchTasks, 3000); // Polling every 3 seconds
+    const interval = setInterval(fetchTasks, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleAction = async (dispatchId: string, action: 'accept' | 'complete') => {
+  const handleAccept = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
     try {
       const res = await fetch('/api/worker/runners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dispatchId, action })
+        body: JSON.stringify({ dispatchId, action: 'accept' })
       });
       if (res.ok) {
-        fetchTasks(); // instantly refresh
+        fetchTasks();
       } else {
         const err = await res.json();
-        alert(err.error || 'Action failed');
+        alert(err.error || 'Failed to claim task (someone else might have grabbed it)');
       }
     } catch (err) {
       console.error(err);
     }
+    setLoadingAction(null);
+  };
+
+  const handleComplete = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'complete' })
+      });
+      if (res.ok) {
+        fetchTasks();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to complete task');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingAction(null);
   };
 
   return (
-    <div className="text-[#242424] max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Live Runner Board</h1>
-        <p className="text-lg text-gray-700">Accept urgent tasks for events you are working</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Available Tasks */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-            <h2 className="text-2xl font-bold font-serif">Available Tasks</h2>
-          </div>
-          
-          {loading && pendingTasks.length === 0 ? (
-            <div className="text-gray-500">Scanning for tasks...</div>
-          ) : pendingTasks.length === 0 ? (
-            <div className="p-8 border-2 border-dashed border-gray-200 rounded-xl text-center text-gray-500">
-              No pending tasks right now.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {pendingTasks.map(task => (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  key={task.id} 
-                  className="p-5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg">{task.task}</h3>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md uppercase ${
-                      task.urgency === 'Critical' ? 'bg-red-200 text-red-800' :
-                      task.urgency === 'High' ? 'bg-orange-200 text-orange-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {task.urgency}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-600 mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {task.event.title} &bull; {task.event.location}
-                  </div>
-                  <button 
-                    onClick={() => handleAction(task.id, 'accept')}
-                    className="w-full bg-[#CD7F32] hover:bg-[#b5702c] text-white font-bold py-2.5 rounded-lg transition-colors shadow-md"
-                  >
-                    Accept Task
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          )}
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="mb-10 relative overflow-hidden bg-gradient-to-r from-[#242424] to-[#1a1a1a] rounded-3xl p-8 md:p-10 text-white shadow-xl">
+        <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-0 right-10 w-32 h-full bg-gradient-to-b from-[#CD7F32] to-transparent transform rotate-45 animate-pulse"></div>
+          <div className="absolute -bottom-10 right-32 w-64 h-64 bg-[#CD7F32] rounded-full blur-[80px]"></div>
         </div>
 
-        {/* My Tasks */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="text-2xl font-bold font-serif mb-6">My Active Tasks</h2>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CD7F32]/20 text-[#CD7F32] rounded-full text-xs font-bold uppercase tracking-widest mb-4 border border-[#CD7F32]/30">
+              <MapPin className="w-3 h-3" />
+              On-Ground Operations
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold font-serif tracking-tight mb-2 text-white">Your Task Board</h1>
+            <p className="text-gray-400 max-w-md">
+              View your direct assignments or grab open requests to assist the team.
+            </p>
+          </div>
           
-          {loading && myTasks.length === 0 ? (
-            <div className="text-gray-500">Loading...</div>
-          ) : myTasks.length === 0 ? (
-            <div className="p-8 border-2 border-dashed border-gray-200 rounded-xl text-center text-gray-500">
-              You haven't accepted any tasks yet.
+          <div className="flex gap-4">
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px]">
+              <div className="text-3xl font-bold text-[#CD7F32] mb-1">{myTasks.filter(t => t.status !== 'Completed').length}</div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Active</div>
+            </div>
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px]">
+              <div className="text-3xl font-bold text-white mb-1">{pendingTasks.length}</div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Open</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-8">
+        {/* My Tasks Section */}
+        <section>
+          <h2 className="text-xl font-bold font-serif flex items-center gap-2 mb-4 text-gray-800">
+            <CheckCircle2 className="text-[#CD7F32] w-5 h-5" />
+            My Active Tasks
+          </h2>
+          
+          {myTasks.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center text-gray-500">
+              You have no active tasks at the moment.
             </div>
           ) : (
             <div className="space-y-4">
               {myTasks.map(task => (
                 <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
                   key={task.id} 
-                  className={`p-5 rounded-xl border ${task.status === 'Completed' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}
+                  className="bg-white border-l-4 border-[#CD7F32] shadow-sm rounded-r-xl p-5"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-bold text-lg ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`}>{task.task}</h3>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md uppercase ${task.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800'}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32]">{task.event?.title}</span>
+                      <h3 className="text-lg font-bold text-gray-900 mt-1">{task.task}</h3>
+                    </div>
+                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
                       {task.status}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600 mb-4">
-                    {task.event.title}
+                  
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span className={`font-bold ${task.urgency === 'Critical' ? 'text-red-600' : task.urgency === 'High' ? 'text-amber-600' : 'text-gray-600'}`}>
+                        {task.urgency} Urgency
+                      </span>
+                    </div>
+                    
+                    {task.status !== 'Completed' && (
+                      <button
+                        onClick={() => handleComplete(task.id)}
+                        disabled={loadingAction === task.id}
+                        className="bg-[#242424] hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                        Mark Completed
+                      </button>
+                    )}
                   </div>
-                  {task.status !== 'Completed' && (
-                    <button 
-                      onClick={() => handleAction(task.id, 'complete')}
-                      className="w-full bg-[#242424] hover:bg-black text-white font-bold py-2.5 rounded-lg transition-colors shadow-md flex items-center justify-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                      Mark Complete
-                    </button>
-                  )}
                 </motion.div>
               ))}
             </div>
           )}
-        </div>
+        </section>
 
+        {/* Pending / Broadcast Tasks */}
+        <section>
+          <h2 className="text-xl font-bold font-serif flex items-center gap-2 mb-4 text-gray-800">
+            <AlertTriangle className="text-amber-500 w-5 h-5" />
+            Open Requests
+          </h2>
+          
+          {pendingTasks.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center text-gray-500">
+              No open requests right now.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {pendingTasks.map(task => (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  key={task.id} 
+                  className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:border-[#CD7F32] transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{task.event?.title}</span>
+                      <h3 className="text-lg font-medium text-gray-900 mt-1">{task.task}</h3>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
+                      task.urgency === 'High' ? 'bg-amber-100 text-amber-700' : 
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {task.urgency}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-4 border-t border-gray-100 pt-4">
+                    <div className="text-sm text-gray-500 flex items-center gap-1">
+                      <Clock className="w-4 h-4"/> 
+                      {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                    <button
+                      onClick={() => handleAccept(task.id)}
+                      disabled={loadingAction === task.id}
+                      className="bg-[#CD7F32] hover:bg-[#b06a28] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Accept Task'}
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

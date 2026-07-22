@@ -137,161 +137,202 @@ export default function MyEvents() {
   const isLive = (status: string | null) => status === 'ONGOING';
 
   return (
-    <div className="text-[#242424] max-w-5xl">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">My Events</h1>
-          <p className="text-lg text-gray-700">Manage all your events</p>
-        </div>
-        <Link href="/manager/events/create">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 bg-[#CD7F32] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-            Create Event
-          </motion.button>
-        </Link>
-      </div>
+    <div className="relative text-[#242424] min-h-screen pb-24 overflow-hidden">
+      {/* Background Blooms */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#CD7F32]/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-[-200px] w-[500px] h-[500px] bg-[#CD7F32]/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
 
-      {/* Events List */}
-      <div className="space-y-6">
-        {loading ? (
-          <div className="text-gray-500">Loading events...</div>
-        ) : events.length === 0 ? (
-          <div className="text-gray-500 bg-white p-8 rounded-xl border border-gray-100 shadow-sm text-center">
-            You haven&apos;t created any events yet.{' '}
-            <Link href="/manager/events/create" className="text-[#CD7F32] hover:underline">Create one now.</Link>
+      <div className="max-w-6xl mx-auto px-4 pt-10">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12"
+        >
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold font-serif tracking-tight mb-2 text-gray-900">My Events</h1>
+            <p className="text-gray-500 text-lg">Manage all your created events and track their status.</p>
           </div>
-        ) : events.map((event, index) => {
-          const live = isLive(event.status);
-          return (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 }}
-              className={`bg-white rounded-xl p-5 border flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 ${live ? 'border-green-400' : event.status === 'COMPLETED' ? 'border-gray-200 opacity-70' : 'border-gray-100'}`}
-              style={{ boxShadow: live ? '-6px 6px 0px rgba(34,197,94,0.5)' : event.status === 'COMPLETED' ? 'none' : '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
+          <Link href="/manager/events/create">
+            <motion.button
+              whileHover={{ scale: 1.02, boxShadow: "0 10px 20px rgba(205,127,50,0.3)" }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#CD7F32] to-[#ffb163] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all"
             >
-              {/* Left — Event Info */}
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-bold font-serif">{event.title}</h3>
-                  {live && (
-                    <span className="flex items-center gap-1.5 text-xs font-bold bg-green-100 text-green-700 px-2.5 py-1 rounded-full uppercase">
-                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span>
-                      LIVE
-                    </span>
-                  )}
-                  {event.status === 'COMPLETED' && (
-                    <span className="flex items-center gap-1.5 text-xs font-bold bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full uppercase">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                      CLOSED
-                    </span>
-                  )}
-                </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              Create New Event
+            </motion.button>
+          </Link>
+        </motion.div>
 
-                <div className="flex flex-wrap items-center text-gray-600 text-sm gap-3">
-                  <span className="flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                    {new Date(event.date).toLocaleDateString()}
-                  </span>
-                  {event.startTime && (
-                    <span className="flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      {event.startTime}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {event.location}
-                  </span>
-                  <span className="bg-orange-100 text-[#CD7F32] px-2 py-0.5 rounded text-xs font-bold uppercase">
-                    {event.staffingRequests?.length || 0} Roles
-                  </span>
-                </div>
+        {/* Events List */}
+        <div className="space-y-6">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+               <svg className="animate-spin h-10 w-10 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+               <p className="mt-4 text-gray-500 font-medium">Loading your events...</p>
+            </div>
+          ) : events.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white/80 backdrop-blur-xl p-12 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center max-w-2xl mx-auto"
+            >
+              <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#CD7F32]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
-
-              {/* Right — Controls */}
-              <div className="flex flex-col gap-2 min-w-[180px]">
-
-                {/* ===== LIVE TOGGLE ===== */}
-                {event.status !== 'COMPLETED' && (
-                  <button
-                    onClick={() => toggleLive(event)}
-                    disabled={toggling === event.id + '_live' || toggling === event.id + '_close'}
-                    className={`relative w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 ${
-                      live
-                        ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100'
-                        : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-[#CD7F32] hover:text-[#CD7F32]'
-                    } disabled:opacity-60`}
-                  >
-                    <span className="flex items-center gap-2">
-                      {live ? (
-                        <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
-                      ) : (
-                        <span className="w-3 h-3 rounded-full bg-gray-300"></span>
-                      )}
-                      {toggling === event.id + '_live' ? 'Updating...' : live ? 'Event is LIVE' : 'Go Live'}
-                    </span>
-                    {/* Toggle pill */}
-                    <div className={`w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 ${live ? 'bg-green-500' : 'bg-gray-300'}`}>
-                      <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 ${live ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                    </div>
-                  </button>
-                )}
-
-                {/* ===== CLOSE EVENT TOGGLE (only when LIVE) ===== */}
-                {live && (
-                  <button
-                    onClick={() => closeEvent(event)}
-                    disabled={toggling === event.id + '_close'}
-                    className="relative w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl font-bold text-sm border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-300 disabled:opacity-60"
-                  >
-                    <span className="flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                      {toggling === event.id + '_close' ? 'Closing...' : 'Close Event'}
-                    </span>
-                    {/* Toggle pill — always off */}
-                    <div className="w-12 h-6 rounded-full bg-red-300 flex items-center px-1">
-                      <div className="w-4 h-4 bg-white rounded-full shadow translate-x-6"></div>
-                    </div>
-                  </button>
-                )}
-
-                {/* Actions when Not Completed */}
-                {event.status !== 'COMPLETED' ? (
-                  <>
-                    <Link href={`/manager/staffing?eventId=${event.id}`}>
-                      <button className="bg-[#242424] w-full justify-center hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        Manage Staffing
-                      </button>
-                    </Link>
-
-                    <Link href={`/manager/events/${event.id}/chat`}>
-                      <button className="bg-white border border-[#CD7F32] w-full justify-center text-[#CD7F32] hover:bg-[#CD7F32] hover:text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
-                        Event Chat
-                      </button>
-                    </Link>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => openRatingModal(event.id)}
-                    className="bg-yellow-50 border border-yellow-200 w-full justify-center text-yellow-700 hover:bg-yellow-100 px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    Rate Workers
-                  </button>
-                )}
-              </div>
+              <h3 className="text-2xl font-bold font-serif mb-2">No Events Yet</h3>
+              <p className="text-gray-500 mb-8">You haven&apos;t created any events yet. Start by creating a beautiful event page.</p>
+              <Link href="/manager/events/create" className="inline-block text-[#CD7F32] font-bold hover:underline bg-[#CD7F32]/10 px-6 py-3 rounded-xl transition-colors">
+                Create Your First Event
+              </Link>
             </motion.div>
-          );
-        })}
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              {events.map((event, index) => {
+                const live = isLive(event.status);
+                const completed = event.status === 'COMPLETED';
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    className={`bg-white/90 backdrop-blur-md rounded-2xl p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-8 transition-all duration-300 relative overflow-hidden group ${live ? 'border border-green-300 shadow-[0_8px_30px_rgba(34,197,94,0.12)]' : completed ? 'border border-gray-200 opacity-75 shadow-sm' : 'border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(205,127,50,0.1)] hover:border-[#CD7F32]/30'}`}
+                  >
+                    {/* Accent border bar on left */}
+                    <div className={`absolute top-0 left-0 w-1.5 h-full ${live ? 'bg-green-500' : completed ? 'bg-gray-300' : 'bg-gradient-to-b from-[#CD7F32] to-[#ffb163]'}`} />
+
+                    {/* Left — Event Info */}
+                    <div className="space-y-4 flex-1 pl-2">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {live && (
+                          <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-green-100 text-green-700 px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            Live Now
+                          </span>
+                        )}
+                        {completed && (
+                          <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-gray-100 text-gray-500 px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            Closed
+                          </span>
+                        )}
+                        {!live && !completed && (
+                          <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-[#CD7F32]/10 text-[#CD7F32] px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm border border-[#CD7F32]/20">
+                            Upcoming
+                          </span>
+                        )}
+                        <h3 className="text-2xl font-bold font-serif text-gray-900 leading-tight group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                      </div>
+
+                      <div className="flex flex-wrap items-center text-sm font-medium text-gray-500 gap-x-6 gap-y-3">
+                        <span className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                          </div>
+                          {new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                        {event.startTime && (
+                          <span className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            {event.startTime}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                          </div>
+                          <span className="line-clamp-1 max-w-[200px]">{event.location}</span>
+                        </span>
+                        
+                        <div className="h-4 w-px bg-gray-200 hidden md:block"></div>
+                        
+                        <span className="flex items-center gap-2 text-[#CD7F32] bg-[#CD7F32]/5 px-3 py-1 rounded-lg border border-[#CD7F32]/10">
+                          <span className="font-bold">{event.staffingRequests?.length || 0}</span> 
+                          <span className="text-xs uppercase tracking-wider font-bold">Staff Roles</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Right — Controls */}
+                    <div className="flex flex-col gap-3 min-w-[220px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-100 pt-5 lg:pt-0 lg:pl-8">
+
+                      {/* ===== LIVE TOGGLE ===== */}
+                      {!completed && (
+                        <button
+                          onClick={() => toggleLive(event)}
+                          disabled={toggling === event.id + '_live' || toggling === event.id + '_close'}
+                          className={`relative w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 shadow-sm ${
+                            live
+                              ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100'
+                              : 'bg-white border-gray-200 text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] hover:shadow-md'
+                          } disabled:opacity-60 active:scale-95`}
+                        >
+                          <span className="flex items-center gap-2">
+                            {live ? (
+                              <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                            ) : (
+                              <span className="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                            )}
+                            {toggling === event.id + '_live' ? 'Updating...' : live ? 'Event is LIVE' : 'Go Live'}
+                          </span>
+                          {/* Toggle pill */}
+                          <div className={`w-11 h-6 rounded-full transition-colors duration-300 flex items-center px-1 border ${live ? 'bg-green-500 border-green-600' : 'bg-gray-100 border-gray-300'}`}>
+                            <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${live ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                          </div>
+                        </button>
+                      )}
+
+                      {/* ===== CLOSE EVENT TOGGLE (only when LIVE) ===== */}
+                      {live && (
+                        <button
+                          onClick={() => closeEvent(event)}
+                          disabled={toggling === event.id + '_close'}
+                          className="relative w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl font-bold text-sm border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-300 disabled:opacity-60 shadow-sm active:scale-95"
+                        >
+                          <span className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            {toggling === event.id + '_close' ? 'Closing...' : 'Close Event'}
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Actions when Not Completed */}
+                      {!completed ? (
+                        <div className="grid grid-cols-2 gap-2 mt-1">
+                          <Link href={`/manager/staffing?eventId=${event.id}`}>
+                            <button className="bg-[#242424] w-full justify-center hover:bg-black text-white px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                              Staffing
+                            </button>
+                          </Link>
+
+                          <Link href={`/manager/events/${event.id}/chat`}>
+                            <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
+                              Chat
+                            </button>
+                          </Link>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => openRatingModal(event.id)}
+                          className="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-200 w-full justify-center text-yellow-700 hover:shadow-md px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                          Rate Workers
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
       {/* Rating Modal */}
       {ratingModalState && (

@@ -7,17 +7,22 @@ export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
+  const [platformLiveEvents, setPlatformLiveEvents] = useState<any[]>([]);
 
   const fetchData = async () => {
     try {
-      const [profRes, appsRes] = await Promise.all([
+      const [profRes, appsRes, liveRes] = await Promise.all([
         fetch('/api/worker/profile', { cache: 'no-store' }),
-        fetch('/api/worker/applications', { cache: 'no-store' })
+        fetch('/api/worker/applications', { cache: 'no-store' }),
+        fetch('/api/events/live', { cache: 'no-store' })
       ]);
       const profData = await profRes.json();
       const appsData = await appsRes.json();
+      const liveData = await liveRes.json();
+      
       if (profData && !profData.error) setProfile(profData);
       if (Array.isArray(appsData)) setApplications(appsData);
+      if (Array.isArray(liveData)) setPlatformLiveEvents(liveData);
     } catch (err) {
       console.error('Dashboard fetch error', err);
     } finally {
@@ -211,6 +216,57 @@ export default function WorkerDashboard() {
           </div>
         )}
       </div>
+
+      {/* Platform Live Events Section */}
+      {platformLiveEvents.length > 0 && (
+        <div className="mt-12 mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
+              <h2 className="text-2xl font-bold font-serif">Platform Live Events</h2>
+            </div>
+            <Link href="/worker/jobs" className="text-sm font-bold text-[#CD7F32] hover:underline">Explore</Link>
+          </div>
+
+          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-4 snap-x hide-scrollbar">
+            {platformLiveEvents.map((event, i) => (
+              <Link href={`/events/${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
+                <div className="bg-white border border-gray-200 hover:border-[#CD7F32] rounded-xl overflow-hidden transition-all duration-300 relative h-full flex flex-col shadow-sm hover:shadow-md">
+                  <div className="absolute top-3 left-3 z-10">
+                    <span className="bg-white/90 backdrop-blur-md border border-gray-200 text-gray-800 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                      ONGOING
+                    </span>
+                  </div>
+                  
+                  <div className="h-32 w-full overflow-hidden bg-gray-100 relative">
+                    <img 
+                      src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                    <div className="flex items-center gap-1.5 text-gray-500 text-xs mb-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span className="line-clamp-1">{event.location}</span>
+                    </div>
+                    
+                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        {event.staffingRequests?.length || 0} Open Roles
+                      </span>
+                      <span className="text-[10px] font-bold text-[#CD7F32] uppercase tracking-wider group-hover:underline">View →</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

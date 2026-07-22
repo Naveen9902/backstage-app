@@ -41,21 +41,31 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     const { 
-      name, email, mobile, avatarUrl, 
-      category, specialization, pastWork, rates, portfolioLinks, isRunnerAvailable 
+      name, email, mobile, avatarUrl, dateOfBirth, emergencyContact, isPhoneVerified,
+      categories, specialization, pastWork, rates, portfolioLinks, isRunnerAvailable,
+      govtIdUrl, liveSelfieUrl, proofOfExperienceType, proofOfExperienceUrl, 
+      socialMediaUrl, referenceEvent, referenceContact, tier
     } = body;
 
     // Update user details
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, mobile, avatarUrl }
+      data: { 
+        name, 
+        email, 
+        mobile, 
+        avatarUrl,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        emergencyContact,
+        isPhoneVerified: Boolean(isPhoneVerified)
+      }
     });
 
     // Upsert worker profile
     const workerProfile = await prisma.workerProfile.upsert({
       where: { userId },
       update: {
-        category,
+        categories: Array.isArray(categories) ? categories : [],
         specialization,
         pastWork,
         rates,
@@ -63,10 +73,18 @@ export async function PUT(req: Request) {
         isRunnerAvailable: Boolean(isRunnerAvailable),
         skills: body.skills || '',
         experience: body.experience || '',
+        govtIdUrl,
+        liveSelfieUrl,
+        proofOfExperienceType,
+        proofOfExperienceUrl,
+        socialMediaUrl,
+        referenceEvent,
+        referenceContact,
+        tier
       },
       create: {
         userId,
-        category,
+        categories: Array.isArray(categories) ? categories : [],
         specialization,
         pastWork,
         rates,
@@ -74,6 +92,14 @@ export async function PUT(req: Request) {
         isRunnerAvailable: Boolean(isRunnerAvailable),
         skills: body.skills || '',
         experience: body.experience || '',
+        govtIdUrl,
+        liveSelfieUrl,
+        proofOfExperienceType,
+        proofOfExperienceUrl,
+        socialMediaUrl,
+        referenceEvent,
+        referenceContact,
+        tier,
         isVerified: false,
         rating: 0
       }

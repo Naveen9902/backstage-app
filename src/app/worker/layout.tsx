@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
+import RunnerAlert from '@/components/RunnerAlert';
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,6 +43,8 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-[#F5F5DC] flex">
+      {profile?.workerProfile?.isRunnerAvailable && <RunnerAlert isRunnerAvailable={profile.workerProfile.isRunnerAvailable} />}
+      
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-[#242424] text-white flex-col fixed h-full border-r-4 border-[#CD7F32] z-40">
         

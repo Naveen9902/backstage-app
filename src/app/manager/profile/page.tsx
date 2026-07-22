@@ -1,5 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
+  const [myEvents, setMyEvents] = useState<any[]>([]);
 
   useEffect(() => {
     fetch('/api/manager/profile')
@@ -37,6 +39,12 @@ export default function ProfilePage() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setReviews(data);
+      });
+
+    fetch('/api/manager/events')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setMyEvents(data);
       });
   }, []);
 
@@ -175,6 +183,57 @@ export default function ProfilePage() {
                 <p className="text-xs font-bold text-gray-500 uppercase">From: {review.reviewer?.name}</p>
               </motion.div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* Live Events Section */}
+      <div className="mt-12 mb-12">
+        <h2 className="text-2xl font-bold font-serif mb-6">My Active Events</h2>
+        {myEvents.filter(ev => ev.status === 'ONGOING' || ev.status === 'UPCOMING').length === 0 ? (
+          <div className="bg-white rounded-xl p-8 border border-gray-100 text-center text-gray-500 italic">
+            You don't have any active events. Head to "My Events" to create one!
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {myEvents
+              .filter(ev => ev.status === 'ONGOING' || ev.status === 'UPCOMING')
+              .map(event => {
+                const isLive = event.status === 'ONGOING';
+                return (
+                  <Link href={`/manager/my-events`} key={event.id}>
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:border-[#CD7F32] transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                          {event.coverImageUrl ? (
+                            <img src={event.coverImageUrl} alt={event.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-[#CD7F32]/10 flex items-center justify-center text-[#CD7F32] font-bold text-lg">
+                              {event.title.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h4>
+                          <p className="text-sm text-gray-500 font-medium mt-0.5">{new Date(event.date).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div>
+                        {isLive ? (
+                          <span className="bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            LIVE NOW
+                          </span>
+                        ) : (
+                          <span className="bg-orange-50 text-[#CD7F32] text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-[#CD7F32]/20">
+                            UPCOMING
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
           </div>
         )}
       </div>

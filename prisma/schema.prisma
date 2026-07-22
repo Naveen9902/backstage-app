@@ -36,6 +36,11 @@ model User {
   notificationsEnabled Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  resetOtp             String?
+  resetOtpExpiry       DateTime?
+  dateOfBirth          DateTime?
+  emergencyContact     String?
+  isPhoneVerified      Boolean  @default(false)
 
   workerProfile    WorkerProfile?
   managerProfile   ManagerProfile?
@@ -48,14 +53,16 @@ model User {
   notifications    Notification[]
   fanEvents        Event[]            @relation("EventFans")
   likedMessages    MessageLike[]
+  runnerTasks      RunnerDispatch[]   @relation("RunnerTasks")
 }
 
 model ManagerProfile {
-  id      String  @id @default(uuid())
-  userId  String  @unique
-  user    User    @relation(fields: [userId], references: [id])
-  company String?
-  bio     String?
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id])
+  company          String?
+  bio              String?
+  subscriptionTier String  @default("FREE") // FREE | PRO | ENTERPRISE
 }
 
 model WorkerProfile {
@@ -69,12 +76,22 @@ model WorkerProfile {
   rating             Float   @default(0.0)
 
   // New extended profile fields
-  category          String?
+  categories        String[] @default([])
+  govtIdUrl         String?
+  liveSelfieUrl     String?
+  proofOfExperienceType String?
+  proofOfExperienceUrl  String?
+  socialMediaUrl    String?
+  referenceEvent    String?
+  referenceContact  String?
+  tier              String?
   specialization    String?
   pastWork          String?
   rates             String?
   portfolioLinks    String?
   isRunnerAvailable Boolean @default(false)
+  latitude          Float?
+  longitude         Float?
 
   applications Application[]
 }
@@ -90,6 +107,18 @@ model Event {
   status           String             @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
   location         String
   createdAt        DateTime           @default(now())
+  
+  // Attendee / Ticketing fields
+  attendeeCategory String?
+  duration         String?
+  language         String?
+  tags             String?
+  coverImageUrl    String?
+  videoUrl         String?
+  artistAvatarUrl  String?
+  latitude         Float?
+  longitude        Float?
+
   staffingRequests StaffingRequest[]
   runnerDispatches RunnerDispatch[]
   messages         EventChatMessage[]
@@ -127,7 +156,8 @@ model RunnerDispatch {
   task      String
   urgency   String
   status    String   @default("Pending")
-  runner    String?
+  runnerId  String?
+  runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id])
   createdAt DateTime @default(now())
 }
 
@@ -138,6 +168,7 @@ model EventChatMessage {
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   text      String
+  channel   String   @default("announcements")
   createdAt DateTime @default(now())
   
   parentId  String?

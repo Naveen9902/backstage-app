@@ -12,53 +12,46 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const workerProfile = await prisma.workerProfile.findUnique({
-      where: { userId },
-      include: { user: true }
-    });
-
-    if (!workerProfile) {
-      return NextResponse.json({ error: 'Worker profile not found' }, { status: 404 });
-    }
-
-    // Get events where worker has an ACCEPTED application
-    const acceptedApps = await prisma.application.findMany({
+    // Get the events this worker is hired for
+    const hiredApplications = await prisma.application.findMany({
       where: {
-        workerProfileId: workerProfile.id,
-        status: 'ACCEPTED'
+        workerProfile: { userId },
+        status: 'ACCEPTED',
+        staffingRequest: {
+          event: { status: 'ONGOING' }
+        }
       },
       include: {
-        staffingRequest: true
+        staffingRequest: { select: { eventId: true } }
       }
     });
 
-    const validEventIds = acceptedApps.map(app => app.staffingRequest.eventId);
+    const hiredEventIds = hiredApplications.map(app => app.staffingRequest.eventId);
 
-    if (validEventIds.length === 0) {
-      return NextResponse.json({ pending: [], myTasks: [] }, { status: 200 });
-    }
-
-    // Fetch pending tasks for these events, OR tasks already assigned to this worker
     const dispatches = await prisma.runnerDispatch.findMany({
       where: {
-        eventId: { in: validEventIds },
         OR: [
-          { status: 'Pending' },
-          { runner: workerProfile.user.name } // Matches current worker
+          // Broadcast to hired staff
+          { status: 'Pending', runnerId: null, eventId: { in: hiredEventIds } },
+          // Directly assigned to this worker
+          { runnerId: userId }
         ]
       },
       include: {
         event: {
-          select: { title: true, location: true }
+          select: { title: true, status: true }
         }
       },
       orderBy: { createdAt: 'desc' }
     });
 
     const pending = dispatches.filter(d => d.status === 'Pending');
-    const myTasks = dispatches.filter(d => d.runner === workerProfile.user.name && d.status !== 'Pending');
+    const myTasks = dispatches.filter(d => d.runnerId === userId && d.status !== 'Pending');
 
-    return NextResponse.json({ pending, myTasks }, { status: 200 });
+    return NextResponse.json({ 
+      pending, 
+      myTasks
+    }, { status: 200 });
   } catch (error) {
     console.error('GET WORKER RUNNERS ERROR:', error);
     return NextResponse.json({ error: 'Failed to fetch runner tasks' }, { status: 500 });
@@ -78,13 +71,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const workerProfile = await prisma.workerProfile.findUnique({
-      where: { userId },
-      include: { user: true }
-    });
-
-    if (!workerProfile) return NextResponse.json({ error: 'Worker profile not found' }, { status: 404 });
-
     const dispatch = await prisma.runnerDispatch.findUnique({ where: { id: dispatchId } });
     if (!dispatch) return NextResponse.json({ error: 'Task not found' }, { status: 404 });
 
@@ -97,14 +83,14 @@ export async function POST(req: Request) {
         where: { id: dispatchId },
         data: {
           status: 'In Progress',
-          runner: workerProfile.user.name
+          runnerId: userId
         }
       });
       return NextResponse.json(updated, { status: 200 });
     } 
     
     if (action === 'complete') {
-      if (dispatch.runner !== workerProfile.user.name) {
+      if (dispatch.runnerId !== userId) {
         return NextResponse.json({ error: 'Unauthorized to complete this task' }, { status: 403 });
       }
       

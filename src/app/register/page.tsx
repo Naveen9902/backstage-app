@@ -7,6 +7,15 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
+  const [workerSkills, setWorkerSkills] = useState<string[]>([]);
+  const SKILL_OPTIONS = [
+    'Bartender', 'Security', 'Audio Engineer', 'Lighting Tech',
+    'Rigger', 'Runner / PA', 'Event Staff', 'Other'
+  ];
+
+  const toggleSkill = (skill: string) => {
+    setWorkerSkills(prev => prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]);
+  };
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +37,7 @@ export default function Register() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email: formData.email, password: formData.password, role })
+        body: JSON.stringify({ name, email: formData.email, password: formData.password, role, skill: workerSkills.join(', ') })
       });
       if (res.ok) {
         window.location.href = '/login';
@@ -115,6 +124,28 @@ export default function Register() {
                 />
               </div>
             </div>
+
+            {role === 'WORKER' && (
+              <div>
+                <label className="block text-sm font-medium text-[#F5F5DC]/80 mb-2.5">Select Specializations (Multiple allowed)</label>
+                <div className="flex flex-wrap gap-2">
+                  {SKILL_OPTIONS.map(skill => (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => toggleSkill(skill)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                        workerSkills.includes(skill)
+                          ? 'bg-[#CD7F32] border-[#CD7F32] text-white shadow-md'
+                          : 'bg-black/30 border-white/10 text-[#F5F5DC]/70 hover:bg-black/50 hover:border-white/30'
+                      }`}
+                    >
+                      {skill}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-[#F5F5DC]/80 mb-1.5">Email Address</label>

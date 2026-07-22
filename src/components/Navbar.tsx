@@ -32,7 +32,7 @@ export default function Navbar() {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
           <Link href="/#features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="/#events" className="hover:text-white transition-colors">Events</Link>
+          <Link href="/events" className="hover:text-white transition-colors">Events</Link>
           <Link href="/#testimonials" className="hover:text-white transition-colors">Testimonials</Link>
           <Link href="/#pricing" className="hover:text-white transition-colors">Pricing</Link>
         </div>
@@ -91,7 +91,7 @@ export default function Navbar() {
             <span className="text-[9px] font-medium tracking-tight">Features</span>
           </Link>
 
-          <Link href="/#events" className="flex-1 flex flex-col items-center justify-center h-full text-white/60 hover:text-[#CD7F32] transition-colors min-w-[50px]">
+          <Link href="/events" className="flex-1 flex flex-col items-center justify-center h-full text-white/60 hover:text-[#CD7F32] transition-colors min-w-[50px]">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             <span className="text-[9px] font-medium tracking-tight">Events</span>
           </Link>

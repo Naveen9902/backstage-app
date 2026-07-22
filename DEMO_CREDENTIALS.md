@@ -16,3 +16,8 @@ Use these pre-seeded accounts to quickly test the application's different roles.
 - **Email**: `worker@backstage.com`
 - **Password**: `worker123`
 - **Role**: Can edit their professional profile, browse available jobs, apply for staffing requests, and view their schedule.
+
+## 🌟 Pro Manager (Pre-seeded with Events)
+- **Email**: `demomanager@backstage.com`
+- **Password**: `password123`
+- **Role**: A premium manager account populated with multiple upcoming, live, and past events to test the manager dashboard and live ops.

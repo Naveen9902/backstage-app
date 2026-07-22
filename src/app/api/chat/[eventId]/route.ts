@@ -46,8 +46,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const url = new URL(req.url);
+    const channel = url.searchParams.get('channel') || 'announcements';
+
     const messages = await prisma.eventChatMessage.findMany({
-      where: { eventId },
+      where: { eventId, channel, parentId: null },
       include: {
         sender: {
           select: { name: true, avatarUrl: true, role: true }
@@ -66,7 +69,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
 export async function POST(req: Request, { params }: { params: Promise<{ eventId: string }> }) {
   try {
     const { eventId } = await params;
-    const { text } = await req.json();
+    const body = await req.json();
+    const { text } = body;
+    const channel = body.channel || 'announcements';
     const user = await getAuthenticatedUser();
     
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -102,7 +107,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       data: {
         eventId,
         senderId: user.id,
-        text: text.trim()
+        text: text.trim(),
+        channel
       },
       include: {
         sender: {

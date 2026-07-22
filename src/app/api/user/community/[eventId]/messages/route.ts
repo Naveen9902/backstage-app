@@ -23,10 +23,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const url = new URL(req.url);
+    const channel = url.searchParams.get('channel') || 'announcements';
+
+    if (channel === 'logistics-directions' && user.role === 'USER') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // Fetch top-level messages (parentId is null)
     const messages = await prisma.eventChatMessage.findMany({
-      where: { eventId, parentId: null },
+      where: { eventId, parentId: null, channel },
       include: {
         sender: {
           select: { name: true, avatarUrl: true, role: true }
@@ -81,12 +90,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const channel = body.channel || 'announcements';
+
+    if (channel === 'announcements' && user.role !== 'MANAGER') {
+      return NextResponse.json({ error: 'Only managers can post in announcements' }, { status: 403 });
+    }
+    if (channel === 'logistics-directions' && user.role === 'USER') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const message = await prisma.eventChatMessage.create({
       data: {
         eventId,
         senderId: userId,
         text: body.text.trim(),
+        channel,
         parentId: body.parentId || null
       },
       include: {

@@ -64,9 +64,24 @@ export default function ManagerDashboard() {
       <div className="flex justify-between items-start mb-10">
         <div>
           <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Dashboard</h1>
-          <p className="text-lg text-gray-700">
-            Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Manager'}!</span>
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <p className="text-lg text-gray-700">
+              Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Manager'}!</span>
+            </p>
+            {profile?.managerProfile?.subscriptionTier && (
+              <div className="inline-flex">
+                <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                  profile.managerProfile.subscriptionTier === 'ENTERPRISE'
+                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                    : profile.managerProfile.subscriptionTier === 'PRO'
+                      ? 'bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20'
+                      : 'bg-gray-100 text-gray-600 border border-gray-200'
+                }`}>
+                  {profile.managerProfile.subscriptionTier} Plan
+                </span>
+              </div>
+            )}
+          </div>
         </div>
         <Link href="/manager/events/create">
           <motion.button

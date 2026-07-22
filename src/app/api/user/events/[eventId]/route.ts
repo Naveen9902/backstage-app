@@ -9,9 +9,26 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
-        staffingRequests: true,
+        manager: {
+          select: { id: true, name: true, avatarUrl: true, role: true }
+        },
+        staffingRequests: {
+          include: {
+            applications: {
+              include: {
+                workerProfile: {
+                  include: {
+                    user: {
+                      select: { id: true, name: true, avatarUrl: true, role: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         fans: {
-          select: { id: true, name: true, avatarUrl: true }
+          select: { id: true, name: true, avatarUrl: true, role: true }
         }
       }
     });

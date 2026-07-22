@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export async function POST(req: Request) {
   console.log("HIT REGISTER ROUTE");
   try {
-    const { email, password, name, role } = await req.json();
+    const { email, password, name, role, skill } = await req.json();
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       await prisma.workerProfile.create({
         data: {
           userId: user.id,
-          skills: '',
+          skills: skill || '',
           experience: '',
         }
       });

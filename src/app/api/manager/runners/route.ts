@@ -15,14 +15,42 @@ export async function GET() {
     const dispatches = await prisma.runnerDispatch.findMany({
       where: { managerId: userId },
       include: {
-        event: {
-          select: { title: true }
-        }
+        event: { select: { title: true } },
+        runner: { select: { name: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json(dispatches, { status: 200 });
+    const hiredApplications = await prisma.application.findMany({
+      where: {
+        status: 'ACCEPTED',
+        staffingRequest: {
+          event: {
+            managerId: userId,
+            status: 'ONGOING'
+          }
+        }
+      },
+      include: {
+        workerProfile: {
+          include: { user: { select: { id: true, name: true } } }
+        },
+        staffingRequest: {
+          include: { event: { select: { title: true, id: true } } }
+        }
+      }
+    });
+
+    const hiredStaff = hiredApplications.map(app => ({
+      userId: app.workerProfile.user.id,
+      name: app.workerProfile.user.name,
+      roleName: app.staffingRequest.roleName,
+      eventName: app.staffingRequest.event.title,
+      eventId: app.staffingRequest.event.id,
+      skills: app.workerProfile.skills
+    }));
+
+    return NextResponse.json({ dispatches, hiredStaff }, { status: 200 });
   } catch (error) {
     console.error('GET RUNNERS ERROR:', error);
     return NextResponse.json({ error: 'Failed to fetch runner dispatches' }, { status: 500 });
@@ -38,13 +66,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { eventId, task, urgency } = await req.json();
+    const { eventId, task, urgency, runnerId } = await req.json();
 
     if (!eventId || !task || !urgency) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Verify event belongs to manager
     const event = await prisma.event.findFirst({
       where: { id: eventId, managerId: userId }
     });
@@ -62,12 +89,12 @@ export async function POST(req: Request) {
         managerId: userId,
         eventId,
         task,
-        urgency
+        urgency,
+        runnerId: runnerId || null
       },
       include: {
-        event: {
-          select: { title: true }
-        }
+        event: { select: { title: true } },
+        runner: { select: { name: true } }
       }
     });
 
@@ -87,9 +114,9 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { dispatchId, runnerName } = await req.json();
+    const { dispatchId, runnerId } = await req.json();
 
-    if (!dispatchId || !runnerName) {
+    if (!dispatchId || !runnerId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -105,11 +132,12 @@ export async function PATCH(req: Request) {
     const updated = await prisma.runnerDispatch.update({
       where: { id: dispatchId },
       data: {
-        status: 'In Progress',
-        runner: runnerName
+        status: 'Pending',
+        runnerId: runnerId
       },
       include: {
-        event: { select: { title: true } }
+        event: { select: { title: true } },
+        runner: { select: { name: true } }
       }
     });
 

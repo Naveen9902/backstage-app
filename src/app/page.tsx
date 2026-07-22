@@ -7,15 +7,17 @@ import Link from 'next/link';
 
 export default function Home() {
   const [topEvents, setTopEvents] = useState<any[]>([]);
+  const [liveEvents, setLiveEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/events/top')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setTopEvents(data);
-      })
-      .catch(console.error)
+    Promise.all([
+      fetch('/api/events/top').then(res => res.json()),
+      fetch('/api/events/live').then(res => res.json())
+    ]).then(([topData, liveData]) => {
+      if (Array.isArray(topData)) setTopEvents(topData);
+      if (Array.isArray(liveData)) setLiveEvents(liveData);
+    }).catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
@@ -121,53 +123,111 @@ export default function Home() {
         </motion.div>
       </main>
 
-      {/* Features Section (Screenshot 3) */}
+      {/* Live Right Now Section */}
+      {liveEvents.length > 0 && (
+        <section className="py-12 bg-black border-y border-white/10 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-[#CD7F32]/10 blur-[120px] pointer-events-none rounded-full" />
+          
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]"></div>
+                <h2 className="text-3xl font-bold font-serif text-white tracking-tight">Live Right Now</h2>
+              </div>
+            </div>
+
+            <div className="flex overflow-x-auto pb-8 -mx-6 px-6 gap-6 snap-x hide-scrollbar">
+              {liveEvents.map((event, i) => (
+                <Link href={`/events/${event.id}`} key={event.id} className="min-w-[320px] md:min-w-[400px] snap-start shrink-0 group">
+                  <div className="bg-[#1a1a1a] border border-white/10 hover:border-[#CD7F32]/50 rounded-2xl overflow-hidden transition-all duration-300 relative h-full flex flex-col">
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-black/60 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        ONGOING
+                      </span>
+                    </div>
+                    
+                    <div className="h-48 w-full overflow-hidden bg-gray-800 relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+                      <img 
+                        src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-0"
+                      />
+                    </div>
+                    
+                    <div className="p-6 flex flex-col flex-grow bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a]">
+                      <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                      <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                      
+                      <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-[#CD7F32] flex items-center justify-center text-[10px] font-bold text-white uppercase overflow-hidden" style={{ backgroundImage: event.artistAvatarUrl ? `url(${event.artistAvatarUrl})` : 'none', backgroundSize: 'cover' }}>
+                            {!event.artistAvatarUrl && event.managerProfile?.user?.name?.charAt(0)}
+                          </div>
+                          <span className="text-xs text-gray-400 font-medium">By {event.managerProfile?.user?.name || 'Manager'}</span>
+                        </div>
+                        <span className="text-xs font-bold text-[#CD7F32] uppercase tracking-wider group-hover:underline">View Live →</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Event Categories Section */}
       <section className="py-24 bg-white text-[#242424]">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#CD7F32] mb-4">Succeed in Events</h2>
+          <h2 className="text-4xl md:text-5xl font-bold font-serif text-[#CD7F32] mb-4">Discover Events</h2>
           <p className="text-gray-500 max-w-2xl mx-auto mb-16">
-            BackStage provides all the tools you need to find talent, manage events, and build your professional network.
+            Find the perfect events that match your interests. From campus fests to corporate networking, we have it all.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             {[
               {
-                title: "Smart Staffing",
-                desc: "Find the perfect candidates for your events with our intelligent matching algorithm.",
-                icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>
+                title: "Campus fests & culture nights",
+                desc: "Cultural fests, culture nights, fresher's/farewell events",
+                icon: <><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></>
               },
               {
-                title: "Community Hub",
-                desc: "Connect with other event professionals in dedicated community spaces.",
-                icon: <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                title: "Hackathons & tech meets",
+                desc: "Hackathons, tech talks, startup meetups",
+                icon: <><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></>
               },
               {
-                title: "Ratings & Reviews",
-                desc: "Build your reputation with transparent ratings and detailed reviews.",
-                icon: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                title: "Workshops & skill-ups",
+                desc: "Hands-on workshops, training sessions, skill-building",
+                icon: <><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></>
               },
               {
-                title: "Real-time Updates",
-                desc: "Stay in the loop with instant notifications for applications and updates.",
-                icon: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                title: "Corporate & networking",
+                desc: "Offsites, launches, mixers (the public/semi-public ones)",
+                icon: <><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></>
               },
               {
-                title: "Runners Services",
-                desc: "Hire dedicated on-site runners for seamless event execution and logistics support.",
-                icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 16 14"/></>
+                title: "Career & job fairs",
+                desc: "Campus placements, job and internship fairs",
+                icon: <><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>
               },
               {
-                title: "Analytics Dashboard",
-                desc: "Gain powerful insights into your event performance with real-time data analytics.",
-                icon: <><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>
+                title: "Music & entertainment",
+                desc: "College gigs, DJ nights, open mics, cultural performances",
+                icon: <><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></>
               }
-            ].map((feature, i) => (
+            ].map((category, i) => (
               <div key={i} className="group bg-white p-8 rounded-xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 hover:border-[#CD7F32]/40 transition-all duration-300 flex flex-col items-center text-center cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
+                  {category.icon}
                 </svg>
-                <h3 className="text-xl font-bold mb-3 font-serif group-hover:text-[#CD7F32] transition-colors">{feature.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{feature.desc}</p>
+                <h3 className="text-xl font-bold mb-3 font-serif group-hover:text-[#CD7F32] transition-colors">{category.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{category.desc}</p>
               </div>
             ))}
           </div>
@@ -175,53 +235,66 @@ export default function Home() {
       </section>
 
       {/* Dynamic Top Events Section */}
-      <section className="py-24 bg-[#1a1a1a]">
+      <section className="py-24 bg-[#F5F5F5]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
-              <h2 className="text-4xl font-bold font-serif text-white mb-2">Live & Upcoming</h2>
-              <p className="text-white/50">Join these active events happening right now.</p>
+              <h2 className="text-[26px] font-bold text-gray-900 mb-1">Live & Upcoming Events</h2>
+              <p className="text-gray-500 text-sm">Join these active events happening right now.</p>
             </div>
-            <Link href="/register" className="text-[#CD7F32] font-bold hover:underline">View All Events &rarr;</Link>
+            <Link href="/events" className="text-[#CD7F32] font-semibold text-sm hover:underline">View All Events &rarr;</Link>
           </div>
 
-          {loading ? (
-            <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-64 bg-[#242424] rounded-2xl border border-white/5 animate-pulse"></div>
-              ))}
+          <div className="grid grid-cols-1 gap-8">
+            {/* Main Area: Event Grid */}
+            <div>
+              {loading ? (
+                <div className="grid md:grid-cols-3 gap-6">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="aspect-[4/5] bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse"></div>
+                  ))}
+                </div>
+              ) : topEvents.length === 0 ? (
+                <div className="bg-white p-12 rounded-xl border border-gray-100 shadow-sm text-center text-gray-500">
+                  No upcoming events at the moment.
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {topEvents.map(event => (
+                    <Link href={`/events/${event.id}`} key={event.id} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgba(205,127,50,0.15)] hover:-translate-y-1 border border-gray-100 hover:border-[#CD7F32]/30 transition-all duration-300">
+                      <div className="aspect-[4/5] rounded-t-2xl overflow-hidden bg-gray-100 mb-0 relative border-b border-gray-100">
+                        <img 
+                          src={event.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 
+                          alt={event.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                        />
+                        <div className="absolute top-3 left-3 flex gap-2">
+                          <span className={`text-[10px] font-bold px-2 py-1 rounded-md bg-white/95 backdrop-blur-md uppercase shadow-sm ${event.status === 'ONGOING' ? 'text-green-600' : 'text-[#CD7F32]'}`}>
+                            {event.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-4 flex flex-col flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <img 
+                            src={event.artistAvatarUrl || event.manager?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.bands || event.manager?.name || "Artist")}&background=random`} 
+                            alt={event.bands || event.manager?.name || "Artist"} 
+                            className="w-6 h-6 rounded-full object-cover border border-gray-200"
+                          />
+                          <span className="text-[12px] font-semibold text-gray-700 truncate">
+                            {event.bands || event.manager?.name || "Unknown Artist"}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-gray-900 mb-1 text-[15px] leading-snug line-clamp-2 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                        <p className="text-[13px] text-gray-500 line-clamp-1 mb-1">{event.location}</p>
+                        <p className="text-[12px] text-gray-400 font-medium line-clamp-1">{event.tags}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-          ) : topEvents.length === 0 ? (
-            <div className="bg-[#242424] p-12 rounded-2xl border border-white/5 text-center text-white/50">
-              No upcoming events at the moment. Check back soon!
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {topEvents.map(event => (
-                <Link href={`/events/${event.id}`} key={event.id} className="bg-[#242424] p-6 rounded-2xl border border-white/5 hover:border-[#CD7F32]/50 hover:shadow-[0_0_20px_rgba(205,127,50,0.1)] transition-all group flex flex-col h-full cursor-pointer">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md uppercase ${event.status === 'ONGOING' ? 'bg-green-500/20 text-green-400' : 'bg-[#CD7F32]/20 text-[#CD7F32]'}`}>
-                      {event.status}
-                    </span>
-                    <span className="text-sm text-white/40">{new Date(event.date).toLocaleDateString()}</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2 font-serif group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
-                  <p className="text-white/60 text-sm mb-6 line-clamp-2">{event.description}</p>
-                  
-                  <div className="mt-auto space-y-3 pt-4 border-t border-white/10">
-                    <div className="flex items-center gap-3 text-sm text-white/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                      {event.location}
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-white/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                      {event.manager?.managerProfile?.company || 'Independent Manager'}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -365,10 +438,7 @@ export default function Home() {
                 <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
                 <li><Link href="/forums" className="hover:text-white transition-colors">Forums</Link></li>
                 <li><Link href="/support" className="hover:text-white transition-colors">Support</Link></li>
-                <li><Link href="/login?role=ADMIN" className="text-[#CD7F32] font-bold hover:underline flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  Admin Access
-                </Link></li>
+
               </ul>
             </div>
 

@@ -37,7 +37,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, description, date, startTime, location } = await req.json();
+    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl } = await req.json();
+
+    // Check manager subscription tier limits (visual/simple count check)
+    const manager = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { managerProfile: true }
+    });
+    
+    const activeEventsCount = await prisma.event.count({
+      where: { managerId: userId, status: { in: ['UPCOMING', 'ONGOING'] } }
+    });
+
+    if (manager?.managerProfile?.subscriptionTier === 'FREE' && activeEventsCount >= 2) {
+      return NextResponse.json({ error: 'Upgrade to PRO to create more than 2 events.' }, { status: 403 });
+    }
 
     // Combine date + startTime into a single DateTime if both provided
     let eventDate = new Date(date);
@@ -54,7 +68,15 @@ export async function POST(req: Request) {
         date: eventDate,
         startTime: startTime || null,
         location,
-        status: 'UPCOMING'
+        status: 'UPCOMING',
+        coverImageUrl: coverImageUrl || null,
+        videoUrl: videoUrl || null,
+        attendeeCategory: attendeeCategory || null,
+        tags: tags || null,
+        language: language || 'English',
+        duration: duration || '2 Hours',
+        bands: bands || null,
+        artistAvatarUrl: artistAvatarUrl || null
       }
     });
 
