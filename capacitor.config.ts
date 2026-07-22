@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Back Stage',
   webDir: 'out',
   server: {
-    url: 'http://10.186.52.53:3000',
-    cleartext: true
+    url: 'https://back-stage-theta.vercel.app',
+    cleartext: false
   }
 
 };
