@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import prisma from '@/lib/prisma';
 import { Calendar, Clock, MapPin, Globe, Ticket, Lightbulb, ThumbsUp, Navigation, ChevronRight, Sparkles } from 'lucide-react';
 import EventMediaGallery from '@/components/EventMediaGallery';
+import { cookies } from 'next/headers';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -11,6 +12,9 @@ type Props = {
 
 export default async function EventDetailsPage({ params }: Props) {
   const { id } = await params;
+  
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('fanUserId')?.value || cookieStore.get('workerUserId')?.value || cookieStore.get('managerUserId')?.value;
   
   const event = await prisma.event.findUnique({
     where: { id },
@@ -76,9 +80,9 @@ export default async function EventDetailsPage({ params }: Props) {
                 <ThumbsUp className="w-5 h-5 text-green-500 fill-green-500" />
                 717 are interested
               </div>
-              <button className="border border-[#CD7F32] text-[#CD7F32] hover:bg-[#CD7F32]/5 font-semibold px-6 py-2 rounded-lg transition-colors text-sm">
-                Join Community
-              </button>
+              <Link href={userId ? `/user/events/${id}` : `/login`} className="border border-[#CD7F32] text-[#CD7F32] hover:bg-[#CD7F32]/5 font-semibold px-6 py-2 rounded-lg transition-colors text-sm text-center">
+                {userId ? 'Join Community' : 'Login to Join Community'}
+              </Link>
             </div>
           </div>
 

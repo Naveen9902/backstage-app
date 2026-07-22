@@ -8,10 +8,14 @@ export default function EventsFilters({ events }: { events: any[] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedVenue, setSelectedVenue] = useState<string>('');
   
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({
     Categories: true,
-    Date: false,
+    Categories: true,
+    Date: true,
+    Venues: false,
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -41,9 +45,31 @@ export default function EventsFilters({ events }: { events: any[] }) {
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesLocation = selectedLocation === 'All' || (event.location && event.location.toLowerCase().includes(selectedLocation.toLowerCase()));
       const matchesCategory = selectedCategories.length === 0 || (event.attendeeCategory && selectedCategories.includes(event.attendeeCategory));
-      return matchesSearch && matchesLocation && matchesCategory;
+      
+      let matchesDate = true;
+      if (selectedDate) {
+        if (!event.date) {
+          matchesDate = false;
+        } else if (selectedDate === 'Today') {
+          const today = new Date();
+          matchesDate = new Date(event.date).toDateString() === today.toDateString();
+        } else if (selectedDate === 'Tomorrow') {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          matchesDate = new Date(event.date).toDateString() === tomorrow.toDateString();
+        } else if (selectedDate === 'This Weekend') {
+          const d = new Date(event.date);
+          matchesDate = d.getDay() === 0 || d.getDay() === 6;
+        } else {
+          matchesDate = event.date.startsWith(selectedDate);
+        }
+      }
+
+      const matchesVenue = !selectedVenue || (event.location && event.location.toLowerCase().includes(selectedVenue.toLowerCase()));
+
+      return matchesSearch && matchesLocation && matchesCategory && matchesDate && matchesVenue;
     });
-  }, [events, searchTerm, selectedLocation, selectedCategories]);
+  }, [events, searchTerm, selectedLocation, selectedCategories, selectedDate, selectedVenue]);
 
   return (
     <div className="bg-[#F5F5F5] min-h-screen pb-20">
@@ -132,22 +158,57 @@ export default function EventsFilters({ events }: { events: any[] }) {
                 {openFilters['Date'] ? <ChevronUp className="w-4 h-4 text-[#CD7F32]" /> : <ChevronDown className="w-4 h-4" />}
                 <span className={openFilters['Date'] ? 'text-[#CD7F32]' : ''}>Date</span>
               </span>
-              <span className="text-xs text-gray-400 hover:text-[#CD7F32] transition-colors">Clear</span>
+              <span className="text-xs text-gray-400 hover:text-[#CD7F32] transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedDate(''); }}>Clear</span>
             </button>
             {openFilters['Date'] && (
-              <div className="px-5 pb-5 pt-2 flex flex-wrap gap-2">
-                {['Today', 'Tomorrow', 'This Weekend'].map(date => (
-                  <button key={date} className="text-xs px-3 py-2 rounded-md bg-white border border-gray-200 text-[#CD7F32] hover:bg-[#CD7F32]/10 hover:border-[#CD7F32]/30 transition-all">
-                    {date}
+              <div className="px-5 pb-5 pt-2 flex flex-col gap-3">
+                <input 
+                  type="date" 
+                  value={selectedDate && !['Today', 'Tomorrow', 'This Weekend'].includes(selectedDate) ? selectedDate : ''}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full text-xs p-2 border border-gray-200 rounded-md outline-none focus:border-[#CD7F32] text-gray-700 cursor-pointer"
+                />
+                <div className="flex flex-wrap gap-2">
+                  {['Today', 'Tomorrow', 'This Weekend'].map(date => (
+                    <button 
+                      key={date} 
+                      onClick={() => setSelectedDate(date === selectedDate ? '' : date)}
+                      className={`text-xs px-3 py-2 rounded-md transition-all ${selectedDate === date ? 'bg-[#CD7F32] text-white shadow-md' : 'bg-white border border-gray-200 text-[#CD7F32] hover:bg-[#CD7F32]/10'}`}
+                    >
+                      {date}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Venues Accordion */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <button 
+              onClick={() => toggleFilter('Venues')}
+              className="w-full px-5 py-4 flex items-center justify-between bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+            >
+              <span className="flex items-center gap-2 font-semibold">
+                {openFilters['Venues'] ? <ChevronUp className="w-4 h-4 text-[#CD7F32]" /> : <ChevronDown className="w-4 h-4" />}
+                <span className={openFilters['Venues'] ? 'text-[#CD7F32]' : ''}>Venues</span>
+              </span>
+              <span className="text-xs text-gray-400 hover:text-[#CD7F32] transition-colors" onClick={(e) => { e.stopPropagation(); setSelectedVenue(''); }}>Clear</span>
+            </button>
+            {openFilters['Venues'] && (
+              <div className="px-5 pb-5 pt-2 flex flex-col gap-2">
+                {['Jio World Garden', 'Phoenix Marketcity', 'Pragati Maidan', 'Hard Rock Cafe'].map(venue => (
+                  <button 
+                    key={venue} 
+                    onClick={() => setSelectedVenue(venue === selectedVenue ? '' : venue)}
+                    className={`text-xs px-3 py-2 rounded-md transition-all text-left ${selectedVenue === venue ? 'bg-[#CD7F32] text-white shadow-md' : 'bg-white border border-gray-200 text-[#CD7F32] hover:bg-[#CD7F32]/10'}`}
+                  >
+                    {venue}
                   </button>
                 ))}
               </div>
             )}
           </div>
-
-          <button className="w-full mt-4 bg-transparent border-2 border-[#CD7F32] text-[#CD7F32] hover:bg-[#CD7F32] hover:text-white py-3 rounded-lg font-bold transition-all shadow-sm hover:shadow-md hover:shadow-[#CD7F32]/20 active:scale-95">
-            Browse by Venues
-          </button>
         </div>
 
         {/* Right Content */}

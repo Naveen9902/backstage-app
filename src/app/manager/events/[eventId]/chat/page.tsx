@@ -61,8 +61,7 @@ export default async function ManagerEventChatPage({ params }: { params: Promise
   const eventData = JSON.parse(JSON.stringify(event));
 
   return (
-    <div className="w-full h-full min-h-[calc(100vh-theme(spacing.20))] bg-[#f3efe5] -m-8">
-      {/* We use -m-8 to break out of the manager layout padding for a full screen feel */}
+    <div className="w-full h-full min-h-screen bg-[#f3efe5]">
       <CommunityChatLayout 
         eventId={eventId}
         event={eventData}

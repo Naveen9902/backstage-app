@@ -2,7 +2,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 
 export default function RunnersPage() {
@@ -67,13 +66,8 @@ export default function RunnersPage() {
     }
     setAssigning(false);
   };
-
   return (
     <div className="min-h-screen bg-gray-50/50">
-      <div className="bg-[#242424]">
-        <Navbar />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="mb-10 relative overflow-hidden bg-[#242424] rounded-3xl p-8 md:p-12 text-white shadow-xl shadow-[#242424]/10">
           {/* Radar Animation Background */}
