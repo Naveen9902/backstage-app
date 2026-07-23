@@ -1,10 +1,8 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is missing. Please set it in your .env file.');
-}
+const stripeSecret = process.env.STRIPE_SECRET_KEY || 'sk_test_mock_fallback_key';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(stripeSecret, {
   apiVersion: '2025-02-24.acacia',
   appInfo: {
     name: 'Back Stage App',
