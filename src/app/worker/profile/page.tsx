@@ -190,7 +190,7 @@ export default function WorkerProfile() {
       const data = await res.json();
       if (data.success) {
         setOtpSent(true);
-        alert("OTP sent! If you haven't set up Twilio, check your Vercel logs to see the test code.");
+        alert("OTP sent! Check your Notifications (the bell icon) to see the code.");
       } else {
         alert(data.error || "Failed to send OTP");
       }
@@ -752,7 +752,6 @@ export default function WorkerProfile() {
               </div>
             )}
           </div>
-        </div>
         </div>
         
         <div className="lg:col-span-3 mt-8 mb-12 p-6 bg-red-50 border border-red-200 rounded-2xl w-full shadow-sm">

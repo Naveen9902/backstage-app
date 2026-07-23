@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
 import twilio from 'twilio';
+import { cookies } from 'next/headers';
+import prisma from '@/lib/prisma';
 
 // Use global for mock fallback in dev (since Next.js dev server clears module scope occasionally)
 const globalAny = global as any;
@@ -55,6 +57,19 @@ export async function POST(req: Request) {
       console.log(`📱 OTP Code: ${otp}`);
       console.log('📱 Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to .env for real SMS.');
       console.log('----------------------------------------------------');
+
+      // Also send it as an in-app notification to the user so they can read it without checking logs
+      const cookieStore = await cookies();
+      const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value || cookieStore.get('managerUserId')?.value;
+      
+      if (userId) {
+        await prisma.notification.create({
+          data: {
+            userId,
+            message: `📱 Your Phone Verification OTP is: ${otp}`
+          }
+        });
+      }
     }
 
     return NextResponse.json({ success: true, message: 'OTP sent' }, { status: 200 });
