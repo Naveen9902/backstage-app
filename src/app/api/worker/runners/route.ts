@@ -98,8 +98,34 @@ export async function POST(req: Request) {
         where: { id: dispatchId },
         data: {
           status: 'Completed'
+        },
+        include: {
+          runner: true,
+          event: {
+            include: { manager: true }
+          }
         }
       });
+      
+      if (updated.event?.managerId) {
+        // 1. Create in-app notification for Manager
+        await prisma.notification.create({
+          data: {
+            userId: updated.event.managerId,
+            message: `Runner ${updated.runner?.name || ''} has completed the task: "${updated.task}"`
+          }
+        });
+        
+        // 2. Send Push Notification to Manager's phone
+        if (updated.event.manager?.pushSubscription) {
+          const { sendPushNotification } = await import('@/lib/push');
+          await sendPushNotification(updated.event.manager.pushSubscription, {
+            title: 'Task Completed! ✅',
+            body: `Runner ${updated.runner?.name || ''} has completed: "${updated.task}"`
+          });
+        }
+      }
+
       return NextResponse.json(updated, { status: 200 });
     }
 
