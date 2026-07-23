@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function RunnersPage() {
   const [urgency, setUrgency] = useState('High');
@@ -36,8 +37,21 @@ export default function RunnersPage() {
     });
     
     fetchDispatches();
-    const interval = setInterval(fetchDispatches, 3000);
-    return () => clearInterval(interval);
+    
+    // Supabase Realtime instead of polling
+    const channel = supabase.channel('manager_runner_dispatches')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'RunnerDispatch' },
+        () => {
+          fetchDispatches(); // Instantly refresh data when any dispatch changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleDirectAssign = async (e: React.FormEvent) => {

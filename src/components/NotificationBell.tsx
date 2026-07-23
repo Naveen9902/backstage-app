@@ -2,10 +2,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { supabase } from '@/lib/supabase';
+
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const fetchNotifications = async () => {
     try {
@@ -14,6 +17,16 @@ export default function NotificationBell() {
         const data = await res.json();
         setNotifications(data);
         setUnreadCount(data.filter((n: any) => !n.isRead).length);
+        if (data.length > 0) {
+          setUserId(data[0].userId);
+        } else {
+          // If no notifications, try to fetch current user to get ID for realtime filtering
+          const meRes = await fetch('/api/auth/me');
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            if (meData.user?.id) setUserId(meData.user.id);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to fetch notifications', err);
@@ -22,9 +35,28 @@ export default function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // Polling every 10s
-    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase.channel(`notifications_${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'Notification', filter: `userId=eq.${userId}` },
+        (payload) => {
+          // Add the new notification to the list and increment unread
+          const newNotif = payload.new;
+          setNotifications(prev => [newNotif, ...prev]);
+          setUnreadCount(prev => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   const markAsRead = async () => {
     const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);

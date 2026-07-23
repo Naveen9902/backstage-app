@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function LiveRunnersBoard() {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
@@ -23,8 +24,21 @@ export default function LiveRunnersBoard() {
 
   useEffect(() => {
     fetchTasks();
-    const interval = setInterval(fetchTasks, 3000);
-    return () => clearInterval(interval);
+    
+    // Supabase Realtime instead of polling
+    const channel = supabase.channel('worker_runner_dispatches')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'RunnerDispatch' },
+        () => {
+          fetchTasks(); // Instantly refresh data when any dispatch changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleAccept = async (dispatchId: string) => {
