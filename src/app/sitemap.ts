@@ -12,7 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     select: {
       id: true,
-      updatedAt: true, // We don't have updatedAt on Event model? Let's check schema... Wait, Event model doesn't have updatedAt. Let's use createdAt or just current date.
       createdAt: true,
     },
   });
