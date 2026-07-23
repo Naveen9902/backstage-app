@@ -227,6 +227,24 @@ export default function WorkerProfile() {
     setVerifyingOtp(false);
   };
 
+  const handleDeleteAccount = async () => {
+    if (confirm("DANGER: Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+      setSaving(true);
+      try {
+        const res = await fetch('/api/user/profile', { method: 'DELETE' });
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          alert('Failed to delete account');
+          setSaving(false);
+        }
+      } catch (e) {
+        alert('An error occurred');
+        setSaving(false);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

@@ -62,7 +62,7 @@ model User {
 model ManagerProfile {
   id               String  @id @default(uuid())
   userId           String  @unique
-  user             User    @relation(fields: [userId], references: [id])
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   company          String?
   bio              String?
   subscriptionTier String  @default("FREE") // FREE | PRO | ENTERPRISE
@@ -74,7 +74,7 @@ model ManagerProfile {
 model WorkerProfile {
   id                 String  @id @default(uuid())
   userId             String  @unique
-  user               User    @relation(fields: [userId], references: [id])
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   skills             String
   experience         String
   isVerified         Boolean @default(false)
@@ -110,7 +110,7 @@ model WorkerProfile {
 model Event {
   id               String             @id @default(uuid())
   managerId        String
-  manager          User               @relation(fields: [managerId], references: [id])
+  manager          User               @relation(fields: [managerId], references: [id], onDelete: Cascade)
   title            String
   description      String
   date             DateTime
@@ -176,7 +176,7 @@ model RunnerDispatch {
   urgency   String
   status    String   @default("Pending")
   runnerId  String?
-  runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id])
+  runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   @@index([eventId])

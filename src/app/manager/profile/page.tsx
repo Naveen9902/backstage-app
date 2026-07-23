@@ -49,6 +49,24 @@ export default function ProfilePage() {
       });
   }, []);
 
+  const handleDeleteAccount = async () => {
+    if (confirm("DANGER: Are you sure you want to permanently delete your account and ALL events? This action cannot be undone.")) {
+      setSaving(true);
+      try {
+        const res = await fetch('/api/user/profile', { method: 'DELETE' });
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          alert('Failed to delete account');
+          setSaving(false);
+        }
+      } catch (e) {
+        alert('An error occurred');
+        setSaving(false);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -291,6 +309,14 @@ export default function ProfilePage() {
           </div>
         </div>
         
+        <div className="mt-8 mb-12 p-6 bg-red-50 border border-red-200 rounded-2xl w-full max-w-4xl mx-auto shadow-sm">
+          <h3 className="font-bold text-red-800 text-lg mb-2">Danger Zone</h3>
+          <p className="text-red-600 text-sm mb-4">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone.</p>
+          <button onClick={handleDeleteAccount} disabled={saving} className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50">
+            Delete Account
+          </button>
+        </div>
+
       </div>
     </div>
   );
