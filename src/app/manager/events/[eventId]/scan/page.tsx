@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
@@ -22,7 +22,12 @@ export default function QRScannerPage() {
     
     scannerRef.current = new Html5QrcodeScanner(
       "qr-reader",
-      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+      { 
+        fps: 10, 
+        qrbox: { width: 250, height: 250 }, 
+        aspectRatio: 1.0,
+        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+      },
       /* verbose= */ false
     );
     

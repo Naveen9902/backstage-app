@@ -9,11 +9,14 @@ export default function CapacitorAppLogic() {
     // Only import Capacitor dynamically when in browser
     if (typeof window !== 'undefined') {
       import('@capacitor/app').then(({ App }) => {
-        App.addListener('backButton', ({ canGoBack }) => {
-          if (canGoBack) {
-            router.back();
-          } else {
+        App.addListener('backButton', () => {
+          const path = window.location.pathname;
+          // If we are at a root screen, exit the app
+          if (path === '/' || path === '/worker' || path === '/manager') {
             App.exitApp();
+          } else {
+            // Otherwise go back in browser history
+            window.history.back();
           }
         });
       }).catch(err => {
