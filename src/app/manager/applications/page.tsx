@@ -17,6 +17,30 @@ export default function ApplicationsPage() {
       });
   }, []);
 
+  const handlePayAndAccept = async (app: any) => {
+    if (!app.workerProfile?.stripeAccountId) {
+      alert("This worker hasn't set up their payment account yet. They must connect Stripe before you can hire them.");
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: app.id })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Checkout failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during checkout');
+    }
+  };
+
   const handleUpdateStatus = async (appId: string, newStatus: string) => {
     try {
       const res = await fetch(`/api/manager/applications/${appId}/status`, {
@@ -34,9 +58,19 @@ export default function ApplicationsPage() {
 
   return (
     <div className="text-[#242424] max-w-6xl">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Applications</h1>
         <p className="text-lg text-gray-700">Review talent applications for your events</p>
+      </div>
+
+      <div className="mb-8 bg-[#f0f9ff] border border-[#bae6fd] p-4 rounded-xl flex items-start gap-4 shadow-sm">
+        <div className="text-blue-500 mt-1 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3 className="font-bold text-blue-900">Protected by Back Stage Event Insurance</h3>
+          <p className="text-blue-800 text-sm mt-1">All verified workers hired through this platform are automatically covered by our $1M Event Liability Insurance policy. Hire with confidence.</p>
+        </div>
       </div>
       
       {loading ? (
@@ -56,7 +90,14 @@ export default function ApplicationsPage() {
               style={{ boxShadow: '-4px 4px 0px rgba(205, 127, 50, 0.9)' }}
             >
               <div>
-                <h3 className="text-xl font-bold font-serif">{app.workerProfile?.user?.name || 'Unknown Worker'}</h3>
+                <h3 className="text-xl font-bold font-serif flex items-center gap-2">
+                  {app.workerProfile?.user?.name || 'Unknown Worker'}
+                  {app.workerProfile?.isVerified && (
+                    <span title="Verified Identity" className="text-green-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </span>
+                  )}
+                </h3>
                 <p className="text-gray-600 text-sm mb-2">{app.workerProfile?.user?.email}</p>
                 <div className="flex gap-4 text-sm text-gray-700 mb-2">
                   <span><strong>Skills:</strong> {app.workerProfile?.skills || 'N/A'}</span>
@@ -70,7 +111,12 @@ export default function ApplicationsPage() {
               <div className="flex flex-col gap-2 min-w-[140px]">
                 {app.status === 'PENDING' ? (
                   <>
-                    <button onClick={() => handleUpdateStatus(app.id, 'ACCEPTED')} className="bg-green-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-700 transition-colors w-full">Accept</button>
+                    <button 
+                      onClick={() => handlePayAndAccept(app)} 
+                      className="bg-[#CD7F32] hover:bg-[#a86524] text-white font-bold px-4 py-2 rounded-lg transition-colors w-full shadow-sm flex items-center justify-center gap-2"
+                    >
+                      Pay & Accept
+                    </button>
                     <button onClick={() => handleUpdateStatus(app.id, 'REJECTED')} className="bg-red-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors w-full">Reject</button>
                   </>
                 ) : (

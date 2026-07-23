@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: boolean }) {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
@@ -25,8 +26,27 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
     };
 
     fetchTasks();
-    const interval = setInterval(fetchTasks, 3000); // Polling every 3 seconds
-    return () => clearInterval(interval);
+    
+    // Subscribe to new runner dispatches that are pending
+    const channel = supabase.channel('runner_alerts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'RunnerDispatch',
+          filter: `status=eq.Pending`
+        },
+        (payload) => {
+          // Re-fetch to ensure relations (like event details) are loaded correctly
+          fetchTasks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isRunnerAvailable]);
 
   const activeTask = pendingTasks.find(task => !ignoredTaskIds.has(task.id));

@@ -13,13 +13,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Back Stage",
-  description: "Connecting talent and creating memorable events.",
+  title: {
+    template: '%s | Back Stage',
+    default: 'Back Stage - The Ultimate Event Staffing Platform',
+  },
+  description: "Connecting world-class talent with premier event managers. Book staff, manage events, and handle payouts all in one place.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "BackStage",
+  },
+  openGraph: {
+    title: 'Back Stage - Event Staffing',
+    description: 'Connecting world-class talent with premier event managers.',
+    url: 'https://backstage-app.vercel.app', // Update with actual URL when deploying
+    siteName: 'Back Stage',
+    images: [
+      {
+        url: '/logo.png', // Ideally a dedicated OG image
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Back Stage - Event Staffing',
+    description: 'Connecting world-class talent with premier event managers.',
+    images: ['/logo.png'],
   },
 };
 

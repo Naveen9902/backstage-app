@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const TIER_CATEGORIES = {
   'Tier 1': [
@@ -47,7 +48,10 @@ export default function WorkerProfile() {
     portfolioLinks: '',
     isRunnerAvailable: false,
     isVerified: false,
-    rating: 0
+    rating: 0,
+    stripeAccountStatus: 'PENDING',
+    stripeAccountId: null as string | null,
+    verificationStatus: 'PENDING'
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -87,7 +91,10 @@ export default function WorkerProfile() {
             portfolioLinks: data.workerProfile?.portfolioLinks || '',
             isRunnerAvailable: data.workerProfile?.isRunnerAvailable || false,
             isVerified: data.workerProfile?.isVerified || false,
-            rating: data.workerProfile?.rating || 0
+            rating: data.workerProfile?.rating || 0,
+            stripeAccountStatus: data.workerProfile?.stripeAccountStatus || 'PENDING',
+            stripeAccountId: data.workerProfile?.stripeAccountId || null,
+            verificationStatus: data.workerProfile?.verificationStatus || 'PENDING'
           });
         }
         setLoading(false);
@@ -130,6 +137,41 @@ export default function WorkerProfile() {
       setInAppNotifs(!newVal);
     }
   };
+
+  const handleStripeConnect = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/stripe/connect', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setMessage('Failed to connect Stripe.');
+        setSaving(false);
+      }
+    } catch (err) {
+      setMessage('An error occurred.');
+      setSaving(false);
+    }
+  };
+
+  const handleVerifyIdentity = async () => {
+    try {
+      setSaving(true);
+      const res = await fetch('/api/stripe/identity', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setMessage(data.error || 'Failed to start verification.');
+        setSaving(false);
+      }
+    } catch (err) {
+      setMessage('An error occurred.');
+      setSaving(false);
+    }
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -282,9 +324,16 @@ export default function WorkerProfile() {
                   <input type="text" value={formData.mobile} onChange={e=>setFormData({...formData, mobile: e.target.value})} placeholder="+1 (555) 000-0000" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${formData.isVerified ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {formData.isVerified ? 'Verified Talent' : 'Unverified'}
-                  </span>
+                  {formData.isVerified ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-green-100 text-green-700 flex items-center gap-1 border border-green-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Verified Talent (ID Checked)
+                    </span>
+                  ) : (
+                    <button type="button" onClick={handleVerifyIdentity} disabled={saving} className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors shadow-sm flex items-center gap-1">
+                      {formData.verificationStatus === 'PENDING' && !formData.isVerified && formData.name ? 'Verify Identity (Stripe)' : 'Verification Failed - Retry'}
+                    </button>
+                  )}
                   {formData.rating > 0 && (
                     <span className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-bold">
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#CD7F32" stroke="#CD7F32"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -478,6 +527,38 @@ export default function WorkerProfile() {
                   <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#CD7F32]"></div>
                 </label>
               </div>
+
+              <div className="md:col-span-2">
+                <PushNotificationManager />
+              </div>
+
+              {/* Stripe Integration */}
+              <div className="md:col-span-2 bg-[#f4f6fc] p-6 rounded-xl border border-[#d6e0f5] space-y-4">
+                <h3 className="font-bold text-lg border-b border-[#d6e0f5] pb-2 text-[#3b5998] flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                  Payout Details (Stripe)
+                </h3>
+                <p className="text-sm text-gray-600">Connect your Stripe account to receive payouts securely when you complete events.</p>
+                
+                <div className="flex items-center gap-4 mt-4">
+                  {formData.stripeAccountId ? (
+                    <span className="px-4 py-2 bg-green-100 text-green-800 font-bold rounded-lg text-sm flex items-center gap-2 border border-green-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      Stripe Connected
+                    </span>
+                  ) : (
+                    <button 
+                      type="button" 
+                      onClick={handleStripeConnect}
+                      disabled={saving}
+                      className="bg-[#635BFF] hover:bg-[#4B45D6] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors shadow-sm flex items-center gap-2"
+                    >
+                      Connect with Stripe
+                    </button>
+                  )}
+                </div>
+              </div>
+
             </div>
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">

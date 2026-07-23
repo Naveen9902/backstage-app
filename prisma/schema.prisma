@@ -41,6 +41,9 @@ model User {
   dateOfBirth          DateTime?
   emergencyContact     String?
   isPhoneVerified      Boolean  @default(false)
+  twoFactorSecret      String?
+  isTwoFactorEnabled   Boolean  @default(false)
+  pushSubscription     String?
 
   workerProfile    WorkerProfile?
   managerProfile   ManagerProfile?
@@ -63,6 +66,9 @@ model ManagerProfile {
   company          String?
   bio              String?
   subscriptionTier String  @default("FREE") // FREE | PRO | ENTERPRISE
+  stripeCustomerId String? // To save payment methods
+
+  @@index([userId])
 }
 
 model WorkerProfile {
@@ -94,6 +100,11 @@ model WorkerProfile {
   longitude         Float?
 
   applications Application[]
+  stripeAccountId     String?  // Stripe Connect Account ID for payouts
+  stripeAccountStatus String   @default("PENDING") // PENDING, ACTIVE, RESTRICTED
+  stripeIdentitySessionId String? // Stripe Identity Verification Session ID
+
+  @@index([userId])
 }
 
 model Event {
@@ -126,6 +137,8 @@ model Event {
   disputes         Dispute[]
   bands            String?
   fans             User[]             @relation("EventFans")
+
+  @@index([managerId])
 }
 
 model StaffingRequest {
@@ -136,6 +149,8 @@ model StaffingRequest {
   quantity     Int
   payRate      Float
   applications Application[]
+
+  @@index([eventId])
 }
 
 model Application {
@@ -146,6 +161,10 @@ model Application {
   staffingRequest   StaffingRequest   @relation(fields: [staffingRequestId], references: [id])
   status            ApplicationStatus @default(PENDING)
   createdAt         DateTime          @default(now())
+  payments          PaymentTransaction[]
+
+  @@index([workerProfileId])
+  @@index([staffingRequestId])
 }
 
 model RunnerDispatch {
@@ -159,6 +178,10 @@ model RunnerDispatch {
   runnerId  String?
   runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id])
   createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([managerId])
+  @@index([runnerId])
 }
 
 model EventChatMessage {
@@ -175,6 +198,10 @@ model EventChatMessage {
   parent    EventChatMessage?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   EventChatMessage[] @relation("MessageReplies")
   likes     MessageLike[]
+
+  @@index([eventId])
+  @@index([senderId])
+  @@index([parentId])
 }
 
 model MessageLike {
@@ -186,6 +213,8 @@ model MessageLike {
   createdAt DateTime @default(now())
 
   @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
 }
 
 model Review {
@@ -201,6 +230,9 @@ model Review {
   createdAt  DateTime @default(now())
 
   @@unique([eventId, reviewerId, revieweeId]) // Prevent duplicate reviews for same pair in same event
+  @@index([eventId])
+  @@index([reviewerId])
+  @@index([revieweeId])
 }
 
 model Dispute {
@@ -216,6 +248,10 @@ model Dispute {
   status      String   @default("OPEN") // OPEN | RESOLVED
   resolution  String?
   createdAt   DateTime @default(now())
+
+  @@index([eventId])
+  @@index([reporterId])
+  @@index([targetId])
 }
 
 model Notification {
@@ -225,4 +261,25 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
+
+model PaymentTransaction {
+  id                    String   @id @default(uuid())
+  applicationId         String
+  application           Application @relation(fields: [applicationId], references: [id])
+  managerId             String
+  workerId              String
+  amountTotal           Float
+  platformFee           Float
+  workerPayout          Float
+  stripePaymentIntentId String?  @unique
+  status                String   @default("PENDING") // PENDING, HELD, PAID_OUT, REFUNDED
+  createdAt             DateTime @default(now())
+
+  @@index([applicationId])
+  @@index([managerId])
+  @@index([workerId])
+}
+

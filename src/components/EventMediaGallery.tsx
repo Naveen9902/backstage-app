@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Play, Film } from 'lucide-react';
+import Image from 'next/image';
 
 type EventMediaGalleryProps = {
   coverImage: string;
@@ -20,10 +21,11 @@ export default function EventMediaGallery({ coverImage, videoUrl, title }: Event
       <div className="relative aspect-[21/9] w-full bg-black">
         {activeSlide === 0 ? (
           <div className="w-full h-full relative">
-            <img 
+            <Image 
               src={coverImage} 
               alt={title} 
-              className="w-full h-full object-cover" 
+              fill
+              className="object-cover" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
             <div className="absolute bottom-4 left-6 text-white">
@@ -71,13 +73,13 @@ export default function EventMediaGallery({ coverImage, videoUrl, title }: Event
             onClick={() => setActiveSlide(0)}
             className={`relative w-24 aspect-video rounded-md overflow-hidden border-2 transition-all ${activeSlide === 0 ? 'border-[#CD7F32] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}
           >
-            <img src={coverImage} alt="Cover Thumbnail" className="w-full h-full object-cover" />
+            <Image src={coverImage} alt="Cover Thumbnail" fill className="object-cover" />
           </button>
           <button 
             onClick={() => setActiveSlide(1)}
             className={`relative w-24 aspect-video rounded-md overflow-hidden border-2 transition-all flex items-center justify-center bg-gray-200 ${activeSlide === 1 ? 'border-[#CD7F32] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}
           >
-            <img src={coverImage} alt="Video Thumbnail" className="w-full h-full object-cover blur-[2px]" />
+            <Image src={coverImage} alt="Video Thumbnail" fill className="object-cover blur-[2px]" />
             <Play className="absolute w-6 h-6 text-white drop-shadow-md" fill="white" />
           </button>
         </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
@@ -173,6 +174,10 @@ export default function ProfilePage() {
                 <div className="md:col-span-2 space-y-1.5 group/input">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Bio & Experience</label>
                   <textarea rows={4} value={formData.bio} onChange={e=>setFormData({...formData, bio: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-medium outline-none transition-all duration-300 shadow-inner resize-y" placeholder="Tell workers a bit about your event management style..."></textarea>
+                </div>
+                
+                <div className="md:col-span-2">
+                  <PushNotificationManager />
                 </div>
               </div>
             </div>

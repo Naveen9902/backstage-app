@@ -326,9 +326,19 @@ function StaffingContent() {
 export default function StaffingPage() {
   return (
     <div className="text-[#242424] max-w-6xl">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Event Staffing</h1>
         <p className="text-lg text-gray-700">Create and manage staffing requests for your events</p>
+      </div>
+
+      <div className="mb-8 bg-[#f0f9ff] border border-[#bae6fd] p-4 rounded-xl flex items-start gap-4 shadow-sm">
+        <div className="text-blue-500 mt-1 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3 className="font-bold text-blue-900">Hire with Peace of Mind</h3>
+          <p className="text-blue-800 text-sm mt-1">Every worker hired through Back Stage is strictly verified using Stripe Identity, and their work at your event is covered by our $1,000,000 General Liability Insurance policy.</p>
+        </div>
       </div>
       <Suspense fallback={<div>Loading...</div>}>
         <StaffingContent />

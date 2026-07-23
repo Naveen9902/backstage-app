@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Search, Bell, Info, Pin, Hash, MessageSquare, Lock, Settings, LogOut, ChevronLeft, Image as ImageIcon, Menu, X } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 type User = {
   id: string;
@@ -99,8 +100,29 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   useEffect(() => {
     setLoading(true);
     fetchMessages();
-    const interval = setInterval(fetchMessages, 3000);
-    return () => clearInterval(interval);
+    
+    const channel = supabase.channel(`community_${eventId}_${activeChannel}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'EventChatMessage', 
+          filter: `eventId=eq.${eventId}` 
+        },
+        (payload) => {
+          // Since we might receive messages for other channels, 
+          // we only fetch if the inserted message belongs to the current activeChannel.
+          if (payload.new.channel === activeChannel) {
+            fetchMessages();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [eventId, activeChannel]);
 
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);

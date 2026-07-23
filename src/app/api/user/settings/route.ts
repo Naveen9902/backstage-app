@@ -48,7 +48,7 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { notificationsEnabled: true }
+      select: { notificationsEnabled: true, isTwoFactorEnabled: true }
     });
 
     if (!user) {

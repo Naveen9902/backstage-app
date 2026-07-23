@@ -10,6 +10,32 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  
+  const event = await prisma.event.findUnique({
+    where: { id },
+  });
+
+  if (!event) return { title: 'Event Not Found' };
+
+  return {
+    title: event.title,
+    description: event.description.substring(0, 160),
+    openGraph: {
+      title: event.title,
+      description: event.description.substring(0, 160),
+      images: event.coverImageUrl ? [{ url: event.coverImageUrl }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description: event.description.substring(0, 160),
+      images: event.coverImageUrl ? [event.coverImageUrl] : [],
+    }
+  };
+}
+
 export default async function EventDetailsPage({ params }: Props) {
   const { id } = await params;
   

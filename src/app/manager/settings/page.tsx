@@ -15,6 +15,9 @@ export default function SettingsPage() {
         if (data.notificationsEnabled !== undefined) {
           setInAppNotifs(data.notificationsEnabled);
         }
+        if (data.isTwoFactorEnabled !== undefined) {
+          setIs2FaEnabled(data.isTwoFactorEnabled);
+        }
       })
       .catch(err => console.error('Failed to load settings', err));
   }, []);
@@ -41,6 +44,54 @@ export default function SettingsPage() {
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  // 2FA State
+  const [is2FaEnabled, setIs2FaEnabled] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [setupOtp, setSetupOtp] = useState('');
+  const [setup2FaStatus, setSetup2FaStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [generating2Fa, setGenerating2Fa] = useState(false);
+  const [verifying2Fa, setVerifying2Fa] = useState(false);
+
+  const handleGenerate2FA = async () => {
+    setGenerating2Fa(true);
+    try {
+      const res = await fetch('/api/auth/2fa/generate', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setQrCodeUrl(data.qrCodeUrl);
+      } else {
+        setSetup2FaStatus({ type: 'error', message: data.error || 'Failed to generate 2FA' });
+      }
+    } catch (err) {
+      setSetup2FaStatus({ type: 'error', message: 'An unexpected error occurred' });
+    }
+    setGenerating2Fa(false);
+  };
+
+  const handleVerify2FA = async () => {
+    if (!setupOtp || setupOtp.length !== 6) return;
+    setVerifying2Fa(true);
+    setSetup2FaStatus(null);
+    try {
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: setupOtp })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSetup2FaStatus({ type: 'success', message: 'Two-Factor Authentication enabled successfully!' });
+        setIs2FaEnabled(true);
+        setQrCodeUrl(null);
+      } else {
+        setSetup2FaStatus({ type: 'error', message: data.error || 'Invalid 2FA code' });
+      }
+    } catch (err) {
+      setSetup2FaStatus({ type: 'error', message: 'An unexpected error occurred' });
+    }
+    setVerifying2Fa(false);
+  };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,6 +236,56 @@ export default function SettingsPage() {
               {updatingPassword ? 'Updating...' : 'Update Password'}
             </button>
           </form>
+
+          {/* Two Factor Auth */}
+          <div className="mt-8 pt-8 border-t border-gray-100 max-w-md">
+            <h3 className="text-xl font-bold font-serif mb-2">Two-Factor Authentication</h3>
+            <p className="text-sm text-gray-500 mb-4">Secure your account with a time-based one-time password (TOTP) from an authenticator app.</p>
+            
+            {setup2FaStatus && (
+              <div className={`p-3 rounded-lg text-sm font-semibold mb-4 ${setup2FaStatus.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {setup2FaStatus.message}
+              </div>
+            )}
+
+            {is2FaEnabled ? (
+              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                2FA is currently active
+              </div>
+            ) : qrCodeUrl ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 flex flex-col items-center">
+                <p className="text-sm font-bold text-center mb-4">1. Scan this QR code with Google Authenticator or Authy</p>
+                <img src={qrCodeUrl} alt="2FA QR Code" className="w-48 h-48 bg-white border border-gray-200 p-2 rounded-lg shadow-sm mb-6" />
+                <p className="text-sm font-bold text-center mb-2">2. Enter the 6-digit code below</p>
+                <div className="flex gap-2 w-full max-w-xs">
+                  <input 
+                    type="text" 
+                    maxLength={6}
+                    value={setupOtp}
+                    onChange={(e) => setSetupOtp(e.target.value)}
+                    placeholder="000000"
+                    className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 text-center tracking-[0.25em] font-mono focus:border-[#CD7F32] outline-none"
+                  />
+                  <button 
+                    onClick={handleVerify2FA}
+                    disabled={verifying2Fa || setupOtp.length !== 6}
+                    className="bg-[#CD7F32] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a86524] disabled:opacity-50 transition-colors"
+                  >
+                    {verifying2Fa ? '...' : 'Verify'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={handleGenerate2FA}
+                disabled={generating2Fa}
+                className="bg-[#242424] text-white px-6 py-2 rounded-lg font-bold hover:bg-black transition-colors disabled:opacity-50"
+              >
+                {generating2Fa ? 'Loading...' : 'Enable 2FA'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Billing */}
