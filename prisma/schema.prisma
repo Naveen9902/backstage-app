@@ -67,6 +67,7 @@ model ManagerProfile {
   bio              String?
   subscriptionTier String  @default("FREE") // FREE | PRO | ENTERPRISE
   stripeCustomerId String? // To save payment methods
+  rating           Float   @default(0.0)
 
   @@index([userId])
 }

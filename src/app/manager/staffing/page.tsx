@@ -211,8 +211,23 @@ function StaffingContent() {
                                       )}
                                     </div>
                                     <div>
-                                      <p className="font-bold text-sm">{app.workerProfile?.user?.name}</p>
-                                      <p className="text-xs text-gray-500 truncate max-w-[200px]">{app.workerProfile?.skills || 'No skills listed'}</p>
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-bold text-sm">{app.workerProfile?.user?.name}</p>
+                                        {app.workerProfile?.rating >= 4.5 && (
+                                          <span className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                                            Top Talent
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-gray-500 truncate max-w-[200px]">{app.workerProfile?.skills || 'No skills listed'}</p>
+                                        {app.workerProfile?.rating > 0 && (
+                                          <span className="flex items-center gap-1 text-[10px] font-bold text-yellow-600 bg-yellow-50 px-1.5 py-0.5 rounded">
+                                            ★ {app.workerProfile.rating.toFixed(1)}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                   

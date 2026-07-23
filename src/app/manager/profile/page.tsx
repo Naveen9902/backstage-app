@@ -11,7 +11,8 @@ export default function ProfilePage() {
     email: '',
     company: '',
     bio: '',
-    avatarUrl: ''
+    avatarUrl: '',
+    rating: 0
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -24,14 +25,15 @@ export default function ProfilePage() {
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
-          setFormData({
-            name: data.name || '',
-            email: data.email || '',
-            company: data.managerProfile?.company || '',
-            bio: data.managerProfile?.bio || '',
-            avatarUrl: data.avatarUrl || ''
-          });
-        }
+            setFormData({
+              name: data.name || '',
+              email: data.email || '',
+              company: data.managerProfile?.company || '',
+              bio: data.managerProfile?.bio || '',
+              avatarUrl: data.avatarUrl || '',
+              rating: data.managerProfile?.rating || 0
+            });
+          }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -98,6 +100,15 @@ export default function ProfilePage() {
           <h1 className="text-4xl font-black tracking-tight text-gray-900 mb-2">Manager Profile</h1>
           <p className="text-gray-500 font-medium">Customize your brand identity and view your active footprint.</p>
         </div>
+        {formData.rating > 0 && (
+          <div className="flex items-center gap-2 bg-[#CD7F32]/10 px-4 py-2 rounded-xl border border-[#CD7F32]/20 shadow-sm">
+            <span className="font-black text-xl text-[#CD7F32]">{formData.rating.toFixed(1)}</span>
+            <div className="flex text-[#CD7F32]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <span className="text-xs font-bold text-[#CD7F32] uppercase tracking-widest ml-1">Rating</span>
+          </div>
+        )}
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -309,7 +320,55 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        <div className="mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
+        {/* REVIEWS SECTION */}
+        <div className="lg:col-span-3 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#CD7F32] to-[#8a5522] flex items-center justify-center shadow-md">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+            </div>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Manager Reviews</h2>
+          </div>
+          
+          {reviews.length === 0 ? (
+            <div className="bg-white rounded-[2rem] p-12 border border-[#EAE6DF] text-center shadow-sm">
+              <div className="w-16 h-16 bg-[#f8f6f0] rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+              </div>
+              <h3 className="font-bold text-lg text-gray-900 mb-1">No Reviews Yet</h3>
+              <p className="text-gray-500 text-sm max-w-sm mx-auto">Once you complete events, workers can leave reviews about their experience with you.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {reviews.map((review, i) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white p-6 rounded-3xl border border-[#EAE6DF] shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <svg key={star} className={`w-4 h-4 transition-colors ${review.rating >= star ? "text-[#CD7F32] fill-[#CD7F32]" : "text-gray-200 fill-gray-100"}`} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">{new Date(review.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  {review.comment && <p className="text-gray-700 text-sm mb-4 leading-relaxed font-medium">"{review.comment}"</p>}
+                  <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                    <div className="w-6 h-6 rounded-full bg-[#CD7F32]/10 flex items-center justify-center text-[#CD7F32] font-bold text-xs">
+                      {review.reviewer?.name?.charAt(0) || '?'}
+                    </div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{review.reviewer?.name}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="lg:col-span-3 mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
             <h3 className="font-black text-[#CD7F32] text-xl mb-2 flex items-center gap-2">

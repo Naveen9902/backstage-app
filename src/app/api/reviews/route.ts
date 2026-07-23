@@ -79,6 +79,15 @@ export async function POST(req: Request) {
         where: { id: reviewee.workerProfile.id },
         data: { rating: avg }
       });
+    } else if (reviewee?.managerProfile) {
+      const allManagerReviews = await prisma.review.findMany({
+        where: { revieweeId: revieweeId }
+      });
+      const avg = allManagerReviews.reduce((acc, r) => acc + r.rating, 0) / allManagerReviews.length;
+      await prisma.managerProfile.update({
+        where: { id: reviewee.managerProfile.id },
+        data: { rating: avg }
+      });
     }
 
     await sendNotification(revieweeId, `You received a new ${rating}-star review.`);
