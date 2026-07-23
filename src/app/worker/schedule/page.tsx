@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 
 export default function MySchedule() {
   const [schedule, setSchedule] = useState<any[]>([]);
@@ -9,6 +10,22 @@ export default function MySchedule() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [ratingTarget, setRatingTarget] = useState<any>(null); // { eventId, managerId, rating, comment }
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [showPassModal, setShowPassModal] = useState<any>(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+
+  const generateQRCode = async (appId: string) => {
+    try {
+      const url = await QRCode.toDataURL(appId, { width: 300, margin: 2, color: { dark: '#111111', light: '#FFFFFF' } });
+      setQrCodeDataUrl(url);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openPass = (app: any) => {
+    setShowPassModal(app);
+    generateQRCode(app.id);
+  };
 
   const fetchSchedule = () => {
     fetch('/api/worker/applications', { cache: 'no-store' })
@@ -173,6 +190,15 @@ export default function MySchedule() {
                             </button>
                           </Link>
                         )}
+                        {!isClosed && (
+                          <button 
+                            onClick={() => openPass(app)}
+                            className="text-sm font-bold bg-black text-white hover:bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                            Show Digital Pass
+                          </button>
+                        )}
                         <Link href={`/worker/events/${app.staffingRequest.eventId}/chat`}>
                           <button className="text-sm font-bold text-[#CD7F32] border border-[#CD7F32] hover:bg-[#CD7F32] hover:text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -247,6 +273,69 @@ export default function MySchedule() {
               </motion.div>
             );
           })}
+        </div>
+      )}
+
+      {/* DIGITAL PASS MODAL */}
+      {showPassModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl relative"
+          >
+            <button 
+              onClick={() => setShowPassModal(null)}
+              className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 p-2 rounded-full backdrop-blur-md z-10 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+            </button>
+            
+            <div className="bg-[#111111] p-8 pb-12 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32] rounded-full blur-[60px] opacity-20"></div>
+              <h2 className="text-2xl font-bold font-serif text-white mb-1 tracking-wide">Back <span className="text-[#CD7F32]">Stage</span></h2>
+              <p className="text-[#CD7F32] text-xs font-bold uppercase tracking-widest mb-6">Digital Event Pass</p>
+              
+              <h3 className="text-xl font-bold text-white leading-tight">
+                {showPassModal.staffingRequest.event.title}
+              </h3>
+              <p className="text-gray-400 mt-2 font-medium">{showPassModal.staffingRequest.roleName}</p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-t-[2rem] -mt-6 relative flex flex-col items-center">
+              <div className="w-16 h-1 bg-gray-200 rounded-full mb-8 absolute top-3"></div>
+              
+              <div className="p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl shadow-inner mb-6">
+                {qrCodeDataUrl ? (
+                  <img src={qrCodeDataUrl} alt="QR Code" className="w-48 h-48 object-contain rounded-lg" />
+                ) : (
+                  <div className="w-48 h-48 flex items-center justify-center text-gray-400">Loading QR...</div>
+                )}
+              </div>
+              
+              <div className="text-center w-full">
+                {showPassModal.checkInTime ? (
+                  <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Checked In at {new Date(showPassModal.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 font-medium mb-4">Present this pass to the Event Manager upon arrival.</p>
+                )}
+                
+                <div className="flex justify-between border-t border-gray-100 pt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  <div className="text-left">
+                    <span className="block text-gray-800 text-sm mb-0.5">{new Date(showPassModal.staffingRequest.event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                    Date
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-gray-800 text-sm mb-0.5">{showPassModal.staffingRequest.event.startTime || 'TBD'}</span>
+                    Call Time
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

@@ -161,6 +161,7 @@ model Application {
   staffingRequest   StaffingRequest   @relation(fields: [staffingRequestId], references: [id])
   status            ApplicationStatus @default(PENDING)
   createdAt         DateTime          @default(now())
+  checkInTime       DateTime?
   payments          PaymentTransaction[]
 
   @@index([workerProfileId])
