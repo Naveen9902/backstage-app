@@ -309,12 +309,19 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        <div className="mt-8 mb-12 p-6 bg-red-50 border border-red-200 rounded-2xl w-full max-w-4xl mx-auto shadow-sm">
-          <h3 className="font-bold text-red-800 text-lg mb-2">Danger Zone</h3>
-          <p className="text-red-600 text-sm mb-4">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone.</p>
-          <button onClick={handleDeleteAccount} disabled={saving} className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50">
-            Delete Account
-          </button>
+        <div className="mt-8 mb-12 p-8 bg-[#111111] border border-red-900/30 rounded-[2rem] w-full max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="relative z-10">
+            <h3 className="font-black text-red-500 text-xl mb-2 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+              DANGER ZONE
+            </h3>
+            <p className="text-gray-400 text-sm mb-6 font-medium max-w-2xl">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone and all data will be permanently wiped.</p>
+            <button onClick={handleDeleteAccount} disabled={saving} className="px-8 py-3 bg-red-950/40 border border-red-900/50 text-red-400 font-bold rounded-xl hover:bg-red-900 hover:text-white hover:border-red-700 transition-all duration-300 disabled:opacity-50 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              Delete My Account Permanently
+            </button>
+          </div>
         </div>
 
       </div>
