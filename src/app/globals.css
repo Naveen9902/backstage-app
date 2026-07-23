@@ -23,7 +23,30 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   margin: 0;
-  padding: 0;
+  
+  /* Safe Area Insets for Native Apps */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  
+  /* Disable Text Selection and Callouts to feel native */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Re-enable text selection for form elements */
+input, textarea {
+  user-select: auto;
+  -webkit-user-select: auto;
+}
+
+/* Hide webkit scrollbars globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 @layer base {
