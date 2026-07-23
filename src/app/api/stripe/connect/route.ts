@@ -21,6 +21,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Worker profile not found' }, { status: 404 });
     }
 
+    // --- SIMULATION MODE ---
+    // If there is no real Stripe key, use the simulation flow
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.log('SIMULATION MODE: Redirecting to mock Stripe onboarding');
+      return NextResponse.json({ url: `/mock/stripe/onboarding?workerId=${workerProfile.id}` });
+    }
+    // -----------------------
+
     let accountId = workerProfile.stripeAccountId;
 
     // Create a new Express account if one doesn't exist

@@ -50,6 +50,15 @@ export async function POST(req: Request) {
     const platformFeeAmount = workerAmount * platformFeePercentage;
     const totalAmount = workerAmount + platformFeeAmount;
 
+    // --- SIMULATION MODE ---
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.log('SIMULATION MODE: Redirecting to mock Stripe checkout');
+      return NextResponse.json({ 
+        url: `/mock/stripe/checkout?applicationId=${application.id}&amount=${totalAmount}&eventId=${application.staffingRequest.eventId}` 
+      });
+    }
+    // -----------------------
+
     // Create a Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
