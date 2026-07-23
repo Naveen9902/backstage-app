@@ -60,6 +60,9 @@ export default function WorkerProfile() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [inAppNotifs, setInAppNotifs] = useState(true);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   useEffect(() => {
     fetch('/api/worker/profile')
@@ -172,6 +175,57 @@ export default function WorkerProfile() {
     }
   };
 
+  const handleSendOtp = async () => {
+    if (!formData.mobile) {
+      alert("Enter a mobile number above first!");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch('/api/auth/phone/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOtpSent(true);
+        alert("OTP sent! If you haven't set up Twilio, check your Vercel logs to see the test code.");
+      } else {
+        alert(data.error || "Failed to send OTP");
+      }
+    } catch (e) {
+      alert("An error occurred sending OTP.");
+    }
+    setVerifyingOtp(false);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode) {
+      alert("Enter the OTP code!");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch('/api/auth/phone/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile, code: otpCode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData({ ...formData, isPhoneVerified: true });
+        setOtpSent(false);
+        setOtpCode('');
+        alert("Phone Verified! Don't forget to Save your Profile at the bottom of the page.");
+      } else {
+        alert(data.error || "Invalid OTP");
+      }
+    } catch (e) {
+      alert("An error occurred verifying OTP.");
+    }
+    setVerifyingOtp(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -391,12 +445,27 @@ export default function WorkerProfile() {
                     <input type="text" placeholder="Name & Phone" value={formData.emergencyContact} onChange={e=>setFormData({...formData, emergencyContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="text-sm font-bold text-gray-700">Phone Verification</label>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-1">
-                      <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
-                      <button type="button" onClick={() => { if(formData.mobile) setFormData({...formData, isPhoneVerified: true}); else alert("Enter mobile number above first!"); }} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${formData.isPhoneVerified ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-[#242424] text-white hover:bg-black transition-colors'}`}>
-                        {formData.isPhoneVerified ? 'Verified ✓' : 'Verify via OTP'}
-                      </button>
+                    <label className="text-sm font-bold text-gray-700">Phone Verification (Required)</label>
+                    <div className="flex flex-col gap-2 mt-1">
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
+                        {formData.isPhoneVerified ? (
+                           <span className="px-6 py-2 rounded-lg font-bold text-sm bg-green-100 text-green-700 border border-green-200 flex items-center justify-center">Verified ✓</span>
+                        ) : (
+                          <button type="button" disabled={verifyingOtp || otpSent} onClick={handleSendOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#242424] text-white hover:bg-black transition-colors disabled:opacity-50">
+                            {verifyingOtp ? 'Sending...' : (otpSent ? 'OTP Sent' : 'Send OTP')}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {otpSent && !formData.isPhoneVerified && (
+                        <div className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                          <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder="Enter 6-digit OTP" className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-[#CD7F32]" />
+                          <button type="button" disabled={verifyingOtp} onClick={handleVerifyOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors disabled:opacity-50">
+                            {verifyingOtp ? 'Verifying...' : 'Verify Code'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
