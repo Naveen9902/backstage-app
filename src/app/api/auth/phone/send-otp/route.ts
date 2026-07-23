@@ -3,6 +3,7 @@ import { Redis } from '@upstash/redis';
 import twilio from 'twilio';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { sendPushNotification } from '@/lib/push';
 
 // Use global for mock fallback in dev (since Next.js dev server clears module scope occasionally)
 const globalAny = global as any;
@@ -69,6 +70,15 @@ export async function POST(req: Request) {
             message: `📱 Your Phone Verification OTP is: ${otp}`
           }
         });
+        
+        // Also send Web Push Notification if subscribed
+        const userObj = await prisma.user.findUnique({ where: { id: userId } });
+        if (userObj?.pushSubscription) {
+          await sendPushNotification(userObj.pushSubscription, {
+            title: 'Verification Code',
+            body: `Your Back Stage OTP is: ${otp}`
+          });
+        }
       }
     }
 
