@@ -753,7 +753,16 @@ export default function WorkerProfile() {
             )}
           </div>
         </div>
+        </div>
         
+        <div className="lg:col-span-3 mt-8 mb-12 p-6 bg-red-50 border border-red-200 rounded-2xl w-full shadow-sm">
+          <h3 className="font-bold text-red-800 text-lg mb-2">Danger Zone</h3>
+          <p className="text-red-600 text-sm mb-4">Permanently delete your Back Stage worker account, including all your applications, chats, and profile data. This action cannot be undone.</p>
+          <button onClick={handleDeleteAccount} disabled={saving} className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50">
+            Delete Account
+          </button>
+        </div>
+
       </div>
     </div>
   );
