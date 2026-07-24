@@ -14,14 +14,14 @@ if (vapidPublicKey && vapidPrivateKey) {
 export async function sendPushNotification(subscriptionJson: string, payload: { title: string; body: string; url?: string }) {
   if (!vapidPublicKey || !vapidPrivateKey) {
     console.warn("VAPID keys not set. Skipping push notification.");
-    return false;
+    return { success: false, error: "VAPID_PRIVATE_KEY is missing on the server" };
   }
   try {
     const subscription = JSON.parse(subscriptionJson);
     await webpush.sendNotification(subscription, JSON.stringify(payload));
-    return true;
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error("Error sending push notification:", error);
-    return false;
+    return { success: false, error: error.message || "Unknown web-push error" };
   }
 }

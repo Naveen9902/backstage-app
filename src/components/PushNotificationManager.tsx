@@ -67,8 +67,12 @@ export default function PushNotificationManager() {
   async function sendTestNotification() {
     setMessage('Sending test notification...')
     const res = await fetch('/api/push/test', { method: 'POST' })
-    if (res.ok) setMessage('Test notification sent!')
-    else setMessage('Failed to send notification')
+    if (res.ok) {
+      setMessage('Test notification sent!')
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setMessage(`Failed: ${data.error || 'Server error'}`)
+    }
   }
 
   if (!isSupported) {

@@ -17,15 +17,15 @@ export async function POST() {
       return NextResponse.json({ error: 'No push subscription found' }, { status: 404 });
     }
 
-    const success = await sendPushNotification(user.pushSubscription, {
+    const result = await sendPushNotification(user.pushSubscription, {
       title: "Test Notification",
       body: "This is a test notification from Back Stage!"
     });
 
-    if (success) {
+    if (result.success) {
       return NextResponse.json({ success: true });
     } else {
-      return NextResponse.json({ error: 'Failed to send push' }, { status: 500 });
+      return NextResponse.json({ error: result.error || 'Failed to send push' }, { status: 500 });
     }
   } catch (err) {
     console.error("Test Push Error:", err);
