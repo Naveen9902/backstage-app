@@ -51,7 +51,9 @@ export default function WorkerProfile() {
     rating: 0,
     stripeAccountStatus: 'PENDING',
     stripeAccountId: null as string | null,
-    verificationStatus: 'PENDING'
+    verificationStatus: 'PENDING',
+    requestedTier: '',
+    originalTier: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -97,7 +99,9 @@ export default function WorkerProfile() {
             rating: data.workerProfile?.rating || 0,
             stripeAccountStatus: data.workerProfile?.stripeAccountStatus || 'PENDING',
             stripeAccountId: data.workerProfile?.stripeAccountId || null,
-            verificationStatus: data.workerProfile?.verificationStatus || 'PENDING'
+            verificationStatus: data.workerProfile?.verificationStatus || 'PENDING',
+            requestedTier: data.workerProfile?.requestedTier || '',
+            originalTier: data.workerProfile?.tier || ''
           });
         }
         setLoading(false);
@@ -254,9 +258,15 @@ export default function WorkerProfile() {
       const res = await fetch('/api/worker/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          // Always send requestedTier as the selected tier if they are saving and not approved yet, OR if they explicitly asked for it
+          requestedTier: (!formData.isVerified || formData.verificationStatus === 'PENDING') ? formData.tier : formData.requestedTier
+        })
       });
       if (res.ok) {
+        const updated = await res.json();
+        setFormData(prev => ({ ...prev, verificationStatus: updated.workerProfile?.verificationStatus || prev.verificationStatus, requestedTier: updated.workerProfile?.requestedTier || prev.requestedTier }));
         setMessage('Profile updated successfully!');
         window.dispatchEvent(new Event('profileUpdated'));
       } else {
@@ -416,10 +426,17 @@ export default function WorkerProfile() {
                 </div>
                 <div className="flex flex-wrap gap-4">
                   {formData.isVerified ? (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-green-100 text-green-700 flex items-center gap-1 border border-green-200">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Verified Talent (ID Checked)
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-green-100 text-green-700 flex items-center gap-1 border border-green-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        {formData.tier} Verified
+                      </span>
+                      {formData.verificationStatus === 'PENDING' && formData.requestedTier && formData.requestedTier !== formData.tier && (
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 flex items-center gap-1 border border-amber-200">
+                          Upgrade to {formData.requestedTier} Pending
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <button type="button" onClick={handleVerifyIdentity} disabled={saving} className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors shadow-sm flex items-center gap-1">
                       {formData.verificationStatus === 'PENDING' && !formData.isVerified && formData.name ? 'Verify Identity (Stripe)' : 'Verification Failed - Retry'}
@@ -471,6 +488,14 @@ export default function WorkerProfile() {
                     </select>
                   </div>
                 </div>
+                {formData.isVerified && formData.tier !== formData.originalTier && formData.verificationStatus !== 'PENDING' && (
+                   <button type="button" onClick={() => {
+                     setFormData({...formData, requestedTier: formData.tier});
+                     setTimeout(() => alert('Please click Save Profile at the bottom to submit your upgrade request.'), 100);
+                   }} className="mt-4 px-4 py-2 bg-[#CD7F32] text-white text-xs font-bold rounded-lg uppercase tracking-wider hover:bg-[#a86524] transition-colors">
+                     Confirm {formData.tier} Upgrade Request
+                   </button>
+                )}
               </div>
 
               {/* TIER 1 VERIFICATION */}

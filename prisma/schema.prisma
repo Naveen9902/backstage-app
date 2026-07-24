@@ -93,6 +93,7 @@ model WorkerProfile {
   referenceEvent    String?
   referenceContact  String?
   tier              String?
+  requestedTier     String?
   specialization    String?
   pastWork          String?
   rates             String?

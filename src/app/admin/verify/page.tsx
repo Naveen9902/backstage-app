@@ -10,6 +10,7 @@ type Worker = {
   experience: string;
   isVerified: boolean;
   verificationStatus: string;
+  requestedTier?: string;
   user: {
     name: string;
     email: string;
@@ -107,6 +108,7 @@ export default function VerifyTalents() {
                   <th className="p-5 pl-6">Talent</th>
                   <th className="p-5">Skills</th>
                   <th className="p-5">Experience</th>
+                  <th className="p-5">Requested Tier</th>
                   <th className="p-5 text-center">Status</th>
                   <th className="p-5 pr-6 text-right">Action</th>
                 </tr>
@@ -130,6 +132,7 @@ export default function VerifyTalents() {
                       </td>
                       <td className="p-5 text-sm text-gray-400 max-w-[200px] truncate">{worker.skills || 'Not provided'}</td>
                       <td className="p-5 text-sm text-gray-400 max-w-[250px] truncate">{worker.experience || 'Not provided'}</td>
+                      <td className="p-5 text-sm text-amber-500 font-bold">{worker.requestedTier || 'None'}</td>
                       <td className="p-5 text-center">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           worker.verificationStatus === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 

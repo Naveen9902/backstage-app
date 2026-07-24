@@ -56,12 +56,19 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
+    const profile = await prisma.workerProfile.findUnique({ where: { id: workerProfileId } });
+    if (!profile) return NextResponse.json({ error: 'Worker not found' }, { status: 404 });
+
     let isVerified = false;
     let verificationStatus = 'PENDING';
+    let updateData: any = {};
 
     if (action === 'APPROVE') {
       isVerified = true;
       verificationStatus = 'APPROVED';
+      if (profile.requestedTier) {
+        updateData.tier = profile.requestedTier;
+      }
     } else if (action === 'REJECT') {
       isVerified = false;
       verificationStatus = 'REJECTED';
@@ -69,12 +76,12 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
+    updateData.isVerified = isVerified;
+    updateData.verificationStatus = verificationStatus;
+
     const updated = await prisma.workerProfile.update({
       where: { id: workerProfileId },
-      data: {
-        isVerified,
-        verificationStatus
-      },
+      data: updateData,
       include: {
         user: { select: { name: true, email: true } }
       }

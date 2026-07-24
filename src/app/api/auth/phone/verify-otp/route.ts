@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
+import prisma from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
 const globalAny = global as any;
 
@@ -15,10 +17,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Phone number and code are required' }, { status: 400 });
     }
 
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value || cookieStore.get('managerUserId')?.value;
+
     let storedCode = null;
+    let userObj = null;
 
     if (redis) {
       storedCode = await redis.get(`otp:${phone}`);
+    } else if (userId) {
+      userObj = await prisma.user.findUnique({ where: { id: userId } });
+      if (userObj && userObj.resetOtp && userObj.resetOtpExpiry && userObj.resetOtpExpiry > new Date()) {
+        storedCode = userObj.resetOtp;
+      }
     } else {
       const mockData = globalAny.mockOtpStore?.[phone];
       if (mockData && mockData.expires > Date.now()) {
@@ -30,13 +41,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'OTP expired or not found' }, { status: 400 });
     }
 
-    if (storedCode.toString() !== code.toString()) {
+    if (String(storedCode).trim() !== String(code).trim()) {
       return NextResponse.json({ error: 'Invalid OTP code' }, { status: 400 });
     }
 
     // Success! Delete the code so it can't be reused
     if (redis) {
       await redis.del(`otp:${phone}`);
+    } else if (userId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { resetOtp: null, resetOtpExpiry: null }
+      });
     } else {
       delete globalAny.mockOtpStore[phone];
     }

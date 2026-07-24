@@ -23,11 +23,23 @@ export async function POST(req: Request) {
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value || cookieStore.get('managerUserId')?.value;
+
     // Store in Upstash Redis (expires in 5 minutes / 300 seconds)
     if (redis) {
       await redis.set(`otp:${phone}`, otp, { ex: 300 });
+    } else if (userId) {
+      console.warn('Upstash Redis not configured. Using Prisma User table for OTP storage as fallback.');
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          resetOtp: otp,
+          resetOtpExpiry: new Date(Date.now() + 300000)
+        }
+      });
     } else {
-      console.warn('Upstash Redis not configured. OTP will only work in mock mode in memory for this session.');
+      console.warn('Upstash Redis not configured and user not logged in. OTP will only work in mock mode in memory for this session.');
       globalAny.mockOtpStore = globalAny.mockOtpStore || {};
       globalAny.mockOtpStore[phone] = { code: otp, expires: Date.now() + 300000 };
     }
@@ -59,10 +71,6 @@ export async function POST(req: Request) {
       console.log('📱 Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER to .env for real SMS.');
       console.log('----------------------------------------------------');
 
-      // Also send it as an in-app notification to the user so they can read it without checking logs
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value || cookieStore.get('managerUserId')?.value;
-      
       if (userId) {
         await prisma.notification.create({
           data: {

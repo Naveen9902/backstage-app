@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
       name, email, mobile, avatarUrl, dateOfBirth, emergencyContact, isPhoneVerified,
       categories, specialization, pastWork, rates, portfolioLinks, isRunnerAvailable,
       govtIdUrl, liveSelfieUrl, proofOfExperienceType, proofOfExperienceUrl, 
-      socialMediaUrl, referenceEvent, referenceContact, tier
+      socialMediaUrl, referenceEvent, referenceContact, tier, requestedTier
     } = body;
 
     // Update user details
@@ -61,45 +61,42 @@ export async function PUT(req: Request) {
       }
     });
 
+    const updateData: any = {
+      categories: Array.isArray(categories) ? categories : [],
+      specialization,
+      pastWork,
+      rates,
+      portfolioLinks,
+      isRunnerAvailable: Boolean(isRunnerAvailable),
+      skills: body.skills || '',
+      experience: body.experience || '',
+      govtIdUrl,
+      liveSelfieUrl,
+      proofOfExperienceType,
+      proofOfExperienceUrl,
+      socialMediaUrl,
+      referenceEvent,
+      referenceContact
+    };
+
+    // Only allow setting initial tier if not verified yet, otherwise it goes through requestedTier
+    const currentProfile = await prisma.workerProfile.findUnique({ where: { userId } });
+    if (!currentProfile || !currentProfile.isVerified) {
+      updateData.tier = tier;
+    }
+
+    if (requestedTier) {
+      updateData.requestedTier = requestedTier;
+      updateData.verificationStatus = 'PENDING';
+    }
+
     // Upsert worker profile
     const workerProfile = await prisma.workerProfile.upsert({
       where: { userId },
-      update: {
-        categories: Array.isArray(categories) ? categories : [],
-        specialization,
-        pastWork,
-        rates,
-        portfolioLinks,
-        isRunnerAvailable: Boolean(isRunnerAvailable),
-        skills: body.skills || '',
-        experience: body.experience || '',
-        govtIdUrl,
-        liveSelfieUrl,
-        proofOfExperienceType,
-        proofOfExperienceUrl,
-        socialMediaUrl,
-        referenceEvent,
-        referenceContact,
-        tier
-      },
+      update: updateData,
       create: {
+        ...updateData,
         userId,
-        categories: Array.isArray(categories) ? categories : [],
-        specialization,
-        pastWork,
-        rates,
-        portfolioLinks,
-        isRunnerAvailable: Boolean(isRunnerAvailable),
-        skills: body.skills || '',
-        experience: body.experience || '',
-        govtIdUrl,
-        liveSelfieUrl,
-        proofOfExperienceType,
-        proofOfExperienceUrl,
-        socialMediaUrl,
-        referenceEvent,
-        referenceContact,
-        tier,
         isVerified: false,
         rating: 0
       }

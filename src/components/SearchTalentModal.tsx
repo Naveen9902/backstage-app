@@ -115,8 +115,19 @@ export default function SearchTalentModal({ eventId, staffingRequestId, roleName
                     <div>
                       <h4 className="font-bold text-gray-900">{worker.user?.name}</h4>
                       <div className="flex items-center gap-2 text-xs mt-1">
-                        <span className="bg-orange-50 text-[#CD7F32] font-bold px-2 py-0.5 rounded uppercase">{worker.tier || 'TIER_1'}</span>
-                        <span className="text-yellow-600 font-bold">★ {(worker.rating || 0).toFixed(1)}</span>
+                        {worker.isVerified && worker.tier ? (
+                          <span className={`flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase shadow-sm border ${
+                            worker.tier === 'Tier 1' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                            worker.tier === 'Tier 2' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                            'bg-purple-100 text-purple-800 border-purple-200'
+                          }`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Verified {worker.tier}
+                          </span>
+                        ) : (
+                          <span className="bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded uppercase">Unverified</span>
+                        )}
+                        <span className="text-yellow-600 font-bold flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> {(worker.rating || 0).toFixed(1)}</span>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
                         <MapPin className="w-3 h-3" />
