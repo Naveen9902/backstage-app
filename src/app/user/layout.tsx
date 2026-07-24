@@ -47,9 +47,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         
         {/* Logo */}
         <div className="px-6 py-8">
-          <Link href="/" className="flex items-center gap-3 group">
-            <img src="/logo.png" alt="BackStage Logo" className="h-10 w-auto object-contain rounded-md shadow-sm group-hover:opacity-90 transition-opacity bg-white" />
-            <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
+          <Link href="/" className="flex items-center gap-3 group"> <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
           </Link>
         </div>
 
@@ -121,9 +119,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
         <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
           {/* Mobile Header Logo */}
-          <Link href="/" className="md:hidden flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-sm" />
-            <span className="font-serif font-bold tracking-wide text-[#CD7F32]">BackStage</span>
+          <Link href="/" className="md:hidden flex items-center gap-2"> <span className="font-serif font-bold tracking-wide text-[#CD7F32]">BackStage</span>
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">

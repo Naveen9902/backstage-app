@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: 'Back Stage',
     images: [
       {
-        url: '/logo.png', // Ideally a dedicated OG image
+        url: '/logo.jpg', // Ideally a dedicated OG image
         width: 800,
         height: 600,
       },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Back Stage - Event Staffing',
     description: 'Connecting world-class talent with premier event managers.',
-    images: ['/logo.png'],
+    images: ['/logo.jpg'],
   },
 };
 
