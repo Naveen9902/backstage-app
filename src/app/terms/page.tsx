@@ -29,7 +29,32 @@ export default function Terms() {
             
             <section>
               <h2 className="text-2xl font-bold text-white mb-4">4. Payment and Fees</h2>
-              <p>Payments for services rendered are processed through our secure third-party provider. BackStage charges a standard platform fee on transactions which will be clearly displayed before any commitments are made.</p>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-[#CD7F32] mb-2">4.1 Terms for Event Managers</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Upfront Commitment:</strong> Managers are required to authorize or securely hold funds in escrow for the total estimated staffing cost before workers are confirmed for an event.</li>
+                    <li><strong>Platform Fees:</strong> BackStage charges a standard service fee on top of the worker's payout. This fee covers platform maintenance, insurance, and payment processing and will be clearly itemized prior to payment.</li>
+                    <li><strong>Cancellations:</strong> If a manager cancels a shift within 24 hours of the start time, a cancellation fee equivalent to a percentage of the agreed payout may be charged and distributed to the affected workers.</li>
+                    <li><strong>Disputes:</strong> Managers have 48 hours after a shift concludes to file a dispute regarding worker hours or performance. If no dispute is filed, funds will automatically be released to the worker.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-semibold text-[#CD7F32] mb-2">4.2 Terms for Workers (Talent)</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Payout Timelines:</strong> Workers will typically receive their payouts within 3-5 business days after a shift is successfully completed and the manager has approved the hours.</li>
+                    <li><strong>Stripe Connect:</strong> All payouts are processed via Stripe Connect. Workers must complete Stripe Identity Verification and provide valid bank details to receive payments.</li>
+                    <li><strong>Platform Deductions:</strong> The agreed-upon hourly rate displayed when accepting a shift is the final rate the worker will earn. BackStage does not deduct hidden fees from this stated payout.</li>
+                    <li><strong>No-Shows and Cancellations:</strong> Workers who fail to show up for an accepted shift or cancel with less than 24 hours' notice may face account penalties, suspension, or permanent banning from the BackStage platform.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-semibold text-[#CD7F32] mb-2">4.3 General Payment Terms</h3>
+                  <p>All transactions are securely processed by third-party providers (e.g., Stripe). BackStage does not store sensitive credit card or banking information on our servers. By using the platform, both parties agree to abide by the terms of our payment processing partners.</p>
+                </div>
+              </div>
             </section>
           </div>
         </div>
