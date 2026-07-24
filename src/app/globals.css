@@ -55,6 +55,17 @@ input, textarea {
   scrollbar-width: none;  /* Firefox */
 }
 
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 @layer base {
   button, .btn-interactive {
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);

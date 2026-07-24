@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -9,6 +9,7 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
   const [ignoredTaskIds, setIgnoredTaskIds] = useState<Set<string>>(new Set());
   const [processingId, setProcessingId] = useState<string | null>(null);
   const router = useRouter();
+  const previousTaskRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isRunnerAvailable) return;
@@ -51,6 +52,17 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
 
   const activeTask = pendingTasks.find(task => !ignoredTaskIds.has(task.id));
 
+  useEffect(() => {
+    if (activeTask && activeTask.id !== previousTaskRef.current) {
+      if (typeof window !== 'undefined') {
+        import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+          Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
+    previousTaskRef.current = activeTask?.id || null;
+  }, [activeTask]);
+
   const handleAccept = async (dispatchId: string) => {
     setProcessingId(dispatchId);
     try {
@@ -84,9 +96,19 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
       {activeTask && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          animate={{ y: 0, opacity: 1, x: 0 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 w-[90%] md:w-[400px] z-[100] bg-white rounded-2xl shadow-2xl border-2 border-red-500 overflow-hidden flex flex-col"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.7}
+          onDragEnd={(e, { offset, velocity }) => {
+            if (offset.x > 100 || (offset.x > 50 && velocity.x > 500)) {
+              handleAccept(activeTask.id);
+            } else if (offset.x < -100 || (offset.x < -50 && velocity.x < -500)) {
+              handleReject(activeTask.id);
+            }
+          }}
+          className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 w-[90%] md:w-[400px] z-[100] bg-white rounded-2xl shadow-2xl border-2 border-red-500 overflow-hidden flex flex-col touch-none"
           style={{ boxShadow: '0 20px 40px -10px rgba(239, 68, 68, 0.4)' }}
         >
           {/* Pulsing Header */}
@@ -114,6 +136,10 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
               </span>
             </div>
             
+            <p className="text-xs text-gray-400 font-bold mb-4 tracking-widest uppercase">
+              Swipe <span className="text-[#CD7F32]">Right</span> to Accept
+            </p>
+
             <div className="flex w-full gap-3 mt-auto">
               <button 
                 onClick={() => handleReject(activeTask.id)}
