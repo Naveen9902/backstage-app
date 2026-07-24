@@ -19,9 +19,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       return NextResponse.json({ error: 'Invalid QR Code' }, { status: 400 });
     }
 
+    // Parse the prefix from the QR Code (e.g. "CHECKIN:uuid" or "CHECKOUT:uuid")
+    let actionPrefix = '';
+    let parsedApplicationId = applicationId;
+    
+    if (applicationId.startsWith('CHECKIN:')) {
+      actionPrefix = 'CHECKIN';
+      parsedApplicationId = applicationId.substring(8);
+    } else if (applicationId.startsWith('CHECKOUT:')) {
+      actionPrefix = 'CHECKOUT';
+      parsedApplicationId = applicationId.substring(9);
+    } else {
+      // Backwards compatibility for old QR codes
+      parsedApplicationId = applicationId;
+    }
+
     // 1. Verify the application exists and belongs to this event
     const application = await prisma.application.findUnique({
-      where: { id: applicationId },
+      where: { id: parsedApplicationId },
       include: {
         workerProfile: {
           include: { user: true }
@@ -50,11 +65,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       return NextResponse.json({ error: `Worker status is ${application.status}. They are not hired for this event.` }, { status: 400 });
     }
 
-    // 4. Determine Clock-In vs Clock-Out
+    // 4. Determine Clock-In vs Clock-Out based on prefix
     if (!application.checkInTime) {
+      if (actionPrefix === 'CHECKOUT') {
+         return NextResponse.json({ error: 'Worker must check in first!' }, { status: 400 });
+      }
+      
       // Clock In
       await prisma.application.update({
-        where: { id: applicationId },
+        where: { id: parsedApplicationId },
         data: { checkInTime: new Date() }
       });
       return NextResponse.json({
@@ -64,10 +83,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
         roleName: application.staffingRequest.roleName
       });
     } else if (!application.checkOutTime) {
+      if (actionPrefix === 'CHECKIN') {
+         return NextResponse.json({ error: 'Worker has already checked in! Please scan their Check-Out QR.' }, { status: 400 });
+      }
+
       // Clock Out
       const checkOutTime = new Date();
       await prisma.application.update({
-        where: { id: applicationId },
+        where: { id: parsedApplicationId },
         data: { checkOutTime }
       });
 

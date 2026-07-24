@@ -64,9 +64,9 @@ export default function MySchedule() {
     }
   };
 
-  const generateQRCode = async (appId: string) => {
+  const generateQRCode = async (data: string) => {
     try {
-      const url = await QRCode.toDataURL(appId, { width: 300, margin: 2, color: { dark: '#111111', light: '#FFFFFF' } });
+      const url = await QRCode.toDataURL(data, { width: 300, margin: 2, color: { dark: '#111111', light: '#FFFFFF' } });
       setQrCodeDataUrl(url);
     } catch (err) {
       console.error(err);
@@ -75,7 +75,13 @@ export default function MySchedule() {
 
   const openPass = (app: any) => {
     setShowPassModal(app);
-    generateQRCode(app.id);
+    if (app.checkOutTime) {
+      setQrCodeDataUrl('');
+    } else if (app.checkInTime) {
+      generateQRCode(`CHECKOUT:${app.id}`);
+    } else {
+      generateQRCode(`CHECKIN:${app.id}`);
+    }
   };
 
   const fetchSchedule = () => {
@@ -475,15 +481,24 @@ export default function MySchedule() {
               </div>
               
               <div className="text-center w-full">
-                {showPassModal.checkInTime ? (
-                  <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    Checked In at {new Date(showPassModal.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {showPassModal.checkOutTime ? (
+                  <div className="bg-gray-100 text-gray-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold mb-4">
+                    Shift Completed!
+                  </div>
+                ) : showPassModal.checkInTime ? (
+                  <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl flex flex-col items-center justify-center gap-1 font-bold mb-4">
+                    <div className="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      Checked In
+                    </div>
+                    <span className="text-sm font-normal text-green-600 mt-2 block">Manager must scan this QR code to check you out.</span>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 font-medium mb-4">Present this pass to the Event Manager upon arrival.</p>
+                  <div className="bg-blue-100 text-blue-700 px-4 py-3 rounded-xl flex flex-col items-center justify-center gap-1 font-bold mb-4">
+                    <span className="text-sm font-normal text-blue-600 block mb-1">Manager must scan this QR code to check you in.</span>
+                  </div>
                 )}
-                
+
                 <div className="flex justify-between border-t border-gray-100 pt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">
                   <div className="text-left">
                     <span className="block text-gray-800 text-sm mb-0.5">{new Date(showPassModal.staffingRequest.event.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
