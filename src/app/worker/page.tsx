@@ -227,7 +227,9 @@ export default function WorkerDashboard() {
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold font-serif text-gray-800">Recently Completed</h2>
-          <Link href="/worker/schedule" className="text-sm font-bold text-[#CD7F32] hover:underline">View All</Link>
+          <Link href="/worker/completed-shifts" className="text-sm font-bold text-[#CD7F32] hover:underline flex items-center gap-1">
+            View All <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </Link>
         </div>
 
         {applications.filter(app => app.staffingRequest?.event?.status === 'COMPLETED').length === 0 ? (
@@ -259,28 +261,12 @@ export default function WorkerDashboard() {
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-2 self-end md:self-auto w-full md:w-auto">
-                      {app.status !== 'PAID' ? (
-                        <button
-                          onClick={() => {
-                            fetch(`/api/worker/applications/${app.id}/status`, {
-                              method: 'PATCH',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ status: 'PAID' })
-                            }).then(() => {
-                              fetchData();
-                            });
-                          }}
-                          className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                          Confirm Payment
+                      <Link href="/worker/completed-shifts" className="flex-1 md:flex-none">
+                        <button className="w-full bg-[#CD7F32] hover:bg-[#b06a28] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                          Review & Pay
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
-                      ) : (
-                        <div className="flex-1 md:flex-none bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                          Payment Confirmed
-                        </div>
-                      )}
+                      </Link>
                       
                       <Link href="/worker/schedule" className="flex-1 md:flex-none">
                         <button className="w-full bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors text-center">

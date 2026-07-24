@@ -167,7 +167,7 @@ export default function ManagerDashboard() {
                 <p className="text-gray-400 text-xs">Successfully closed and wrapped up</p>
               </div>
             </div>
-            <Link href="/manager/my-events">
+            <Link href="/manager/completed-events">
               <button className="text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                 View All Events
               </button>
@@ -212,9 +212,14 @@ export default function ManagerDashboard() {
 
           {/* Recently Completed Events (Review & Pay) */}
           <div className="mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold font-serif">Recently Completed</h2>
-              <Link href="/manager/my-events" className="text-sm font-bold text-[#CD7F32] hover:underline">View All</Link>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold font-serif text-gray-900">Recently Completed</h2>
+                <p className="text-sm text-gray-500 mt-1">Review staff and finalize payments for closed events.</p>
+              </div>
+              <Link href="/manager/completed-events" className="text-[#CD7F32] font-bold text-sm hover:underline flex items-center gap-1">
+                View All <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </Link>
             </div>
             
             {eventsData.filter(e => e.status === 'COMPLETED').length === 0 ? (
@@ -239,10 +244,12 @@ export default function ManagerDashboard() {
                       </div>
                     </div>
                     
-                    <div className="flex w-full md:w-auto">
-                      <Link href="/manager/my-events" className="w-full">
-                        <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#CD7F32] hover:bg-[#a06227] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div className="flex flex-col gap-2 min-w-[200px] shrink-0 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+                      <Link href={`/manager/completed-events`}>
+                        <button
+                          className="bg-[#CD7F32] w-full justify-center hover:bg-[#b06a28] text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors shadow-sm hover:shadow-md"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                           Review & Pay Staff
                         </button>
                       </Link>
