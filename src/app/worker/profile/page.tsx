@@ -194,7 +194,12 @@ export default function WorkerProfile() {
       const data = await res.json();
       if (data.success) {
         setOtpSent(true);
-        alert("OTP sent! Check your Notifications (the bell icon) to see the code.");
+        if (data.mockOtp) {
+          alert("SIMULATION MODE: Your OTP is " + data.mockOtp);
+          setOtpCode(data.mockOtp);
+        } else {
+          alert("OTP sent! Check your phone.");
+        }
       } else {
         alert(data.error || "Failed to send OTP");
       }

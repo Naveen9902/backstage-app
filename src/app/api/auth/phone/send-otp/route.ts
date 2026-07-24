@@ -81,9 +81,10 @@ export async function POST(req: Request) {
           });
         }
       }
+      return NextResponse.json({ success: true, message: 'OTP sent in simulation mode', mockOtp: otp }, { status: 200 });
     }
 
-    return NextResponse.json({ success: true, message: 'OTP sent' }, { status: 200 });
+    return NextResponse.json({ success: true, message: 'OTP sent via Twilio' }, { status: 200 });
   } catch (error: any) {
     console.error('Send OTP Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
