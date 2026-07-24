@@ -360,7 +360,7 @@ export default function StaffingPage() {
         </div>
         <div>
           <h3 className="font-bold text-blue-900">Hire with Peace of Mind</h3>
-          <p className="text-blue-800 text-sm mt-1">Every worker hired through Back Stage is strictly verified using Stripe Identity, and their work at your event is covered by our $1,000,000 General Liability Insurance policy.</p>
+          <p className="text-blue-800 text-sm mt-1">Every worker hired through Back Stage is strictly verified using Stripe Identity, and their work at your event is covered by our ₹8,00,00,000 General Liability Insurance policy.</p>
         </div>
       </div>
       <Suspense fallback={<div>Loading...</div>}>

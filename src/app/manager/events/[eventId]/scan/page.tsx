@@ -218,7 +218,7 @@ export default function QRScannerPage() {
                 </div>
                 <div className="flex justify-between items-center py-3 bg-gray-50 rounded-xl px-4 mt-2">
                   <span className="text-gray-600 font-bold">Total Due</span>
-                  <span className="font-bold text-2xl text-green-600">${checkoutData.totalAmount}</span>
+                  <span className="font-bold text-2xl text-green-600">₹{checkoutData.totalAmount}</span>
                 </div>
                 
                 <button 

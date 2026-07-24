@@ -69,7 +69,7 @@ export default function ApplicationsPage() {
         </div>
         <div>
           <h3 className="font-bold text-blue-900">Protected by Back Stage Event Insurance</h3>
-          <p className="text-blue-800 text-sm mt-1">All verified workers hired through this platform are automatically covered by our $1M Event Liability Insurance policy. Hire with confidence.</p>
+          <p className="text-blue-800 text-sm mt-1">All verified workers hired through this platform are automatically covered by our ₹8 Crore Event Liability Insurance policy. Hire with confidence.</p>
         </div>
       </div>
       

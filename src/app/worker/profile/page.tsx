@@ -746,7 +746,7 @@ export default function WorkerProfile() {
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-6">
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-gray-300">Pending Payouts</span>
-                <span className="text-sm font-bold text-[#CD7F32]">$350.00</span>
+                <span className="text-sm font-bold text-[#CD7F32]">₹29,000</span>
               </div>
               <div className="w-full bg-black/50 rounded-full h-1.5 mt-2 overflow-hidden">
                 <div className="bg-gradient-to-r from-[#CD7F32] to-yellow-500 w-[60%] h-full rounded-full"></div>

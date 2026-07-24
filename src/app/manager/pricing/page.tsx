@@ -42,7 +42,7 @@ export default function PricingPage() {
             <div className="bg-[#242424] rounded-3xl p-8 border border-[#CD7F32]/50 shadow-2xl transform md:-translate-y-4 flex flex-col relative overflow-hidden">
               <div className="absolute top-0 right-0 bg-[#CD7F32] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">MOST POPULAR</div>
               <h3 className="text-xl font-bold font-serif text-white mb-2">Manager Pro</h3>
-              <div className="text-4xl font-bold text-white mb-6">$49<span className="text-sm text-white/50 font-normal">/month</span></div>
+              <div className="text-4xl font-bold text-white mb-6">₹3999<span className="text-sm text-white/50 font-normal">/month</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-3 text-white/80">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -69,7 +69,7 @@ export default function PricingPage() {
             {/* Enterprise Tier */}
             <div className="bg-[#f8f9fa] rounded-3xl p-8 border border-gray-200 hover:shadow-xl transition-shadow flex flex-col">
               <h3 className="text-xl font-bold font-serif mb-2">Enterprise</h3>
-              <div className="text-4xl font-bold mb-6">$199<span className="text-sm text-gray-500 font-normal">/month</span></div>
+              <div className="text-4xl font-bold mb-6">₹14999<span className="text-sm text-gray-500 font-normal">/month</span></div>
               <ul className="space-y-4 mb-8 flex-1">
                 <li className="flex items-center gap-3 text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
