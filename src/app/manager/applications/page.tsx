@@ -17,29 +17,6 @@ export default function ApplicationsPage() {
       });
   }, []);
 
-  const handlePayAndAccept = async (app: any) => {
-    if (!app.workerProfile?.stripeAccountId) {
-      alert("This worker hasn't set up their payment account yet. They must connect Stripe before you can hire them.");
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: app.id })
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || 'Checkout failed');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('An error occurred during checkout');
-    }
-  };
 
   const handleUpdateStatus = async (appId: string, newStatus: string) => {
     try {
@@ -112,10 +89,10 @@ export default function ApplicationsPage() {
                 {app.status === 'PENDING' ? (
                   <>
                     <button 
-                      onClick={() => handlePayAndAccept(app)} 
+                      onClick={() => handleUpdateStatus(app.id, 'ACCEPTED')} 
                       className="bg-[#CD7F32] hover:bg-[#a86524] text-white font-bold px-4 py-2 rounded-lg transition-colors w-full shadow-sm flex items-center justify-center gap-2"
                     >
-                      Pay & Accept
+                      Accept
                     </button>
                     <button onClick={() => handleUpdateStatus(app.id, 'REJECTED')} className="bg-red-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors w-full">Reject</button>
                   </>
