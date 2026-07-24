@@ -118,12 +118,12 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t border-gray-800 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center justify-around h-16 px-2">
-          {menuItems.filter(item => ['Dashboard', 'My Events', 'Runners', 'Profile'].includes(item.name)).map((item) => {
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t border-gray-800 z-50 overflow-x-auto no-scrollbar pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center h-16 px-2 gap-2 min-w-max">
+          {menuItems.map((item) => {
             const isActive = pathname === item.path || (item.path !== '/manager' && pathname?.startsWith(item.path));
             return (
-              <Link key={item.name} href={item.path} onClick={triggerHaptic} className={`flex flex-col items-center justify-center w-full h-full ${isActive ? 'text-[#CD7F32]' : 'text-white/50 hover:text-white/80'}`}>
+              <Link key={item.name} href={item.path} onClick={triggerHaptic} className={`flex flex-col items-center justify-center w-16 h-full flex-shrink-0 ${isActive ? 'text-[#CD7F32]' : 'text-white/50 hover:text-white/80'}`}>
                 <motion.div 
                   whileTap={{ scale: 0.8 }} 
                   animate={isActive ? { y: -2 } : { y: 0 }}
@@ -131,7 +131,9 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
                 >
                   {item.icon}
                 </motion.div>
-                <span className="text-[10px] font-semibold leading-none">{item.name === 'My Events' ? 'Events' : item.name}</span>
+                <span className="text-[10px] font-semibold leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full px-1 text-center">
+                  {item.name}
+                </span>
               </Link>
             );
           })}
