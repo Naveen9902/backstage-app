@@ -3,8 +3,16 @@ import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
 
-export default async function ManagerEventChatPage({ params }: { params: Promise<{ eventId: string }> }) {
+export default async function ManagerEventChatPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ eventId: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { eventId } = await params;
+  const resolvedSearchParams = await searchParams;
+  const initialChannel = typeof resolvedSearchParams?.channel === 'string' ? resolvedSearchParams.channel : 'announcements';
   
   const cookieStore = await cookies();
   let userId = cookieStore.get('managerUserId')?.value || cookieStore.get('userId')?.value;
@@ -68,6 +76,7 @@ export default async function ManagerEventChatPage({ params }: { params: Promise
         currentUser={currentUserObj}
         otherEvents={otherEvents}
         returnHref="/manager/my-events"
+        initialChannel={initialChannel}
       />
     </div>
   );

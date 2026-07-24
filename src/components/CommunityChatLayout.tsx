@@ -27,11 +27,12 @@ type CommunityChatLayoutProps = {
   currentUser: User;
   otherEvents?: any[];
   returnHref?: string;
+  initialChannel?: string;
 };
 
-const ALL_CHANNELS = ['announcements', 'general', 'logistics-directions', 'networking', 'q-and-a'];
+const ALL_CHANNELS = ['announcements', 'general', 'staff-chat', 'networking', 'q-and-a'];
 
-export default function CommunityChatLayout({ eventId, event, currentUser, otherEvents = [], returnHref = "/user/community" }: CommunityChatLayoutProps) {
+export default function CommunityChatLayout({ eventId, event, currentUser, otherEvents = [], returnHref = "/user/community", initialChannel }: CommunityChatLayoutProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [activeChannel, setActiveChannel] = useState('announcements');
+  const [activeChannel, setActiveChannel] = useState(initialChannel || 'announcements');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const manager = event.manager;
@@ -236,7 +237,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Production Channels</h3>
                 <div className="space-y-0.5">
-                  {ALL_CHANNELS.filter(ch => !(ch === 'logistics-directions' && currentUser.role === 'USER')).map(ch => (
+                  {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && currentUser.role === 'USER')).map(ch => (
                     <div 
                       key={ch}
                       onClick={() => handleChannelSelect(ch)}
@@ -417,7 +418,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
           <div className="px-2">
             <div className="px-2 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Channels</div>
             <div className="space-y-1">
-              {ALL_CHANNELS.filter(ch => !(ch === 'logistics-directions' && currentUser.role === 'USER')).map(ch => (
+              {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && currentUser.role === 'USER')).map(ch => (
                 <button 
                   key={ch}
                   onClick={() => handleChannelSelect(ch)}

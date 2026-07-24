@@ -309,18 +309,25 @@ export default function MyEvents() {
                       {/* Actions when Not Completed */}
                       {!completed ? (
                         <>
-                          <div className="grid grid-cols-2 gap-2 mt-1">
+                          <div className="grid grid-cols-3 gap-2 mt-1">
                             <Link href={`/manager/staffing?eventId=${event.id}`}>
-                              <button className="bg-[#242424] w-full justify-center hover:bg-black text-white px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                              <button className="bg-[#242424] w-full justify-center hover:bg-black text-white px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                                 Staffing
                               </button>
                             </Link>
 
-                            <Link href={`/manager/events/${event.id}/chat`}>
-                              <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
-                                Chat
+                            <Link href={`/manager/events/${event.id}/chat?channel=staff-chat`}>
+                              <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
+                                Staff Chat
+                              </button>
+                            </Link>
+
+                            <Link href={`/manager/events/${event.id}/chat?channel=general`}>
+                              <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                Comm Chat
                               </button>
                             </Link>
                           </div>

@@ -59,10 +59,10 @@ export default function EventWorkersPage() {
       <div className="bg-[#242424] text-white pt-10 pb-6 px-6 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#CD7F32]/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="max-w-4xl mx-auto flex flex-col gap-4 relative z-10">
-          <button onClick={() => router.push('/manager/my-events')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors w-fit">
+          <Link href="/manager/my-events" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors w-fit">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             Back to My Events
-          </button>
+          </Link>
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
