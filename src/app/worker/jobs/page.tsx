@@ -8,13 +8,22 @@ export default function FindJobs() {
   const [loading, setLoading] = useState(true);
   const [applyingTo, setApplyingTo] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
 
   const fetchJobs = async () => {
     try {
-      const res = await fetch('/api/worker/jobs');
-      const data = await res.json();
+      const [jobsRes, profileRes] = await Promise.all([
+        fetch('/api/worker/jobs'),
+        fetch('/api/worker/profile')
+      ]);
+      const data = await jobsRes.json();
+      const profileData = await profileRes.json();
+      
       if (Array.isArray(data)) {
         setJobs(data);
+      }
+      if (profileData && profileData.workerProfile) {
+        setIsVerified(profileData.workerProfile.isVerified);
       }
     } catch (err) {
       console.error(err);
@@ -72,6 +81,18 @@ export default function FindJobs() {
           />
         </div>
       </div>
+      
+      {!loading && !isVerified && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 className="font-bold">Verification Pending</h3>
+            <p className="text-sm">You must wait for an Admin to review and approve your tier application before you can apply for jobs.</p>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-gray-500 font-medium p-8 bg-white rounded-xl">Loading open roles...</div>
@@ -129,8 +150,8 @@ export default function FindJobs() {
                   ) : (
                     <button 
                       onClick={() => handleApply(job.id)}
-                      disabled={applyingTo === job.id}
-                      className="bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50"
+                      disabled={applyingTo === job.id || !isVerified}
+                      className="bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {applyingTo === job.id ? 'Applying...' : 'Apply Now'}
                     </button>

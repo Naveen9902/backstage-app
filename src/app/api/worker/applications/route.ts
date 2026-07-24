@@ -74,6 +74,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Worker profile not found' }, { status: 404 });
     }
 
+    if (!workerProfile.isVerified) {
+      return NextResponse.json({ error: 'You must be approved by an Admin before applying for jobs' }, { status: 403 });
+    }
+
     // Check if already applied
     const existing = await prisma.application.findFirst({
       where: {

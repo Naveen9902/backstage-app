@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, X, Check } from 'lucide-react';
 
@@ -11,15 +11,23 @@ type Worker = {
   isVerified: boolean;
   verificationStatus: string;
   requestedTier?: string;
+  govtIdUrl?: string;
+  liveSelfieUrl?: string;
+  proofOfExperienceUrl?: string;
+  socialMediaUrl?: string;
+  referenceContact?: string;
+  referenceEvent?: string;
   user: {
     name: string;
     email: string;
+    mobile?: string;
   };
 };
 
 export default function VerifyTalents() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchWorkers();
@@ -125,7 +133,8 @@ export default function VerifyTalents() {
                   </tr>
                 ) : (
                   workers.map((worker) => (
-                    <tr key={worker.id} className="hover:bg-white/[0.02] transition-colors group">
+                    <Fragment key={worker.id}>
+                    <tr className="hover:bg-white/[0.02] transition-colors group cursor-pointer" onClick={() => setExpandedId(expandedId === worker.id ? null : worker.id)}>
                       <td className="p-5 pl-6">
                         <div className="font-semibold text-gray-200 group-hover:text-[var(--primary)] transition-colors">{worker.user.name}</div>
                         <div className="text-sm text-gray-500">{worker.user.email}</div>
@@ -165,6 +174,56 @@ export default function VerifyTalents() {
                         )}
                       </td>
                     </tr>
+                    {expandedId === worker.id && (
+                      <tr key={`${worker.id}-details`} className="bg-black/40 border-b border-white/5">
+                        <td colSpan={6} className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                            <div className="space-y-4">
+                              <h4 className="font-bold text-[var(--primary)] uppercase tracking-wider text-xs border-b border-white/10 pb-2">Identity & Contact</h4>
+                              <p><span className="text-gray-500">Mobile:</span> {worker.user.mobile || 'N/A'}</p>
+                              <div>
+                                <span className="text-gray-500 block mb-1">Government ID:</span>
+                                {worker.govtIdUrl ? (
+                                  <a href={worker.govtIdUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">View Document</a>
+                                ) : <span className="text-red-400">Not provided</span>}
+                              </div>
+                              <div>
+                                <span className="text-gray-500 block mb-1">Live Selfie:</span>
+                                {worker.liveSelfieUrl ? (
+                                  <a href={worker.liveSelfieUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">View Image</a>
+                                ) : <span className="text-red-400">Not provided</span>}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              <h4 className="font-bold text-[var(--primary)] uppercase tracking-wider text-xs border-b border-white/10 pb-2">Professional Details</h4>
+                              <div>
+                                <span className="text-gray-500 block mb-1">Proof of Experience:</span>
+                                {worker.proofOfExperienceUrl ? (
+                                  <a href={worker.proofOfExperienceUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">View Proof</a>
+                                ) : <span className="text-gray-600">Not provided</span>}
+                              </div>
+                              <div>
+                                <span className="text-gray-500 block mb-1">Social Media / LinkedIn:</span>
+                                {worker.socialMediaUrl ? (
+                                  <a href={worker.socialMediaUrl} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{worker.socialMediaUrl}</a>
+                                ) : <span className="text-gray-600">Not provided</span>}
+                              </div>
+                              <p><span className="text-gray-500">Reference Event:</span> {worker.referenceEvent || 'None'}</p>
+                              <p><span className="text-gray-500">Reference Contact:</span> {worker.referenceContact || 'None'}</p>
+                            </div>
+                          </div>
+                          
+                          {worker.verificationStatus === 'PENDING' && (
+                            <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-4">
+                              <button onClick={() => updateWorker(worker.id, 'REJECT')} className="px-6 py-2 rounded-lg font-bold text-sm bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">Reject Application</button>
+                              <button onClick={() => updateWorker(worker.id, 'APPROVE')} className="px-6 py-2 rounded-lg font-bold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">Approve & Verify Tier</button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   ))
                 )}
               </tbody>
