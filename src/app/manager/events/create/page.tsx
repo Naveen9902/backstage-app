@@ -20,7 +20,8 @@ export default function CreateEvent() {
     tags: '',
     language: 'English',
     duration: '2 Hours',
-    bands: ''
+    bands: '',
+    socialLink: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -52,6 +53,17 @@ export default function CreateEvent() {
 
   const inputClasses = "w-full bg-white/50 border border-gray-200 rounded-xl px-4 py-3.5 focus:outline-none focus:border-[#CD7F32] focus:ring-4 focus:ring-[#CD7F32]/10 transition-all text-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.03)] hover:border-[#CD7F32]/40";
   const labelClasses = "text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1.5 block";
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'coverImageUrl' | 'videoUrl' | 'artistAvatarUrl') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, [field]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="relative text-[#242424] min-h-screen overflow-hidden pb-20">
@@ -221,46 +233,61 @@ export default function CreateEvent() {
                     />
                   </div>
 
-                  {/* Artist Profile Image URL */}
+                  {/* Ad Image */}
                   <div>
-                    <label className={labelClasses}>Artist Avatar URL</label>
-                    <input 
-                      type="url" 
-                      value={(formData as any).artistAvatarUrl || ''}
-                      onChange={e => setFormData({...formData, artistAvatarUrl: e.target.value} as any)}
-                      className={inputClasses} 
-                      placeholder="https://..." 
-                    />
+                    <label className={labelClasses}>Ad Image</label>
+                    <div className="relative">
+                      <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'artistAvatarUrl')}
+                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
+                      />
+                    </div>
                   </div>
 
                   <div className="md:col-span-2 my-2 border-t border-gray-100"></div>
 
                   {/* Cover Image URL */}
                   <div className="md:col-span-2">
-                    <label className={labelClasses}>Event Poster / Cover Image URL</label>
+                    <label className={labelClasses}>Event Poster / Cover Image</label>
                     <div className="relative">
                       <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input 
-                        type="url" 
-                        value={formData.coverImageUrl}
-                        onChange={e => setFormData({...formData, coverImageUrl: e.target.value})}
-                        className={inputClasses + " pl-12"} 
-                        placeholder="https://images.unsplash.com/..." 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'coverImageUrl')}
+                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
                       />
                     </div>
                   </div>
 
                   {/* Video URL */}
                   <div className="md:col-span-2">
-                    <label className={labelClasses}>Teaser Video URL</label>
+                    <label className={labelClasses}>Teaser Video (Past event video)</label>
                     <div className="relative">
                       <Film className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <input 
+                        type="file" 
+                        accept="video/*"
+                        onChange={(e) => handleFileUpload(e, 'videoUrl')}
+                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Social Link */}
+                  <div className="md:col-span-2">
+                    <label className={labelClasses}>Social Link</label>
+                    <div className="relative">
+                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input 
                         type="url" 
-                        value={formData.videoUrl}
-                        onChange={e => setFormData({...formData, videoUrl: e.target.value})}
+                        value={formData.socialLink}
+                        onChange={e => setFormData({...formData, socialLink: e.target.value})}
                         className={inputClasses + " pl-12"} 
-                        placeholder="https://www.w3schools.com/html/mov_bbb.mp4" 
+                        placeholder="https://instagram.com/..." 
                       />
                     </div>
                   </div>

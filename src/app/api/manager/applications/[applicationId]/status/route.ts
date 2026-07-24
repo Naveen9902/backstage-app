@@ -41,7 +41,7 @@ export async function PATCH(
         staffingRequest: {
           select: { 
             roleName: true,
-            event: { select: { title: true } }
+            event: { select: { title: true, date: true } }
           }
         }
       }
@@ -55,6 +55,39 @@ export async function PATCH(
       where: { id: applicationId },
       data: { status }
     });
+
+    if (status === 'ACCEPTED' && application.staffingRequest.event.date) {
+      const acceptedDate = application.staffingRequest.event.date;
+      const startOfDay = new Date(acceptedDate);
+      startOfDay.setUTCHours(0,0,0,0);
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setUTCHours(23,59,59,999);
+
+      const pendingApps = await prisma.application.findMany({
+        where: {
+          workerProfileId: application.workerProfileId,
+          status: 'PENDING',
+          id: { not: applicationId },
+          staffingRequest: {
+            event: {
+              date: {
+                gte: startOfDay,
+                lte: endOfDay
+              }
+            }
+          }
+        }
+      });
+      
+      if (pendingApps.length > 0) {
+        await prisma.application.updateMany({
+          where: {
+            id: { in: pendingApps.map(a => a.id) }
+          },
+          data: { status: 'REJECTED' }
+        });
+      }
+    }
 
     await sendNotification(
       application.workerProfile.userId,

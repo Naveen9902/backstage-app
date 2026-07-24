@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl } = await req.json();
+    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl, socialLink } = await req.json();
 
     // Check manager subscription tier limits (visual/simple count check)
     const manager = await prisma.user.findUnique({
@@ -76,7 +76,8 @@ export async function POST(req: Request) {
         language: language || 'English',
         duration: duration || '2 Hours',
         bands: bands || null,
-        artistAvatarUrl: artistAvatarUrl || null
+        artistAvatarUrl: artistAvatarUrl || null,
+        socialLink: socialLink || null
       }
     });
 

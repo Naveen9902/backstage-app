@@ -90,6 +90,39 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Already applied' }, { status: 400 });
     }
 
+    const targetStaffingRequest = await prisma.staffingRequest.findUnique({
+      where: { id: staffingRequestId },
+      include: { event: true }
+    });
+
+    if (!targetStaffingRequest || !targetStaffingRequest.event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    const startOfDay = new Date(targetStaffingRequest.event.date);
+    startOfDay.setUTCHours(0,0,0,0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setUTCHours(23,59,59,999);
+
+    const conflictingApp = await prisma.application.findFirst({
+      where: {
+        workerProfileId: workerProfile.id,
+        status: 'ACCEPTED',
+        staffingRequest: {
+          event: {
+            date: {
+              gte: startOfDay,
+              lte: endOfDay
+            }
+          }
+        }
+      }
+    });
+
+    if (conflictingApp) {
+      return NextResponse.json({ error: 'You are already hired for an event on this date' }, { status: 400 });
+    }
+
     const application = await prisma.application.create({
       data: {
         workerProfileId: workerProfile.id,

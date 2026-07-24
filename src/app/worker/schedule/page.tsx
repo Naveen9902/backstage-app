@@ -179,15 +179,35 @@ export default function MySchedule() {
                 const isSelected = selectedDayApps && selectedDayApps.length > 0 && new Date(selectedDayApps[0].staffingRequest.event.date).getDate() === day && new Date(selectedDayApps[0].staffingRequest.event.date).getMonth() === month;
                 const isCurrent = isToday(day);
 
+                let dayBgClass = 'text-gray-400 hover:bg-gray-50 cursor-default';
+                let selectedBgClass = 'bg-[#CD7F32] text-white shadow-md scale-105';
+
+                if (hasGig) {
+                  const hasLive = appsForDay.some(app => app.staffingRequest.event.status === 'ONGOING');
+                  const hasCompleted = appsForDay.every(app => app.staffingRequest.event.status === 'COMPLETED');
+                  const hasUpcoming = !hasLive && !hasCompleted;
+
+                  if (hasLive) {
+                     dayBgClass = 'bg-green-100 text-green-900 hover:bg-green-200 cursor-pointer';
+                     selectedBgClass = 'bg-green-500 text-white shadow-md scale-105';
+                  } else if (hasUpcoming) {
+                     dayBgClass = 'bg-orange-100 text-orange-900 hover:bg-orange-200 cursor-pointer';
+                     selectedBgClass = 'bg-orange-500 text-white shadow-md scale-105';
+                  } else {
+                     dayBgClass = 'bg-red-100 text-red-900 hover:bg-red-200 cursor-pointer';
+                     selectedBgClass = 'bg-red-500 text-white shadow-md scale-105';
+                  }
+                } else if (isCurrent) {
+                  dayBgClass = 'bg-gray-100 text-gray-900 font-bold border border-gray-200';
+                }
+
                 return (
                   <div key={day} className="aspect-square p-0.5">
                     <button
                       onClick={() => handleDayClick(day)}
                       disabled={!hasGig && !isCurrent}
                       className={`w-full h-full rounded-2xl flex flex-col items-center justify-center relative transition-all duration-300
-                        ${isSelected ? 'bg-[#CD7F32] text-white shadow-md scale-105' : 
-                          hasGig ? 'bg-[#CD7F32]/10 text-gray-900 hover:bg-[#CD7F32]/20 cursor-pointer' : 
-                          isCurrent ? 'bg-gray-100 text-gray-900 font-bold border border-gray-200' : 'text-gray-400 hover:bg-gray-50 cursor-default'}
+                        ${isSelected ? selectedBgClass : dayBgClass}
                       `}
                     >
                       <span className={`text-sm ${hasGig || isSelected || isCurrent ? 'font-bold' : 'font-medium'}`}>{day}</span>
@@ -195,12 +215,18 @@ export default function MySchedule() {
                       {/* Dots for shifts */}
                       {hasGig && (
                         <div className="flex gap-0.5 absolute bottom-1.5">
-                          {appsForDay.slice(0, 3).map((app, i) => (
-                            <span 
-                              key={i} 
-                              className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : app.staffingRequest.event.status === 'ONGOING' ? 'bg-green-500 animate-pulse' : 'bg-[#CD7F32]'}`}
-                            ></span>
-                          ))}
+                          {appsForDay.slice(0, 3).map((app, i) => {
+                            let dotColor = 'bg-orange-500';
+                            if (app.staffingRequest.event.status === 'ONGOING') dotColor = 'bg-green-500 animate-pulse';
+                            else if (app.staffingRequest.event.status === 'COMPLETED') dotColor = 'bg-red-500';
+                            
+                            return (
+                              <span 
+                                key={i} 
+                                className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : dotColor}`}
+                              ></span>
+                            );
+                          })}
                         </div>
                       )}
                     </button>

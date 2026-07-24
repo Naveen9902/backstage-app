@@ -223,7 +223,7 @@ export default function WorkerDashboard() {
         )}
       </div>
 
-      {/* Recently Completed Shifts (Review & Payment) */}
+      {/* Recently Completed Shifts (Review) */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold font-serif text-gray-800">Recently Completed</h2>
@@ -263,7 +263,7 @@ export default function WorkerDashboard() {
                     <div className="flex flex-wrap items-center gap-2 self-end md:self-auto w-full md:w-auto">
                       <Link href="/worker/completed-shifts" className="flex-1 md:flex-none">
                         <button className="w-full bg-[#CD7F32] hover:bg-[#b06a28] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm flex items-center justify-center gap-1.5">
-                          Review & Pay
+                          Review
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
                       </Link>

@@ -132,6 +132,7 @@ model Event {
   artistAvatarUrl  String?
   latitude         Float?
   longitude        Float?
+  socialLink       String?
 
   staffingRequests StaffingRequest[]
   runnerDispatches RunnerDispatch[]
