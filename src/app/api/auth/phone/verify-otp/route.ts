@@ -5,10 +5,6 @@ import { cookies } from 'next/headers';
 
 const globalAny = global as any;
 
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN 
-  ? Redis.fromEnv() 
-  : null;
-
 export async function POST(req: Request) {
   try {
     const { phone, code } = await req.json();
@@ -23,9 +19,7 @@ export async function POST(req: Request) {
     let storedCode = null;
     let userObj = null;
 
-    if (redis) {
-      storedCode = await redis.get(`otp:${phone}`);
-    } else if (userId) {
+    if (userId) {
       userObj = await prisma.user.findUnique({ where: { id: userId } });
       if (userObj && userObj.resetOtp && userObj.resetOtpExpiry && userObj.resetOtpExpiry > new Date()) {
         storedCode = userObj.resetOtp;
@@ -46,9 +40,7 @@ export async function POST(req: Request) {
     }
 
     // Success! Delete the code so it can't be reused
-    if (redis) {
-      await redis.del(`otp:${phone}`);
-    } else if (userId) {
+    if (userId) {
       await prisma.user.update({
         where: { id: userId },
         data: { resetOtp: null, resetOtpExpiry: null }

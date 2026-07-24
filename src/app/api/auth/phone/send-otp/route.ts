@@ -5,12 +5,7 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendPushNotification } from '@/lib/push';
 
-// Use global for mock fallback in dev (since Next.js dev server clears module scope occasionally)
 const globalAny = global as any;
-
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN 
-  ? Redis.fromEnv() 
-  : null;
 
 export async function POST(req: Request) {
   try {
@@ -26,20 +21,18 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value || cookieStore.get('managerUserId')?.value;
 
-    // Store in Upstash Redis (expires in 5 minutes / 300 seconds)
-    if (redis) {
-      await redis.set(`otp:${phone}`, otp, { ex: 300 });
-    } else if (userId) {
-      console.warn('Upstash Redis not configured. Using Prisma User table for OTP storage as fallback.');
+
+
+    if (userId) {
       await prisma.user.update({
         where: { id: userId },
         data: {
           resetOtp: otp,
-          resetOtpExpiry: new Date(Date.now() + 300000)
+          resetOtpExpiry: new Date(Date.now() + 300000) // 5 minutes
         }
       });
     } else {
-      console.warn('Upstash Redis not configured and user not logged in. OTP will only work in mock mode in memory for this session.');
+      console.warn('User not logged in. OTP will only work in mock mode in memory for this session.');
       globalAny.mockOtpStore = globalAny.mockOtpStore || {};
       globalAny.mockOtpStore[phone] = { code: otp, expires: Date.now() + 300000 };
     }
