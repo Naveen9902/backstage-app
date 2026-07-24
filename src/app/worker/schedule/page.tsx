@@ -513,7 +513,7 @@ export default function MySchedule() {
             
             <div className="bg-[#111111] p-8 pb-12 text-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32] rounded-full blur-[60px] opacity-20"></div>
-              <h2 className="text-2xl font-bold font-serif text-white mb-1 tracking-wide">Back <span className="text-[#CD7F32]">Stage</span></h2>
+              <div className={`flex items-center gap-2.5 ${"text-2xl font-bold font-serif text-white mb-1 tracking-wide"}`}><img src="/logo.jpg" alt="Logo" className="w-8 h-8 object-contain drop-shadow-md" /><h2>Back <span className="text-[#CD7F32]">Stage</span></h2></div>
               <p className="text-[#CD7F32] text-xs font-bold uppercase tracking-widest mb-6">Digital Event Pass</p>
               
               <h3 className="text-xl font-bold text-white leading-tight">

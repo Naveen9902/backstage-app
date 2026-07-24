@@ -64,7 +64,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
         <div className="px-6 py-8">
           <Link href="/" className="flex items-center gap-3 group">
             <img src="/logo.png" alt="BackStage Logo" className="h-10 w-auto object-contain rounded-md shadow-sm group-hover:opacity-90 transition-opacity bg-white" />
-            <span className="text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors">Back <span className="text-[#CD7F32]">Stage</span></span>
+            <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
           </Link>
         </div>
 

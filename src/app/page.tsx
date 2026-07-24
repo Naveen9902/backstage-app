@@ -456,10 +456,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-sm">
             <div>
               <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-white mb-4">
-                <div className="w-8 h-8 rounded-lg bg-[#CD7F32] flex items-center justify-center shadow-lg shadow-[#CD7F32]/20">
-                  <span className="text-[#242424]">B</span>
-                </div>
-                Back<span className="text-[#CD7F32]">Stage</span>
+                <div className="flex items-center gap-2.5 text-2xl font-bold text-white tracking-wide font-serif mb-4"><img src="/logo.jpg" alt="Logo" className="w-8 h-8 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
               </Link>
               <p className="text-white/40">The ultimate platform for event staffing and community building.</p>
             </div>

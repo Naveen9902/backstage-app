@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendPushNotification } from '@/lib/push';
 
-const globalAny = global as any;
+const globalAny = globalThis as any;
 
 export async function POST(req: Request) {
   try {

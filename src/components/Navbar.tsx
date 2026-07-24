@@ -25,7 +25,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 md:gap-3">
             <img src="/logo.png" alt="BackStage Logo" className="h-8 md:h-10 w-auto object-contain rounded-md" />
-            <span className="text-lg md:text-xl font-bold text-white tracking-wide font-serif">Back <span className="text-[#CD7F32]">Stage</span></span>
+            <div className={`flex items-center gap-2.5 ${"text-lg md:text-xl font-bold text-white tracking-wide font-serif"}`}><img src="/logo.jpg" alt="Logo" className="w-6 h-6 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
           </Link>
         </div>
         
