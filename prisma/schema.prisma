@@ -164,6 +164,7 @@ model Application {
   status            ApplicationStatus @default(PENDING)
   createdAt         DateTime          @default(now())
   checkInTime       DateTime?
+  checkOutTime      DateTime?
   payments          PaymentTransaction[]
 
   @@index([workerProfileId])

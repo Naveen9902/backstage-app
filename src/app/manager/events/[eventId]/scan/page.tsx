@@ -13,6 +13,8 @@ export default function QRScannerPage() {
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'scanning' | 'processing' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [checkoutData, setCheckoutData] = useState<{ workerName: string, roleName: string, totalHours: string, totalAmount: string, applicationId: string } | null>(null);
+  const [paying, setPaying] = useState(false);
   
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -62,12 +64,19 @@ export default function QRScannerPage() {
       const data = await res.json();
       
       if (res.ok) {
-        setStatus('success');
-        setMessage(`Successfully checked in ${data.workerName}!`);
-        // Auto reset after 3 seconds
-        setTimeout(() => {
-          resetScanner();
-        }, 3000);
+        if (data.action === 'CHECK_OUT') {
+          setStatus('success');
+          setMessage(`${data.workerName} clocked out!`);
+          setCheckoutData(data);
+          // Do not auto-reset, wait for manager to pay
+        } else {
+          setStatus('success');
+          setMessage(`Successfully checked in ${data.workerName}!`);
+          // Auto reset after 3 seconds
+          setTimeout(() => {
+            resetScanner();
+          }, 3000);
+        }
       } else {
         setStatus('error');
         setMessage(data.error || 'Failed to check in worker.');
@@ -88,8 +97,33 @@ export default function QRScannerPage() {
     setStatus('scanning');
     setScanResult(null);
     setMessage('');
+    setCheckoutData(null);
     if (scannerRef.current) {
       scannerRef.current.resume();
+    }
+  };
+
+  const markAsPaid = async () => {
+    if (!checkoutData) return;
+    setPaying(true);
+    try {
+      const res = await fetch(`/api/manager/applications/${checkoutData.applicationId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'PAID' })
+      });
+      if (res.ok) {
+        setCheckoutData(null);
+        setStatus('success');
+        setMessage('Payment successful! Worker has been paid.');
+        setTimeout(() => resetScanner(), 3000);
+      } else {
+        alert('Failed to mark as paid.');
+      }
+    } catch(err) {
+      alert('Error connecting to server.');
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -160,6 +194,51 @@ export default function QRScannerPage() {
              </motion.div>
           )}
         </div>
+
+        {/* Checkout Payment Popup Overlay */}
+        {checkoutData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm pointer-events-auto">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="bg-[#CD7F32] p-6 text-center">
+                <h3 className="text-2xl font-serif font-bold text-white mb-1">Clock Out</h3>
+                <p className="text-white/80 font-medium">{checkoutData.workerName}</p>
+              </div>
+              <div className="p-6 flex flex-col gap-4">
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-500 font-semibold">Role</span>
+                  <span className="font-bold text-gray-900">{checkoutData.roleName}</span>
+                </div>
+                <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                  <span className="text-gray-500 font-semibold">Time Worked</span>
+                  <span className="font-bold text-[#CD7F32] text-xl">{checkoutData.totalHours} hrs</span>
+                </div>
+                <div className="flex justify-between items-center py-3 bg-gray-50 rounded-xl px-4 mt-2">
+                  <span className="text-gray-600 font-bold">Total Due</span>
+                  <span className="font-bold text-2xl text-green-600">${checkoutData.totalAmount}</span>
+                </div>
+                
+                <button 
+                  onClick={markAsPaid}
+                  disabled={paying}
+                  className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+                >
+                  {paying ? 'Processing...' : 'Mark as Paid'}
+                </button>
+                <button 
+                  onClick={resetScanner}
+                  disabled={paying}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  Dismiss (Pay Later)
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
 
       {/* CSS overrides for the html5-qrcode UI to make it look premium */}

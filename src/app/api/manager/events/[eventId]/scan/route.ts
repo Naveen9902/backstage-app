@@ -50,17 +50,47 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       return NextResponse.json({ error: `Worker status is ${application.status}. They are not hired for this event.` }, { status: 400 });
     }
 
-    // 4. Update checkInTime
-    await prisma.application.update({
-      where: { id: applicationId },
-      data: { checkInTime: new Date() }
-    });
+    // 4. Determine Clock-In vs Clock-Out
+    if (!application.checkInTime) {
+      // Clock In
+      await prisma.application.update({
+        where: { id: applicationId },
+        data: { checkInTime: new Date() }
+      });
+      return NextResponse.json({
+        success: true,
+        action: 'CHECK_IN',
+        workerName: application.workerProfile.user.name,
+        roleName: application.staffingRequest.roleName
+      });
+    } else if (!application.checkOutTime) {
+      // Clock Out
+      const checkOutTime = new Date();
+      await prisma.application.update({
+        where: { id: applicationId },
+        data: { checkOutTime }
+      });
 
-    return NextResponse.json({
-      success: true,
-      workerName: application.workerProfile.user.name,
-      roleName: application.staffingRequest.roleName
-    });
+      // Calculate total hours
+      const checkInTime = new Date(application.checkInTime);
+      const diffMs = checkOutTime.getTime() - checkInTime.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      
+      const hourlyRate = application.staffingRequest.payRate;
+      const totalAmount = hourlyRate * diffHours;
+
+      return NextResponse.json({
+        success: true,
+        action: 'CHECK_OUT',
+        workerName: application.workerProfile.user.name,
+        roleName: application.staffingRequest.roleName,
+        totalHours: diffHours.toFixed(2),
+        totalAmount: totalAmount.toFixed(2),
+        applicationId: application.id
+      });
+    } else {
+      return NextResponse.json({ error: 'Worker has already clocked out.' }, { status: 400 });
+    }
 
   } catch (error) {
     console.error('QR SCAN ERROR:', error);
