@@ -4,11 +4,15 @@ const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
 
 if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails(
-    'mailto:support@backstage.com',
-    vapidPublicKey,
-    vapidPrivateKey
-  );
+  try {
+    webpush.setVapidDetails(
+      'mailto:support@backstage.com',
+      vapidPublicKey,
+      vapidPrivateKey
+    );
+  } catch (err) {
+    console.warn("Failed to initialize web-push with provided VAPID keys. Push notifications will be disabled.", err);
+  }
 }
 
 export async function sendPushNotification(subscriptionJson: string, payload: { title: string; body: string; url?: string }) {
