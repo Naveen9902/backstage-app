@@ -22,22 +22,32 @@ export default function QRScannerPage() {
     // Start scanner on mount
     setStatus('scanning');
     
-    scannerRef.current = new Html5QrcodeScanner(
-      "qr-reader",
-      { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 }, 
-        aspectRatio: 1.0,
-        supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-      },
-      /* verbose= */ false
-    );
-    
-    scannerRef.current.render(onScanSuccess, onScanFailure);
+    // Use Html5Qrcode directly to bypass injected UI and auto-start the camera
+    import('html5-qrcode').then(({ Html5Qrcode }) => {
+      const html5QrCode = new Html5Qrcode("qr-reader");
+      scannerRef.current = html5QrCode as any; // Store reference to pause/resume/clear later
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { 
+          fps: 10, 
+          qrbox: { width: 250, height: 250 }, 
+          aspectRatio: 1.0
+        },
+        onScanSuccess,
+        onScanFailure
+      ).catch(err => {
+        console.error("Error starting camera: ", err);
+        setStatus('error');
+        setMessage('Camera access denied or unavailable.');
+      });
+    });
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(error => console.error("Failed to clear html5QrcodeScanner. ", error));
+        (scannerRef.current as any).stop().then(() => {
+          (scannerRef.current as any).clear();
+        }).catch((err: any) => console.error("Failed to clear html5Qrcode. ", err));
       }
     };
   }, []);
