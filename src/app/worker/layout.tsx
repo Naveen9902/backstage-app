@@ -126,7 +126,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
           {/* Mobile Header Logo */}
           <Link href="/" className="md:hidden flex items-center gap-2">
             <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-sm" />
-            <span className="font-serif font-bold tracking-wide">Back<span className="text-[#CD7F32]">Stage</span></span>
+            <span className="font-serif font-bold tracking-wide text-[#242424]">Back<span className="text-[#CD7F32]">Stage</span></span>
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">
