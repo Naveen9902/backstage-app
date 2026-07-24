@@ -165,9 +165,9 @@ export default function WorkerDashboard() {
             <p className="text-gray-400 text-xs">Events you have successfully worked</p>
           </div>
         </div>
-        <Link href="/worker/schedule" className="w-full sm:w-auto">
+        <Link href="/worker/completed-shifts" className="w-full sm:w-auto">
           <button className="w-full sm:w-auto text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-            View Schedule
+            View Completed Shifts
           </button>
         </Link>
       </motion.div>
@@ -265,12 +265,6 @@ export default function WorkerDashboard() {
                         <button className="w-full bg-[#CD7F32] hover:bg-[#b06a28] text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm flex items-center justify-center gap-1.5">
                           Review & Pay
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                        </button>
-                      </Link>
-                      
-                      <Link href="/worker/schedule" className="flex-1 md:flex-none">
-                        <button className="w-full bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors text-center">
-                          Review
                         </button>
                       </Link>
                     </div>
