@@ -2,27 +2,32 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { Menu, Bell, User, MapPin, CheckCircle2, Lock, ChevronRight, Mail } from 'lucide-react';
 
 export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [platformLiveEvents, setPlatformLiveEvents] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [nearbyEvents, setNearbyEvents] = useState<any[]>([]);
+  const [invites, setInvites] = useState<any[]>([]);
+  
+  const [activeTier, setActiveTier] = useState('TIER_1');
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(['Security', 'Usher']);
+
+  const availableRoles = ['Security', 'Usher', 'Bartender', 'Runner', 'Stagehand', 'VIP Host'];
 
   const fetchData = async () => {
     try {
-      const [profRes, appsRes, liveRes] = await Promise.all([
-        fetch('/api/worker/profile', { cache: 'no-store' }),
-        fetch('/api/worker/applications', { cache: 'no-store' }),
-        fetch('/api/events/live', { cache: 'no-store' })
-      ]);
-      const profData = await profRes.json();
-      const appsData = await appsRes.json();
-      const liveData = await liveRes.json();
+      const res = await fetch('/api/worker/dashboard', { cache: 'no-store' });
+      const data = await res.json();
       
-      if (profData && !profData.error) setProfile(profData);
-      if (Array.isArray(appsData)) setApplications(appsData);
-      if (Array.isArray(liveData)) setPlatformLiveEvents(liveData);
+      if (data && !data.error) {
+        setUser(data.user);
+        if (data.user?.workerProfile?.tier) setActiveTier(data.user.workerProfile.tier);
+        if (data.user?.workerProfile?.categories?.length > 0) setSelectedRoles(data.user.workerProfile.categories);
+        
+        if (Array.isArray(data.nearbyEvents)) setNearbyEvents(data.nearbyEvents);
+        if (Array.isArray(data.invites)) setInvites(data.invites);
+      }
     } catch (err) {
       console.error('Dashboard fetch error', err);
     } finally {
@@ -32,241 +37,306 @@ export default function WorkerDashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Poll every 5s
-    return () => clearInterval(interval);
   }, []);
 
-  const acceptedApps = applications.filter(app => app.status === 'ACCEPTED');
-  const pendingApps = applications.filter(app => app.status === 'PENDING').length;
-  const liveShifts = acceptedApps.filter(app => app.staffingRequest?.event?.status === 'ONGOING');
-  const completedShifts = acceptedApps.filter(app => app.staffingRequest?.event?.status === 'COMPLETED').length;
-  const upcomingShifts = acceptedApps.filter(app => !app.staffingRequest?.event?.status || app.staffingRequest?.event?.status === 'UPCOMING').length;
-  const isRunner = profile?.workerProfile?.isRunnerAvailable ? 'Active' : 'Inactive';
+  const toggleRole = async (role: string) => {
+    const newRoles = selectedRoles.includes(role) 
+      ? selectedRoles.filter(r => r !== role)
+      : [...selectedRoles, role];
+      
+    setSelectedRoles(newRoles);
+    
+    // Auto-save to backend
+    fetch('/api/worker/profile', { 
+      method: 'PUT', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categories: newRoles }) 
+    });
+  };
 
-  const stats = [
-    {
-      label: 'Confirmed Shifts',
-      value: acceptedApps.length.toString(),
-      sub: `${upcomingShifts} upcoming · ${completedShifts} done`,
-      icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#CD7F32]"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-    },
-    {
-      label: 'Pending Apps',
-      value: pendingApps.toString(),
-      sub: 'Awaiting response',
-      icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#CD7F32]"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    },
-    {
-      label: 'Runner Status',
-      value: isRunner,
-      sub: isRunner === 'Active' ? 'Available for tasks' : 'Enable in Profile',
-      icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#CD7F32]"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    },
-  ];
+  const acceptInvite = async (applicationId: string) => {
+    try {
+      const res = await fetch(`/api/worker/applications/${applicationId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ACCEPTED' })
+      });
+      if (res.ok) {
+        setInvites(invites.filter(inv => inv.id !== applicationId));
+        alert("Job offer accepted!");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const declineInvite = async (applicationId: string) => {
+    try {
+      const res = await fetch(`/api/worker/applications/${applicationId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'REJECTED' })
+      });
+      if (res.ok) {
+        setInvites(invites.filter(inv => inv.id !== applicationId));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) return <div className="p-10 font-medium text-gray-500">Loading your dashboard...</div>;
 
+  const profile = user?.workerProfile;
+
   return (
-    <div className="text-[#242424]">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-10 gap-4">
-        <div>
-          <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Dashboard</h1>
-          <p className="text-lg text-gray-700">Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Talent'}!</span></p>
-        </div>
-        <Link href="/worker/jobs">
-          <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-[#CD7F32]/20 w-full md:w-auto justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-            Find Jobs
-          </motion.button>
-        </Link>
-      </div>
-
-      {/* LIVE EVENT ALERT */}
-      {liveShifts.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 bg-green-50 border border-green-300 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
-            <div>
-              <p className="font-bold text-green-800">
-                {liveShifts.length === 1
-                  ? `"${liveShifts[0].staffingRequest.event.title}" is LIVE — You are on duty!`
-                  : `${liveShifts.length} events are LIVE — You are on duty!`}
-              </p>
-              <p className="text-green-600 text-sm">Check for runner tasks and communicate with your team.</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 flex-shrink-0 w-full sm:w-auto">
-            <Link href="/worker/runners" className="flex-1 sm:flex-none">
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Runner Tasks
-              </button>
-            </Link>
-            <Link href={`/worker/events/${liveShifts[0]?.staffingRequest?.eventId}/chat`} className="flex-1 sm:flex-none">
-              <button className="w-full bg-white border border-green-400 text-green-700 hover:bg-green-50 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Event Chat
-              </button>
-            </Link>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-2xl p-6 flex flex-col justify-between h-48 border border-gray-100"
-            style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
-          >
-            <div>{stat.icon}</div>
-            <div>
-              <h3 className={`text-4xl font-semibold mb-0.5 ${stat.label === 'Runner Status' && stat.value === 'Active' ? 'text-green-600' : ''}`}>{stat.value}</h3>
-              <p className="text-gray-600 font-medium text-sm">{stat.label}</p>
-              <p className="text-gray-400 text-xs mt-0.5">{stat.sub}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Completed Shifts Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-gray-50 border border-gray-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="M20 6 9 17l-5-5"/></svg>
-          </div>
-          <div>
-            <h3 className="text-3xl font-bold text-gray-500">{completedShifts}</h3>
-            <p className="text-gray-500 font-semibold text-sm">Completed Shifts</p>
-            <p className="text-gray-400 text-xs">Events you have successfully worked</p>
-          </div>
-        </div>
-        <Link href="/worker/schedule" className="w-full sm:w-auto">
-          <button className="w-full sm:w-auto text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-            View Schedule
-          </button>
-        </Link>
-      </motion.div>
-
-      {/* Recent Applications — exclude completed events */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold font-serif">Recent Applications</h2>
-          <Link href="/worker/applications" className="text-sm font-bold text-[#CD7F32] hover:underline">View All</Link>
-        </div>
-
-        {applications.filter(app => app.staffingRequest?.event?.status !== 'COMPLETED').length === 0 ? (
-          <div className="bg-white rounded-xl p-8 border border-gray-100 text-center text-gray-500" style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}>
-            You haven&apos;t applied to any active jobs yet. Browse available jobs to get started!
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {applications
-              .filter(app => app.staffingRequest?.event?.status !== 'COMPLETED')
-              .slice(0, 4)
-              .map((app, index) => {
-                const eventStatus = app.staffingRequest?.event?.status;
-                const isLive = eventStatus === 'ONGOING';
-                return (
-                  <motion.div
-                    key={app.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-xl p-4 border flex items-center justify-between shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isLive ? 'bg-green-500 animate-pulse' : 'bg-[#CD7F32]'}`}></div>
-                      <div>
-                        <h4 className="font-bold text-sm">{app.staffingRequest?.roleName}</h4>
-                        <p className="text-xs text-gray-500">
-                          {app.staffingRequest?.event?.title}
-                          {isLive && <span className="ml-2 text-green-600 font-semibold">● LIVE</span>}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
-                      ${app.status === 'PENDING' ? 'bg-orange-50 text-orange-700' : ''}
-                      ${app.status === 'ACCEPTED' ? 'bg-green-50 text-green-700' : ''}
-                      ${app.status === 'REJECTED' ? 'bg-red-50 text-red-700' : ''}
-                    `}>
-                      {app.status}
-                    </span>
-                  </motion.div>
-                );
-              })}
-          </div>
-        )}
-      </div>
-
-      {/* Platform Live Events Section */}
-      {platformLiveEvents.length > 0 && (
-        <div className="mt-12 mb-8">
-          <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-[#f4efe5] text-[#242424] font-sans pb-20">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:p-8">
+        
+        {/* Left Side / Main Mobile View - Designed to look like a mobile mockup */}
+        <div className="flex-1 lg:max-w-md w-full mx-auto relative lg:border-[8px] lg:border-black lg:rounded-[3rem] lg:overflow-hidden lg:shadow-2xl bg-white lg:h-[850px] flex flex-col">
+          {/* Mobile Notch Placeholder (Desktop only) */}
+          <div className="hidden lg:block absolute top-0 inset-x-0 h-6 bg-black rounded-b-3xl w-40 mx-auto z-50"></div>
+          
+          {/* Top Notification / Message Bar */}
+          <div className="flex items-center justify-between px-6 pt-12 pb-4 bg-white border-b border-gray-100 sticky top-0 z-40">
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative group">
+              <Menu className="w-6 h-6 text-gray-800" />
+            </button>
+            <div className="font-bold font-serif text-xl tracking-tight">Worker Hub</div>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
-              <h2 className="text-2xl font-bold font-serif">Platform Live Events</h2>
-            </div>
-            <Link href="/worker/jobs" className="text-sm font-bold text-[#CD7F32] hover:underline">Explore</Link>
-          </div>
-
-          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-4 snap-x hide-scrollbar">
-            {platformLiveEvents.map((event, i) => (
-              <Link href={`/events/${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
-                <div className="bg-white border border-gray-200 hover:border-[#CD7F32] rounded-xl overflow-hidden transition-all duration-300 relative h-full flex flex-col shadow-sm hover:shadow-md">
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="bg-white/90 backdrop-blur-md border border-gray-200 text-gray-800 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                      ONGOING
-                    </span>
-                  </div>
-                  
-                  <div className="h-32 w-full overflow-hidden bg-gray-100 relative">
-                    <img 
-                      src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
-                    <div className="flex items-center gap-1.5 text-gray-500 text-xs mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                      <span className="line-clamp-1">{event.location}</span>
-                    </div>
-                    
-                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                        {event.staffingRequests?.length || 0} Open Roles
-                      </span>
-                      <span className="text-[10px] font-bold text-[#CD7F32] uppercase tracking-wider group-hover:underline">View →</span>
-                    </div>
-                  </div>
+              <div className="relative border-2 border-green-500 p-1.5 rounded-full cursor-pointer hover:bg-green-50 transition-colors shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+                <Bell className="w-5 h-5 text-gray-800" />
+                {invites.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
+              </div>
+              <Link href="/worker/profile">
+                <div className="w-9 h-9 rounded-full bg-[#242424] flex items-center justify-center text-white cursor-pointer hover:scale-105 transition-transform border-2 border-white shadow-md">
+                  {user?.avatarUrl ? <img src={user.avatarUrl} className="w-full h-full rounded-full object-cover" /> : <User className="w-5 h-5" />}
                 </div>
               </Link>
-            ))}
+            </div>
+          </div>
+
+          <div className="overflow-y-auto flex-1 pb-10">
+            {/* Tiers Navigation */}
+            <div className="px-6 py-4 flex gap-4 border-b border-gray-100 overflow-x-auto hide-scrollbar">
+              {['TIER_1', 'TIER_2', 'TIER_3'].map((tier, idx) => (
+                <button
+                  key={tier}
+                  onClick={() => setActiveTier(tier)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    activeTier === tier 
+                      ? 'bg-[#CD7F32] text-white shadow-md shadow-[#CD7F32]/20' 
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  Tier {idx + 1}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-6">
+              {/* Profile Card (Location Based) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-[#242424] rounded-2xl p-6 text-white mb-8 shadow-xl relative overflow-hidden"
+              >
+                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-[#CD7F32] rounded-full blur-[50px] opacity-50"></div>
+                
+                <div className="flex justify-between items-start mb-4 relative z-10">
+                  <div>
+                    <h2 className="text-2xl font-bold font-serif mb-1">{user?.name || 'Worker'}</h2>
+                    <div className="flex items-center gap-1 text-[#CD7F32] text-sm font-semibold">
+                      <MapPin className="w-4 h-4" />
+                      <span>{profile?.location || 'Location Not Set'}</span>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20">
+                    {activeTier.replace('_', ' ')}
+                  </div>
+                </div>
+
+                {/* TIER 1 Multiple Role Selection */}
+                {activeTier === 'TIER_1' && (
+                  <div className="mt-6 border-t border-white/10 pt-4 relative z-10">
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-3">Your Selected Roles</p>
+                    <div className="flex flex-wrap gap-2">
+                      {availableRoles.map(role => {
+                        const isSelected = selectedRoles.includes(role);
+                        return (
+                          <button
+                            key={role}
+                            onClick={() => toggleRole(role)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                              isSelected ? 'bg-[#CD7F32] text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                            }`}
+                          >
+                            {isSelected && <CheckCircle2 className="w-3 h-3 inline mr-1" />}
+                            {role}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Job Invites Section */}
+              {invites.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-[#CD7F32]"/> Job Invitations
+                  </h3>
+                  <div className="space-y-3">
+                    {invites.map(invite => (
+                      <div key={invite.id} className="bg-green-50 border border-green-200 rounded-xl p-4 shadow-sm">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-bold text-gray-900">{invite.staffingRequest?.roleName}</h4>
+                            <p className="text-xs text-gray-600 font-medium">{invite.staffingRequest?.event?.title}</p>
+                          </div>
+                          <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                            You're Invited
+                          </span>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <button onClick={() => acceptInvite(invite.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm transition-colors">
+                            Accept
+                          </button>
+                          <button onClick={() => declineInvite(invite.id)} className="px-4 border border-gray-300 hover:bg-gray-100 text-gray-600 font-bold py-2 rounded-lg text-sm transition-colors">
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Active Events Grid */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-lg">Nearby Events</h3>
+                  <Link href="/worker/jobs" className="text-[#CD7F32] text-xs font-bold hover:underline">View All</Link>
+                </div>
+                
+                {/* 3x4 Grid for Desktop, vertical list for mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {nearbyEvents.slice(0, 12).map((event, i) => (
+                    <Link href={`/events/${event.id}`} key={event.id}>
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
+                        className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:border-[#CD7F32] transition-colors shadow-sm h-full flex flex-col"
+                      >
+                        <div className="h-24 bg-gray-200 relative">
+                          <img src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&q=80'} alt="" className="w-full h-full object-cover" />
+                          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-green-600 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            LIVE
+                          </div>
+                        </div>
+                        <div className="p-3 flex-1 flex flex-col">
+                          <h4 className="font-bold text-sm text-gray-900 line-clamp-1 mb-1">{event.title}</h4>
+                          <p className="text-[10px] text-gray-500 flex items-center gap-1 mb-2 line-clamp-1">
+                            <MapPin className="w-3 h-3"/> 
+                            {event.distance !== null && event.distance !== undefined ? `${event.distance.toFixed(1)} miles away` : event.location}
+                          </p>
+                          <div className="mt-auto text-[10px] font-bold text-[#CD7F32] uppercase tracking-wider">
+                            Apply Now →
+                          </div>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  ))}
+                  
+                  {nearbyEvents.length === 0 && (
+                    <div className="col-span-full py-10 text-center text-gray-500 text-sm bg-white rounded-xl border border-dashed border-gray-300">
+                      No active events in your area right now.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Right Side / Verification & User Flow */}
+        <div className="flex-1 lg:max-w-xl w-full mx-auto hidden lg:flex flex-col gap-6">
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold font-serif">Tier Progression</h2>
+              <Link href="/worker/profile" className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#CD7F32] transition-colors">
+                <User className="w-4 h-4" /> Edit Full Profile
+              </Link>
+            </div>
+            
+            <p className="text-gray-600 mb-8">
+              Complete verifications and maintain high ratings to automatically unlock higher tiers. Higher tiers give you access to premium events, higher pay rates, and priority applications.
+            </p>
+
+            <div className="space-y-6">
+              {/* Tier 2 Requirements */}
+              <div className={`p-6 rounded-2xl border-2 transition-all ${activeTier === 'TIER_1' ? 'border-[#CD7F32] bg-orange-50/30' : 'border-gray-100 bg-gray-50'}`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center font-bold text-lg">2</div>
+                    <div>
+                      <h3 className="font-bold text-lg text-gray-900">Unlock Tier 2</h3>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Priority Access</p>
+                    </div>
+                  </div>
+                  {activeTier !== 'TIER_1' ? <CheckCircle2 className="w-6 h-6 text-green-500" /> : <Lock className="w-5 h-5 text-gray-400" />}
+                </div>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-700"><CheckCircle2 className="w-4 h-4 text-green-500"/> ID Verification completed</span>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-700"><div className="w-4 h-4 rounded-full border-2 border-gray-300"/> Complete 5 shifts (2/5)</span>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-700"><div className="w-4 h-4 rounded-full border-2 border-gray-300"/> Maintain 4.5+ Rating (Current: {profile?.rating || 0})</span>
+                  </li>
+                </ul>
+                
+                {activeTier === 'TIER_1' && (
+                  <button className="mt-5 w-full bg-[#242424] text-white py-2.5 rounded-xl text-sm font-bold hover:bg-black transition-colors flex items-center justify-center gap-2">
+                    Start Tier 2 Verification <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Tier 3 Requirements */}
+              <div className={`p-6 rounded-2xl border-2 transition-all ${activeTier === 'TIER_2' ? 'border-[#CD7F32] bg-orange-50/30' : 'border-gray-100 bg-gray-50 opacity-70'}`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold text-lg">3</div>
+                    <div>
+                      <h3 className="font-bold text-lg text-gray-900">Unlock Tier 3</h3>
+                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Premium Talent</p>
+                    </div>
+                  </div>
+                  <Lock className="w-5 h-5 text-gray-400" />
+                </div>
+                
+                <ul className="space-y-3">
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-500"><div className="w-4 h-4 rounded-full border-2 border-gray-300"/> Complete 20 shifts</span>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-500"><div className="w-4 h-4 rounded-full border-2 border-gray-300"/> Maintain 4.8+ Rating</span>
+                  </li>
+                  <li className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-500"><div className="w-4 h-4 rounded-full border-2 border-gray-300"/> Manager Endorsement</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

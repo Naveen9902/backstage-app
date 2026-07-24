@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import SearchTalentModal from '@/components/SearchTalentModal';
 
 function StaffingContent() {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ function StaffingContent() {
   const [disputeModal, setDisputeModal] = useState<{targetId: string, name: string} | null>(null);
   const [disputeForm, setDisputeForm] = useState({ reason: 'NO_SHOW', description: '' });
   const [submittingDispute, setSubmittingDispute] = useState(false);
+  const [searchTalentReq, setSearchTalentReq] = useState<{ id: string, roleName: string } | null>(null);
   
   const [formData, setFormData] = useState({
     roleName: '',
@@ -188,6 +190,16 @@ function StaffingContent() {
                       </div>
                     </div>
 
+                    <div className="bg-gray-50 border-t border-gray-100 p-3 flex justify-end">
+                      <button 
+                        onClick={() => setSearchTalentReq({ id: req.id, roleName: req.roleName })}
+                        className="text-xs font-bold bg-[#242424] hover:bg-black text-white px-4 py-2 rounded-lg flex items-center gap-1 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        Search Talent to Invite
+                      </button>
+                    </div>
+
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.div 
@@ -274,6 +286,19 @@ function StaffingContent() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modals */}
+      {searchTalentReq && (
+        <SearchTalentModal 
+          eventId={selectedEventId} 
+          staffingRequestId={searchTalentReq.id} 
+          roleName={searchTalentReq.roleName}
+          onClose={() => {
+            setSearchTalentReq(null);
+            fetchRequests();
+          }}
+        />
       )}
 
       {/* Dispute Modal */}
