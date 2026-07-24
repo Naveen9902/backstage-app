@@ -16,8 +16,8 @@ export async function GET() {
     const jobs = await prisma.staffingRequest.findMany({
       where: {
         event: {
-          date: {
-            gte: new Date()
+          status: {
+            in: ['UPCOMING', 'ONGOING']
           }
         }
       },

@@ -207,9 +207,17 @@ export default async function EventDetailsPage({ params }: Props) {
             </div>
 
             <div className="border-t border-gray-100 pt-6 flex flex-col items-center">
-              <button className="w-full bg-[#CD7F32] hover:bg-[#b56e29] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/30 transition-transform active:scale-95 text-lg">
-                Book Now
-              </button>
+              {userId && cookieStore.get('workerUserId')?.value && event.staffingRequests && event.staffingRequests.length > 0 ? (
+                <Link href={`/worker/jobs`} className="w-full">
+                  <button className="w-full bg-[#CD7F32] hover:bg-[#b56e29] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/30 transition-transform active:scale-95 text-lg">
+                    Find Jobs
+                  </button>
+                </Link>
+              ) : (
+                <button className="w-full bg-[#CD7F32] hover:bg-[#b56e29] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/30 transition-transform active:scale-95 text-lg">
+                  Book Now
+                </button>
+              )}
             </div>
           </div>
         </div>
