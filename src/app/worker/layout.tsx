@@ -132,8 +132,8 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t border-gray-800 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-        <div className="flex items-center justify-around h-16 px-2">
-          {menuItems.filter(item => ['Dashboard', 'Find Jobs', 'My Schedule', 'Profile'].includes(item.name)).map((item) => {
+        <div className="flex items-center justify-around h-16 px-1">
+          {menuItems.filter(item => ['Dashboard', 'Find Jobs', 'My Schedule', 'Live Runner Tasks', 'Profile'].includes(item.name)).map((item) => {
             const isActive = pathname === item.path || (item.path !== '/worker' && pathname?.startsWith(item.path));
             return (
               <Link key={item.name} href={item.path} onClick={triggerHaptic} className={`flex flex-col items-center justify-center w-full h-full ${isActive ? 'text-[#CD7F32]' : 'text-white/50 hover:text-white/80'}`}>
@@ -144,7 +144,9 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
                 >
                   {item.icon}
                 </motion.div>
-                <span className="text-[10px] font-semibold leading-none">{item.name === 'Find Jobs' ? 'Jobs' : item.name === 'My Schedule' ? 'Schedule' : item.name}</span>
+                <span className="text-[10px] font-semibold leading-none truncate w-full text-center px-1">
+                  {item.name === 'My Schedule' ? 'Schedule' : item.name === 'Live Runner Tasks' ? 'Tasks' : item.name === 'Find Jobs' ? 'Jobs' : item.name}
+                </span>
               </Link>
             );
           })}
