@@ -183,10 +183,10 @@ export default function LiveRunnersBoard() {
                   key={task.id} 
                   className="bg-white border-l-4 border-[#CD7F32] shadow-sm rounded-r-xl p-5"
                 >
-                  <div className="flex justify-between items-start mb-3 gap-3">
-                    <div className="min-w-0 flex-1">
+                  <div className="flex justify-between items-start mb-3 gap-3 w-full">
+                    <div className="min-w-0 w-full overflow-hidden flex-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32] block truncate">{task.event?.title}</span>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all">{task.task}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
                     </div>
                     <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">
                       {task.status}
@@ -234,10 +234,10 @@ export default function LiveRunnersBoard() {
                   key={task.id} 
                   className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:border-[#CD7F32] transition-colors"
                 >
-                  <div className="flex justify-between items-start mb-3 gap-3">
-                    <div className="min-w-0 flex-1">
+                  <div className="flex justify-between items-start mb-3 gap-3 w-full">
+                    <div className="min-w-0 w-full overflow-hidden flex-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block truncate">{task.event?.title}</span>
-                      <h3 className="text-lg font-medium text-gray-900 mt-1 break-words break-all">{task.task}</h3>
+                      <h3 className="text-lg font-medium text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
                       task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
