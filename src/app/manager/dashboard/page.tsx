@@ -209,6 +209,49 @@ export default function ManagerDashboard() {
               </div>
             )}
           </div>
+
+          {/* Recently Completed Events (Review & Pay) */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold font-serif">Recently Completed</h2>
+              <Link href="/manager/my-events" className="text-sm font-bold text-[#CD7F32] hover:underline">View All</Link>
+            </div>
+            
+            {eventsData.filter(e => e.status === 'COMPLETED').length === 0 ? (
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 text-center text-gray-500">
+                No completed events to review yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {eventsData.filter(e => e.status === 'COMPLETED').slice(0, 4).map((event, index) => (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white rounded-xl p-4 border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-gray-400"></div>
+                      <div>
+                        <h4 className="font-bold text-sm">{event.title}</h4>
+                        <p className="text-xs text-gray-500">{event.location} · {new Date(event.date).toISOString().split('T')[0]}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex w-full md:w-auto">
+                      <Link href="/manager/my-events" className="w-full">
+                        <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#CD7F32] hover:bg-[#a06227] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                          Review & Pay Staff
+                        </button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

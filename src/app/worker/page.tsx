@@ -223,6 +223,78 @@ export default function WorkerDashboard() {
         )}
       </div>
 
+      {/* Recently Completed Shifts (Review & Payment) */}
+      <div className="mt-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold font-serif text-gray-800">Recently Completed</h2>
+          <Link href="/worker/schedule" className="text-sm font-bold text-[#CD7F32] hover:underline">View All</Link>
+        </div>
+
+        {applications.filter(app => app.staffingRequest?.event?.status === 'COMPLETED').length === 0 ? (
+          <div className="bg-gray-50 rounded-xl p-8 border border-gray-100 text-center text-gray-500">
+            No completed shifts yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {applications
+              .filter(app => app.staffingRequest?.event?.status === 'COMPLETED')
+              .slice(0, 4)
+              .map((app, index) => {
+                return (
+                  <motion.div
+                    key={app.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white rounded-xl p-4 border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0 bg-gray-400"></div>
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-800">{app.staffingRequest?.roleName}</h4>
+                        <p className="text-xs text-gray-500">
+                          {app.staffingRequest?.event?.title}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-2 self-end md:self-auto w-full md:w-auto">
+                      {app.status !== 'PAID' ? (
+                        <button
+                          onClick={() => {
+                            fetch(`/api/worker/applications/${app.id}/status`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ status: 'PAID' })
+                            }).then(() => {
+                              fetchData();
+                            });
+                          }}
+                          className="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                          Confirm Payment
+                        </button>
+                      ) : (
+                        <div className="flex-1 md:flex-none bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                          Payment Confirmed
+                        </div>
+                      )}
+                      
+                      <Link href="/worker/schedule" className="flex-1 md:flex-none">
+                        <button className="w-full bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors text-center">
+                          Review
+                        </button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                );
+              })}
+          </div>
+        )}
+      </div>
+
       {/* Platform Live Events Section */}
       {platformLiveEvents.length > 0 && (
         <div className="mt-12 mb-8">
