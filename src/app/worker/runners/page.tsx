@@ -183,20 +183,20 @@ export default function LiveRunnersBoard() {
                   key={task.id} 
                   className="bg-white border-l-4 border-[#CD7F32] shadow-sm rounded-r-xl p-5"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32]">{task.event?.title}</span>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1">{task.task}</h3>
+                  <div className="flex justify-between items-start mb-3 gap-3">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32] block truncate">{task.event?.title}</span>
+                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all">{task.task}</h3>
                     </div>
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">
                       {task.status}
                     </span>
                   </div>
                   
-                  <div className="flex items-center justify-between mt-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                      <span className={`font-bold ${task.urgency === 'Critical' ? 'text-red-600' : task.urgency === 'High' ? 'text-amber-600' : 'text-gray-600'}`}>
+                      <span className="flex items-center gap-1 shrink-0"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span className={`font-bold shrink-0 ${task.urgency === 'Critical' ? 'text-red-600' : task.urgency === 'High' ? 'text-amber-600' : 'text-gray-600'}`}>
                         {task.urgency} Urgency
                       </span>
                     </div>
@@ -234,12 +234,12 @@ export default function LiveRunnersBoard() {
                   key={task.id} 
                   className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:border-[#CD7F32] transition-colors"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{task.event?.title}</span>
-                      <h3 className="text-lg font-medium text-gray-900 mt-1">{task.task}</h3>
+                  <div className="flex justify-between items-start mb-3 gap-3">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block truncate">{task.event?.title}</span>
+                      <h3 className="text-lg font-medium text-gray-900 mt-1 break-words break-all">{task.task}</h3>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
                       task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
                       task.urgency === 'High' ? 'bg-amber-100 text-amber-700' : 
                       'bg-gray-100 text-gray-700'
@@ -248,15 +248,14 @@ export default function LiveRunnersBoard() {
                     </span>
                   </div>
                   
-                  <div className="flex items-center justify-between mt-4 border-t border-gray-100 pt-4">
-                    <div className="text-sm text-gray-500 flex items-center gap-1">
-                      <Clock className="w-4 h-4"/> 
-                      {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
+                    <div className="flex items-center gap-4 text-sm text-gray-500 min-w-0">
+                      <span className="flex items-center gap-1 shrink-0"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
-                    <button
+                    <button 
                       onClick={() => handleAccept(task.id)}
                       disabled={loadingAction === task.id}
-                      className="bg-[#CD7F32] hover:bg-[#b06a28] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50"
+                      className="bg-[#CD7F32] hover:bg-[#b06a28] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto shrink-0 justify-center"
                     >
                       {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Accept Task'}
                     </button>
