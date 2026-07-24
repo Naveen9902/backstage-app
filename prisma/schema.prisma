@@ -150,6 +150,7 @@ model StaffingRequest {
   roleName     String
   quantity     Int
   payRate      Float
+  tier         String?
   applications Application[]
 
   @@index([eventId])

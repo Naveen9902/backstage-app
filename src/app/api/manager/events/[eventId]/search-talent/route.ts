@@ -67,8 +67,9 @@ export async function GET(request: Request, context: { params: Promise<{ eventId
 
     // Filter by role if specified
     if (role && role !== 'ALL') {
+      const lowerRole = role.toLowerCase();
       matchedWorkers = matchedWorkers.filter(worker => 
-        worker.categories && worker.categories.includes(role)
+        worker.categories && worker.categories.some((c: string) => c.toLowerCase() === lowerRole)
       );
     }
 

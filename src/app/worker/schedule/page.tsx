@@ -457,6 +457,7 @@ export default function MySchedule() {
                               Rate this Event
                             </button>
                           );
+                        })()}
                         </div>
                         )}
                       </div>

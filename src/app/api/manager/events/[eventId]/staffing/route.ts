@@ -78,14 +78,15 @@ export async function POST(
       return NextResponse.json({ error: 'Cannot add staffing requests to a completed event' }, { status: 400 });
     }
 
-    const { roleName, quantity, payRate } = await req.json();
+    const { roleName, quantity, payRate, tierTarget } = await req.json();
 
     const request = await prisma.staffingRequest.create({
       data: {
         eventId,
         roleName,
         quantity: parseInt(quantity, 10),
-        payRate: parseFloat(payRate)
+        payRate: parseFloat(payRate),
+        tier: tierTarget || 'TIER_1'
       }
     });
 
