@@ -18,10 +18,25 @@ function StaffingContent() {
   const [searchTalentReq, setSearchTalentReq] = useState<{ id: string, roleName: string } | null>(null);
   
   const [formData, setFormData] = useState({
-    roleName: '',
+    tierTarget: 'TIER_1',
+    roleName: 'Runner',
     quantity: 1,
     payRate: ''
   });
+
+  const rolesByTier: Record<string, string[]> = {
+    'TIER_1': ['Runner', 'Usher', 'Stagehand', 'Cleaner'],
+    'TIER_2': ['Security', 'VIP Host', 'Technician', 'Bartender'],
+    'TIER_3': ['Event Director', 'Head of Security', 'Executive VIP Host']
+  };
+
+  // Update roleName automatically when tier changes if current role isn't in new tier
+  useEffect(() => {
+    const validRoles = rolesByTier[formData.tierTarget];
+    if (!validRoles.includes(formData.roleName)) {
+      setFormData(prev => ({ ...prev, roleName: validRoles[0] }));
+    }
+  }, [formData.tierTarget]);
 
   const fetchEvents = () => {
     fetch('/api/manager/events').then(res => res.json()).then(data => {
@@ -57,7 +72,7 @@ function StaffingContent() {
       });
       if (res.ok) {
         fetchRequests();
-        setFormData({ roleName: '', quantity: 1, payRate: '' });
+        setFormData(prev => ({ ...prev, quantity: 1, payRate: '' }));
       }
     } catch (err) {
       console.error(err);
@@ -140,8 +155,29 @@ function StaffingContent() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label className="text-sm font-bold text-gray-700">Target Tier</label>
+                <select 
+                  value={formData.tierTarget} 
+                  onChange={e => setFormData({...formData, tierTarget: e.target.value})} 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"
+                >
+                  <option value="TIER_1">Tier 1 (General)</option>
+                  <option value="TIER_2">Tier 2 (Specialized)</option>
+                  <option value="TIER_3">Tier 3 (Premium)</option>
+                </select>
+              </div>
+              <div>
                 <label className="text-sm font-bold text-gray-700">Role Name</label>
-                <input required value={formData.roleName} onChange={e=>setFormData({...formData, roleName: e.target.value})} type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" placeholder="e.g. Bartender, Security" />
+                <select 
+                  required 
+                  value={formData.roleName} 
+                  onChange={e => setFormData({...formData, roleName: e.target.value})} 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"
+                >
+                  {rolesByTier[formData.tierTarget].map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-sm font-bold text-gray-700">Quantity Needed</label>
@@ -240,6 +276,34 @@ function StaffingContent() {
                                           </span>
                                         )}
                                       </div>
+                                      
+                                      {/* Times & Earnings */}
+                                      {(app.checkInTime || app.status === 'PAID') && (
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs font-medium">
+                                          <div className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-100">
+                                            <span className="opacity-70">In:</span>
+                                            {app.checkInTime ? new Date(app.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                          </div>
+                                          
+                                          {app.checkOutTime ? (
+                                            <>
+                                              <div className="flex items-center gap-1 text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                                                <span className="opacity-70">Out:</span>
+                                                {new Date(app.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                              </div>
+                                              
+                                              <div className="flex items-center gap-1 text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 font-bold">
+                                                <span className="opacity-70 font-normal">Earned:</span>
+                                                ₹{((new Date(app.checkOutTime).getTime() - new Date(app.checkInTime).getTime()) / (1000 * 60 * 60) * req.payRate).toFixed(2)}
+                                              </div>
+                                            </>
+                                          ) : (
+                                            <div className="flex items-center gap-1 text-gray-400 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                              <span className="opacity-70">Out:</span> Pending
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   
@@ -258,9 +322,10 @@ function StaffingContent() {
                                           <>
                                             <button 
                                               onClick={() => handleStatusUpdate(app.id, 'PAID')}
-                                              className="px-3 py-1.5 bg-[#CD7F32] text-white hover:bg-[#a06227] text-xs font-bold uppercase rounded transition-colors"
+                                              disabled={!app.checkOutTime}
+                                              className={`px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${app.checkOutTime ? 'bg-[#CD7F32] text-white hover:bg-[#a06227]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                              Mark Paid
+                                              {app.checkOutTime ? 'Mark Paid' : 'Awaiting Checkout'}
                                             </button>
                                             <button 
                                               onClick={() => setDisputeModal({ targetId: app.workerProfile.user.id, name: app.workerProfile.user.name })}

@@ -482,8 +482,37 @@ export default function MySchedule() {
               
               <div className="text-center w-full">
                 {showPassModal.checkOutTime ? (
-                  <div className="bg-gray-100 text-gray-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold mb-4">
-                    Shift Completed!
+                  <div className="flex flex-col gap-3 mb-4">
+                    <div className="bg-gray-100 text-gray-700 px-4 py-4 rounded-xl flex flex-col items-center justify-center gap-1 font-bold shadow-inner">
+                      <span className="uppercase tracking-wider text-xs text-gray-500">Shift Completed</span>
+                      <span className="text-3xl text-[#CD7F32] font-black mt-1 font-serif">
+                        ₹{((new Date(showPassModal.checkOutTime).getTime() - new Date(showPassModal.checkInTime).getTime()) / (1000 * 60 * 60) * showPassModal.staffingRequest.payRate).toFixed(2)}
+                      </span>
+                      <span className="text-xs font-normal text-gray-500 mt-1">Total Earnings</span>
+                    </div>
+                    {showPassModal.status !== 'PAID' ? (
+                      <button
+                        onClick={() => {
+                          fetch(`/api/worker/applications/${showPassModal.id}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: 'PAID' })
+                          }).then(() => {
+                            setShowPassModal({ ...showPassModal, status: 'PAID' });
+                            fetchSchedule();
+                          });
+                        }}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-colors shadow-md flex justify-center items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Confirm Payment Received
+                      </button>
+                    ) : (
+                      <div className="bg-indigo-100 text-indigo-700 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Payment Confirmed
+                      </div>
+                    )}
                   </div>
                 ) : showPassModal.checkInTime ? (
                   <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl flex flex-col items-center justify-center gap-1 font-bold mb-4">
