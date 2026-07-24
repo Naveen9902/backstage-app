@@ -2,9 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
+
+const triggerHaptic = async () => {
+  if (typeof window !== 'undefined') {
+    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    }).catch(() => {});
+  }
+};
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -48,7 +56,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] via-[#f0eadd] to-[#e6d8b8] flex relative selection:bg-[#CD7F32]/30 selection:text-[#242424]">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-[#242424] text-white flex-col fixed h-full border-r-4 border-[#CD7F32] z-40">
         
@@ -110,14 +118,20 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t-2 border-[#CD7F32] z-50 overflow-x-auto no-scrollbar pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
-        <div className="flex items-center h-16 px-2 gap-2 min-w-max">
-          {menuItems.map((item) => {
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t border-gray-800 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center justify-around h-16 px-2">
+          {menuItems.filter(item => ['Dashboard', 'My Events', 'Runners', 'Profile'].includes(item.name)).map((item) => {
             const isActive = pathname === item.path || (item.path !== '/manager' && pathname?.startsWith(item.path));
             return (
-              <Link key={item.name} href={item.path} className={`flex flex-col items-center justify-center w-16 h-full flex-shrink-0 ${isActive ? 'text-[#CD7F32]' : 'text-white/60 hover:text-white'}`}>
-                <div className="mb-1">{item.icon}</div>
-                <span className="text-[10px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis max-w-full px-1">{item.name}</span>
+              <Link key={item.name} href={item.path} onClick={triggerHaptic} className={`flex flex-col items-center justify-center w-full h-full ${isActive ? 'text-[#CD7F32]' : 'text-white/50 hover:text-white/80'}`}>
+                <motion.div 
+                  whileTap={{ scale: 0.8 }} 
+                  animate={isActive ? { y: -2 } : { y: 0 }}
+                  className="mb-1"
+                >
+                  {item.icon}
+                </motion.div>
+                <span className="text-[10px] font-semibold leading-none">{item.name === 'My Events' ? 'Events' : item.name}</span>
               </Link>
             );
           })}
@@ -128,9 +142,9 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
       <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
         <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
           {/* Mobile Header Logo */}
-          <Link href="/" className="md:hidden flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 w-auto rounded-sm" />
-            <span className="font-serif font-bold tracking-wide">Back<span className="text-[#CD7F32]">Stage</span></span>
+          <Link href="/manager/dashboard" className="md:hidden flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="h-8 w-auto mix-blend-multiply" />
+            <span className="font-serif font-bold tracking-wide text-[#CD7F32]">BackStage</span>
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">
@@ -146,8 +160,19 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
             </button>
           </div>
         </header>
-        <div className="p-4 md:p-10 md:pt-0 flex-1">
-          {children}
+        <div className="p-4 md:p-10 md:pt-0 flex-1 relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="w-full h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>

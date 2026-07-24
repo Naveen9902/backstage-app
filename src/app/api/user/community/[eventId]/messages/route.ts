@@ -82,8 +82,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
     const { eventId } = await params;
     const body = await req.json();
     
-    if (!body.text || !body.text.trim()) {
-      return NextResponse.json({ error: 'Message text is required' }, { status: 400 });
+    if ((!body.text || !body.text.trim()) && !body.imageUrl) {
+      return NextResponse.json({ error: 'Message text or image is required' }, { status: 400 });
     }
 
     const userId = await getUserId();
@@ -106,7 +106,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       data: {
         eventId,
         senderId: userId,
-        text: body.text.trim(),
+        text: body.text ? body.text.trim() : "",
+        imageUrl: body.imageUrl || null,
         channel,
         parentId: body.parentId || null
       },

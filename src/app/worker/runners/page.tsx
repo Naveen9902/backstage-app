@@ -4,6 +4,48 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
+const SwipeToComplete = ({ onComplete, loading }: { onComplete: () => void, loading: boolean }) => {
+  const [isCompleted, setIsCompleted] = useState(false);
+  
+  return (
+    <div className="relative w-56 h-12 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center border border-gray-200 shadow-inner group">
+      <span className="text-xs font-bold text-gray-400 select-none pointer-events-none tracking-widest z-0">
+        {loading ? 'COMPLETING...' : isCompleted ? 'DONE' : 'SWIPE TO COMPLETE'}
+      </span>
+      {!isCompleted && !loading && (
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 176 }} // 224 (w-56) - 48 (w-12)
+          dragElastic={0.05}
+          dragSnapToOrigin
+          onDragEnd={(e, info) => {
+            if (info.offset.x > 120) {
+              if (typeof window !== 'undefined') {
+                import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+                  Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+                }).catch(() => {});
+              }
+              setIsCompleted(true);
+              onComplete();
+            }
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-[#242424] to-black rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </motion.div>
+      )}
+      <div className={`absolute top-0 left-0 h-full bg-green-500 transition-all duration-500 ease-out z-10 ${isCompleted ? 'w-full' : 'w-0'}`}></div>
+      {isCompleted && (
+        <div className="absolute inset-0 flex items-center justify-center text-white font-bold z-20">
+          <CheckCircle2 className="w-5 h-5 mr-2" /> DONE
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 export default function LiveRunnersBoard() {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
   const [myTasks, setMyTasks] = useState<any[]>([]);
@@ -36,8 +78,14 @@ export default function LiveRunnersBoard() {
       )
       .subscribe();
 
+    // Fallback: poll every 5 seconds just in case Realtime isn't enabled on the table
+    const pollInterval = setInterval(() => {
+      fetchTasks();
+    }, 5000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, []);
 
@@ -154,14 +202,10 @@ export default function LiveRunnersBoard() {
                     </div>
                     
                     {task.status !== 'Completed' && (
-                      <button
-                        onClick={() => handleComplete(task.id)}
-                        disabled={loadingAction === task.id}
-                        className="bg-[#242424] hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50"
-                      >
-                        {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                        Mark Completed
-                      </button>
+                      <SwipeToComplete 
+                        onComplete={() => handleComplete(task.id)} 
+                        loading={loadingAction === task.id} 
+                      />
                     )}
                   </div>
                 </motion.div>

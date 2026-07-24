@@ -70,12 +70,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
   try {
     const { eventId } = await params;
     const body = await req.json();
-    const { text } = body;
+    const { text, imageUrl } = body;
     const channel = body.channel || 'announcements';
     const user = await getAuthenticatedUser();
     
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!text || !text.trim()) return NextResponse.json({ error: 'Empty message' }, { status: 400 });
+    if ((!text || !text.trim()) && !imageUrl) return NextResponse.json({ error: 'Empty message' }, { status: 400 });
 
     // Validate access
     if (user.role === 'MANAGER') {
@@ -107,7 +107,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       data: {
         eventId,
         senderId: user.id,
-        text: text.trim(),
+        text: text ? text.trim() : "",
+        imageUrl: imageUrl || null,
         channel
       },
       include: {

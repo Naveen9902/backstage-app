@@ -338,9 +338,10 @@ export default function WorkerProfile() {
               <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[80px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
             </div>
 
-            {/* Avatar & Action Row */}
-            <div className="px-8 flex flex-col sm:flex-row justify-between items-start sm:items-end relative -mt-16 sm:-mt-20 mb-8 z-10">
-              <div className="relative mb-4 sm:mb-0">
+            {/* Avatar, Trust Score & Action Row */}
+            <div className="px-8 flex flex-col sm:flex-row justify-between items-start sm:items-end relative -mt-16 sm:-mt-20 mb-8 z-10 gap-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
+                <div className="relative mb-4 sm:mb-0">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 sm:border-[6px] border-white bg-gradient-to-br from-[#CD7F32] to-[#8a5522] shadow-2xl flex items-center justify-center overflow-hidden group/avatar cursor-pointer relative z-10 transition-transform duration-500 hover:scale-105" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                   {!formData.avatarUrl && (
                     <span className="text-5xl sm:text-6xl font-black text-white mix-blend-overlay shadow-sm">
@@ -368,7 +369,25 @@ export default function WorkerProfile() {
                 </div>
                 <div className="absolute inset-0 rounded-full border border-[#CD7F32]/30 scale-[1.15] opacity-0 group-hover:opacity-100 transition-all duration-700 z-0 pointer-events-none"></div>
               </div>
-              
+
+              {/* Gamified Trust Score */}
+              <div className="bg-white p-3 rounded-2xl shadow-[0_4px_15px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                <div className="relative w-14 h-14 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path className="text-gray-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path className="text-[#CD7F32] animate-[strokeDash_2s_ease-out_forwards]" strokeWidth="3" strokeDasharray="98, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <span className="absolute text-lg font-black text-gray-900">98</span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Trust Score</p>
+                  <p className="text-sm font-bold bg-gradient-to-r from-yellow-500 to-yellow-700 bg-clip-text text-transparent flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Gold Tier
+                  </p>
+                </div>
+              </div>
+            </div>
               <button 
                 onClick={handleSubmit} 
                 disabled={saving || loading || isUnderage} 
@@ -712,8 +731,34 @@ export default function WorkerProfile() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Active Events */}
+        {/* RIGHT COLUMN: Active Events & Wallet */}
         <div className="lg:col-span-1 space-y-6">
+          {/* Earnings Wallet (Premium UI) */}
+          <div className="bg-gradient-to-br from-[#111] via-[#222] to-[#000] rounded-[2rem] p-6 text-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32]/20 blur-[40px] rounded-full group-hover:bg-[#CD7F32]/30 transition-colors"></div>
+            
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Available to Withdraw</h3>
+            <div className="flex items-end gap-1 mb-6">
+              <span className="text-2xl font-medium text-gray-400 mb-1">$</span>
+              <span className="text-4xl font-black tracking-tight">1,240.00</span>
+            </div>
+            
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-6">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-bold text-gray-300">Pending Payouts</span>
+                <span className="text-sm font-bold text-[#CD7F32]">$350.00</span>
+              </div>
+              <div className="w-full bg-black/50 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div className="bg-gradient-to-r from-[#CD7F32] to-yellow-500 w-[60%] h-full rounded-full"></div>
+              </div>
+            </div>
+            
+            <button className="w-full bg-white text-black font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Withdraw to Bank
+            </button>
+          </div>
+
           <div className="bg-gradient-to-b from-white to-[#fdfcf9] rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#EAE6DF] p-6 sticky top-24">
             <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>

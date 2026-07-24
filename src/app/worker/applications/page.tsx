@@ -52,6 +52,7 @@ export default function MyApplications() {
                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide
                   ${app.status === 'PENDING' ? 'bg-orange-50 text-orange-700 border border-orange-200' : ''}
                   ${app.status === 'ACCEPTED' ? 'bg-green-50 text-green-700 border border-green-200' : ''}
+                  ${app.status === 'PAID' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : ''}
                   ${app.status === 'REJECTED' ? 'bg-red-50 text-red-700 border border-red-200' : ''}
                 `}>
                   {app.status}

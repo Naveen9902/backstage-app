@@ -239,16 +239,24 @@ function StaffingContent() {
                                       </>
                                     ) : (
                                       <div className="flex items-center gap-2">
-                                        <span className={`px-3 py-1.5 rounded text-xs font-bold uppercase ${app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                        <span className={`px-3 py-1.5 rounded text-xs font-bold uppercase ${app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' : app.status === 'PAID' ? 'bg-indigo-100 text-indigo-700' : 'bg-red-100 text-red-700'}`}>
                                           {app.status}
                                         </span>
                                         {app.status === 'ACCEPTED' && (
-                                          <button 
-                                            onClick={() => setDisputeModal({ targetId: app.workerProfile.user.id, name: app.workerProfile.user.name })}
-                                            className="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-700 text-xs font-bold uppercase rounded transition-colors"
-                                          >
-                                            Report Issue
-                                          </button>
+                                          <>
+                                            <button 
+                                              onClick={() => handleStatusUpdate(app.id, 'PAID')}
+                                              className="px-3 py-1.5 bg-[#CD7F32] text-white hover:bg-[#a06227] text-xs font-bold uppercase rounded transition-colors"
+                                            >
+                                              Mark Paid
+                                            </button>
+                                            <button 
+                                              onClick={() => setDisputeModal({ targetId: app.workerProfile.user.id, name: app.workerProfile.user.name })}
+                                              className="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-700 text-xs font-bold uppercase rounded transition-colors"
+                                            >
+                                              Report Issue
+                                            </button>
+                                          </>
                                         )}
                                       </div>
                                     )}

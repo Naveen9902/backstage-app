@@ -23,6 +23,7 @@ enum ApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
+  PAID
 }
 
 model User {
@@ -193,6 +194,7 @@ model EventChatMessage {
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   text      String
+  imageUrl  String?
   channel   String   @default("announcements")
   createdAt DateTime @default(now())
   

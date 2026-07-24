@@ -94,68 +94,81 @@ export default function QRScannerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
+    <div className="fixed inset-0 bg-black overflow-hidden flex flex-col">
+      {/* Camera Feed */}
+      <div id="qr-reader" className="absolute inset-0 w-full h-full object-cover z-0"></div>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col items-center py-12 px-6">
+        
+        {/* Header */}
+        <div className="w-full flex items-center justify-between pointer-events-auto">
           <button 
             onClick={() => router.push(`/manager/events/${eventId}`)}
-            className="text-gray-400 hover:text-white flex items-center justify-center gap-2 mx-auto mb-4"
+            className="w-12 h-12 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors hover:bg-black/60"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Back to Event
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
-          <h1 className="text-3xl font-bold font-serif text-white tracking-tight">Access Scanner</h1>
-          <p className="text-[#CD7F32] text-sm mt-1 uppercase tracking-widest font-bold">Scan Digital Event Pass</p>
+          <div className="bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full text-white font-bold text-sm tracking-widest uppercase">
+            Scanner
+          </div>
+          <div className="w-12"></div>
         </div>
 
-        <div className="bg-white rounded-3xl overflow-hidden shadow-2xl">
-          <div className="p-2 bg-gray-50 border-b border-gray-100">
-            {/* The html5-qrcode scanner injects into this div */}
-            <div id="qr-reader" className="w-full border-none rounded-2xl overflow-hidden [&_video]:rounded-2xl"></div>
-          </div>
-          
-          <div className="p-6 text-center h-40 flex flex-col justify-center items-center">
-            {status === 'scanning' && (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" className="text-gray-400 mb-3 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
-                <p className="text-gray-500 font-medium">Point camera at worker's QR code</p>
-              </>
-            )}
-            
-            {status === 'processing' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
+        {/* Viewfinder */}
+        <div className="relative w-64 h-64 mt-[15vh]">
+           <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-[#CD7F32] rounded-tl-3xl"></div>
+           <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-[#CD7F32] rounded-tr-3xl"></div>
+           <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-[#CD7F32] rounded-bl-3xl"></div>
+           <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-[#CD7F32] rounded-br-3xl"></div>
+           
+           {/* Scanning animation line */}
+           {status === 'scanning' && (
+             <motion.div 
+               animate={{ top: ['0%', '100%', '0%'] }} 
+               transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
+               className="absolute left-0 w-full h-0.5 bg-[#CD7F32] shadow-[0_0_8px_2px_rgba(205,127,50,0.5)]"
+             />
+           )}
+        </div>
+
+        {/* Status Text Area */}
+        <div className="bg-black/60 backdrop-blur-lg rounded-3xl p-6 w-full max-w-sm flex flex-col items-center justify-center min-h-[140px] pointer-events-auto border border-white/10 shadow-2xl mt-auto">
+          {status === 'scanning' && (
+            <p className="text-white/80 font-medium text-center">Center the QR code in the frame to scan automatically.</p>
+          )}
+          {status === 'processing' && (
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
                 <div className="w-8 h-8 border-4 border-[#CD7F32] border-t-transparent rounded-full animate-spin mb-3"></div>
-                <p className="text-gray-800 font-bold">Verifying Pass...</p>
-              </motion.div>
-            )}
-            
-            {status === 'success' && (
-              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3">
+                <p className="text-white font-bold">Verifying Pass...</p>
+             </motion.div>
+          )}
+          {status === 'success' && (
+             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </div>
-                <p className="text-green-700 font-bold">{message}</p>
-              </motion.div>
-            )}
-
-            {status === 'error' && (
-              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-3">
+                <p className="text-green-400 font-bold text-center">{message}</p>
+             </motion.div>
+          )}
+          {status === 'error' && (
+             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                 </div>
-                <p className="text-red-600 font-bold">{message}</p>
-              </motion.div>
-            )}
-          </div>
+                <p className="text-red-400 font-bold text-center">{message}</p>
+             </motion.div>
+          )}
         </div>
       </div>
-      
+
       {/* CSS overrides for the html5-qrcode UI to make it look premium */}
       <style dangerouslySetInnerHTML={{__html: `
-        #qr-reader { border: none !important; }
+        #qr-reader { border: none !important; width: 100% !important; height: 100% !important; background: black; }
         #qr-reader__dashboard_section_csr span { display: none !important; }
-        #qr-reader__dashboard_section_swaplink { text-decoration: none !important; color: #CD7F32 !important; font-weight: bold; margin-top: 10px; display: inline-block; }
-        #qr-reader__dashboard_section_csr button { background-color: #111111 !important; color: white !important; border: none !important; padding: 8px 16px !important; border-radius: 8px !important; font-weight: bold !important; cursor: pointer !important; }
+        #qr-reader__dashboard_section_swaplink { display: none !important; }
+        #qr-reader__dashboard_section_csr button { display: none !important; }
+        #qr-reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
       `}} />
     </div>
   );

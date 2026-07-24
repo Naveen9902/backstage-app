@@ -203,6 +203,49 @@ export default function MySchedule() {
               })}
             </div>
           </div>
+
+          {/* Upcoming Shifts List */}
+          <div className="mt-8">
+            <h2 className="text-xl font-bold font-serif mb-4 text-gray-800 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#CD7F32]"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Upcoming Shifts
+            </h2>
+            
+            {schedule.filter(a => a.staffingRequest.event.status !== 'COMPLETED').length === 0 ? (
+              <div className="text-center p-8 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-200 border-dashed text-gray-500">
+                <p>No upcoming shifts scheduled.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {schedule.filter(a => a.staffingRequest.event.status !== 'COMPLETED').map(app => (
+                  <div key={app.id} onClick={() => openPass(app)} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden group">
+                    {app.staffingRequest.event.status === 'ONGOING' && (
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                    )}
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-50 rounded-xl flex flex-col items-center justify-center border border-gray-100 flex-shrink-0 group-hover:bg-[#CD7F32]/10 transition-colors">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase leading-none mb-1">{new Date(app.staffingRequest.event.date).toLocaleDateString(undefined, { month: 'short' })}</span>
+                        <span className="text-lg font-bold text-[#CD7F32] leading-none">{new Date(app.staffingRequest.event.date).getDate()}</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">{app.staffingRequest.event.title}</h4>
+                        <p className="text-xs text-gray-500 font-medium">{app.staffingRequest.roleName} · {app.staffingRequest.event.startTime || 'TBD'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      {app.staffingRequest.event.status === 'ONGOING' ? (
+                        <span className="bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE
+                        </span>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 group-hover:text-[#CD7F32] transition-colors"><path d="m9 18 6-6-6-6"/></svg>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

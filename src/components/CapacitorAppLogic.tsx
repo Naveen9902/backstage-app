@@ -22,6 +22,14 @@ export default function CapacitorAppLogic() {
       }).catch(err => {
         console.warn('Capacitor App module not found, likely running in pure web mode', err);
       });
+
+      // Configure StatusBar
+      import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+        StatusBar.setStyle({ style: Style.Light }).catch(console.warn);
+        StatusBar.setBackgroundColor({ color: '#F5F5DC' }).catch(console.warn);
+      }).catch(err => {
+        console.warn('Capacitor StatusBar module not found', err);
+      });
     }
   }, [router]);
 
