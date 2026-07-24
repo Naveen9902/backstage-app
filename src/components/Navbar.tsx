@@ -23,7 +23,7 @@ export default function Navbar() {
     <>
       <nav className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-white/5 bg-[#1a1a1a]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 md:gap-3"> <div className={`flex items-center gap-2.5 ${"text-lg md:text-xl font-bold text-white tracking-wide font-serif"}`}><img src="/logo.jpg" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
+          <Link href="/" className="flex items-center gap-2 md:gap-3"> <div className={`flex items-center gap-2.5 ${"text-lg md:text-xl font-bold text-white tracking-wide font-serif"}`}><img src="/logo.jpg" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
           </Link>
         </div>
         

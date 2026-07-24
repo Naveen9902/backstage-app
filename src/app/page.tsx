@@ -456,7 +456,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-sm">
             <div>
               <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-white mb-4">
-                <div className="flex items-center gap-2.5 text-2xl font-bold text-white tracking-wide font-serif mb-4"><img src="/logo.jpg" alt="Logo" className="w-14 h-14 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
+                <div className="flex items-center gap-2.5 text-2xl font-bold text-white tracking-wide font-serif mb-4"><img src="/logo.jpg" alt="Logo" className="w-24 h-24 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
               </Link>
               <p className="text-white/40">The ultimate platform for event staffing and community building.</p>
             </div>

@@ -21,7 +21,7 @@ export default function AdminLayoutClient({ children, user }: { children: React.
         
         {/* Logo */}
         <div className="px-6 py-8 flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3 group"> <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
+          <Link href="/" className="flex items-center gap-3 group"> <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
           </Link>
         </div>
 
