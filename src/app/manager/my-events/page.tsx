@@ -91,12 +91,15 @@ export default function MyEvents() {
           if (Array.isArray(req.applications)) {
             req.applications.forEach((app: any) => {
               const workerId = app.workerProfile?.user?.id;
-              if (app.status === 'ACCEPTED' && workerId && !seenIds.has(workerId)) {
+              if ((app.status === 'ACCEPTED' || app.status === 'PAID') && workerId && !seenIds.has(workerId)) {
                 seenIds.add(workerId);
                 workers.push({
                   id: workerId,
                   name: app.workerProfile.user.name,
-                  role: req.roleName
+                  role: req.roleName,
+                  applicationId: app.id,
+                  applicationStatus: app.status,
+                  checkOutTime: app.checkOutTime
                 });
               }
             });
@@ -379,6 +382,38 @@ export default function MyEvents() {
                             Reviewed
                           </span>
                         )}
+                        <div className="flex gap-2">
+                          {worker.applicationStatus === 'PAID' ? (
+                            <span className="flex items-center gap-1 text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md shadow-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                              Paid
+                            </span>
+                          ) : (
+                            <button
+                              disabled={!worker.checkOutTime}
+                              onClick={() => {
+                                fetch(`/api/manager/applications/${worker.applicationId}/status`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ status: 'PAID' })
+                                }).then(() => {
+                                  // Update local state to reflect paid status
+                                  if (ratingModalState) {
+                                    setRatingModalState({
+                                      ...ratingModalState,
+                                      workers: ratingModalState.workers.map((w: any) => 
+                                        w.id === worker.id ? { ...w, applicationStatus: 'PAID' } : w
+                                      )
+                                    });
+                                  }
+                                });
+                              }}
+                              className={`flex items-center gap-1 text-xs font-bold uppercase px-3 py-1.5 rounded-md transition-colors ${worker.checkOutTime ? 'bg-[#CD7F32] text-white hover:bg-[#a06227]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                            >
+                              {worker.checkOutTime ? 'Mark Paid' : 'Awaiting Checkout'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                       
                       {!hasReviewed && (
