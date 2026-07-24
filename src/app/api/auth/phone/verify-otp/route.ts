@@ -36,7 +36,9 @@ export async function POST(req: Request) {
     }
 
     if (String(storedCode).trim() !== String(code).trim()) {
-      return NextResponse.json({ error: 'Invalid OTP code' }, { status: 400 });
+      return NextResponse.json({ 
+        error: `Invalid OTP code. Received: '${code}', Expected: '${storedCode}'` 
+      }, { status: 400 });
     }
 
     // Success! Delete the code so it can't be reused
