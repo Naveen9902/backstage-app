@@ -91,3 +91,160 @@ input, textarea {
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   GLOBAL DARK MODE OVERRIDES FOR DASHBOARDS AND APP
+   ========================================================================== */
+html.dark body {
+  background-color: #121212 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Background overrides for cards, panels, and containers in dark mode */
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-slate-50,
+html.dark .bg-neutral-50,
+html.dark .bg-zinc-50 {
+  background-color: #1e1e1e !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark .bg-gray-100,
+html.dark .bg-slate-100,
+html.dark .bg-neutral-100,
+html.dark .bg-zinc-100 {
+  background-color: #262626 !important;
+  color: #e5e7eb !important;
+}
+
+html.dark .bg-gray-200,
+html.dark .bg-slate-200 {
+  background-color: #333333 !important;
+  color: #e5e7eb !important;
+}
+
+/* Subtle tinted backgrounds in dark mode */
+html.dark .bg-blue-50,
+html.dark .bg-blue-50\/80 {
+  background-color: rgba(30, 58, 138, 0.4) !important;
+  color: #bfdbfe !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+html.dark .bg-green-50,
+html.dark .bg-green-50\/80 {
+  background-color: rgba(6, 78, 59, 0.4) !important;
+  color: #a7f3d0 !important;
+  border-color: rgba(5, 150, 105, 0.5) !important;
+}
+
+html.dark .bg-purple-50,
+html.dark .bg-purple-50\/80 {
+  background-color: rgba(88, 28, 135, 0.4) !important;
+  color: #e9d5ff !important;
+  border-color: rgba(147, 51, 234, 0.5) !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-50\/80,
+html.dark .bg-yellow-50 {
+  background-color: rgba(120, 53, 15, 0.4) !important;
+  color: #fde68a !important;
+  border-color: rgba(217, 119, 6, 0.5) !important;
+}
+
+html.dark .bg-red-50,
+html.dark .bg-red-50\/80 {
+  background-color: rgba(127, 29, 29, 0.4) !important;
+  color: #fecaca !important;
+  border-color: rgba(220, 38, 38, 0.5) !important;
+}
+
+/* Text color overrides in dark mode */
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-\[\#242424\],
+html.dark .text-black,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-neutral-900 {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: #9ca3af !important;
+}
+
+html.dark .text-blue-700,
+html.dark .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+html.dark .text-green-700,
+html.dark .text-green-800 {
+  color: #6ee7b7 !important;
+}
+
+html.dark .text-purple-700,
+html.dark .text-purple-800 {
+  color: #d8b4fe !important;
+}
+
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-yellow-700,
+html.dark .text-yellow-800 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-red-700,
+html.dark .text-red-800 {
+  color: #fca5a5 !important;
+}
+
+/* Border overrides in dark mode */
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+  border-color: #333333 !important;
+}
+
+html.dark .divide-gray-100 > * + *,
+html.dark .divide-gray-200 > * + * {
+  border-color: #333333 !important;
+}
+
+/* Hover state adjustments in dark mode */
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #2a2a2a !important;
+}
+
+html.dark .hover\:text-gray-900:hover,
+html.dark .hover\:text-black:hover {
+  color: #ffffff !important;
+}
+
+/* Form inputs, selects, and textareas in dark mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1a1a1a !important;
+  color: #f3f4f6 !important;
+  border-color: #404040 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
+}

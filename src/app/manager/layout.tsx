@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const triggerHaptic = async () => {
   if (typeof window !== 'undefined') {
@@ -146,6 +147,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             <NotificationBell />
             <button
               onClick={async () => {

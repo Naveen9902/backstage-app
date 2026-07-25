@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -123,6 +124,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             <NotificationBell />
             <button
               onClick={async () => {

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
 import RunnerAlert from '@/components/RunnerAlert';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -126,6 +127,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
             <NotificationBell />
             <button
               onClick={async () => {

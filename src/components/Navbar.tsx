@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const [session, setSession] = useState<{loggedIn: boolean, user?: any}>({ loggedIn: false });
@@ -35,15 +36,16 @@ export default function Navbar() {
           <Link href="/#pricing" className="hover:text-white transition-colors">Pricing</Link>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <ThemeToggle />
           {session.loggedIn ? (
             <>
-              <span className="text-white/60 text-sm mr-2">Hi, {session.user?.name}</span>
+              <span className="hidden sm:inline text-white/60 text-sm mr-2">Hi, {session.user?.name}</span>
               <Link href={getDashboardLink()}>
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 bg-[#242424] text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-black/20 border border-[#CD7F32]/50 hover:bg-[#1a1a1a] cursor-pointer"
+                  className="flex items-center gap-2 bg-[#242424] text-white px-3 md:px-5 py-2 md:py-2.5 rounded-lg font-semibold text-xs md:text-sm shadow-lg shadow-black/20 border border-[#CD7F32]/50 hover:bg-[#1a1a1a] cursor-pointer"
                 >
                   Dashboard
                 </motion.div>
@@ -53,21 +55,21 @@ export default function Navbar() {
                   await fetch('/api/auth/logout', { method: 'POST' });
                   window.location.href = '/';
                 }}
-                className="text-red-400 hover:text-red-300 text-sm font-semibold transition-colors"
+                className="text-red-400 hover:text-red-300 text-xs md:text-sm font-semibold transition-colors"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-white hover:text-[#CD7F32] font-semibold text-sm transition-colors mr-2">Sign In</Link>
+              <Link href="/login" className="text-white hover:text-[#CD7F32] font-semibold text-xs md:text-sm transition-colors mr-1 md:mr-2">Sign In</Link>
               <Link href="/register">
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 bg-[#CD7F32] text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow-lg shadow-[#CD7F32]/20 cursor-pointer"
+                  className="flex items-center gap-1.5 md:gap-2 bg-[#CD7F32] text-white px-3 md:px-5 py-2 md:py-2.5 rounded-lg font-semibold text-xs md:text-sm shadow-lg shadow-[#CD7F32]/20 cursor-pointer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden sm:inline"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
                   Get Started
                 </motion.div>
               </Link>

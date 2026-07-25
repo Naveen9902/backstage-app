@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayoutClient({ children, user }: { children: React.ReactNode, user: any }) {
   const pathname = usePathname();
@@ -87,8 +88,9 @@ export default function AdminLayoutClient({ children, user }: { children: React.
           {/* Mobile Header Logo */}
           <Link href="/" className="md:hidden flex items-center gap-2"> <span className="font-serif font-bold tracking-wide text-white">Back<span className="text-[#CD7F32]">Stage</span></span>
           </Link>
-          
-          <button
+          <div className="flex items-center gap-2 md:gap-4">
+            <ThemeToggle />
+            <button
             onClick={async () => {
               await fetch('/api/auth/logout', { method: 'POST' });
               window.location.href = '/';
@@ -96,7 +98,8 @@ export default function AdminLayoutClient({ children, user }: { children: React.
             className="md:hidden text-gray-500 hover:text-red-500 p-2"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-          </button>
+            </button>
+          </div>
         </header>
         <div className="p-4 md:p-10 pt-0 flex-1">
           {children}
