@@ -470,14 +470,14 @@ export default function RunnersPage() {
                                     {dispatch.status === 'Completed' && dispatch.price !== null && dispatch.price !== undefined && (
                                       <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80 -mx-4 -mb-4 p-3 rounded-b-2xl">
                                         {dispatch.paymentStatus === 'CONFIRMED' ? (
-                                          <span className="text-xs font-bold text-emerald-700 flex items-center justify-center w-full gap-1 bg-emerald-100/60 py-1.5 rounded-lg border border-emerald-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                            Payment Confirmed (₹{dispatch.price})
+                                          <span className="text-xs font-bold text-emerald-700 flex items-center justify-center w-full gap-1.5 bg-emerald-100/80 py-2 px-3 rounded-xl border border-emerald-300 shadow-2xs font-mono">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                            <span>Payment Confirmed by Runner (₹{dispatch.price})</span>
                                           </span>
                                         ) : dispatch.paymentStatus === 'SENT' ? (
-                                          <span className="text-xs font-semibold text-amber-700 flex items-center justify-center w-full gap-1.5 bg-amber-100/60 py-1.5 px-2 rounded-lg border border-amber-200 text-center">
-                                            <svg className="animate-spin h-3.5 w-3.5 text-amber-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                            <span>Payment Sent - Awaiting Runner</span>
+                                          <span className="text-xs font-bold text-blue-700 flex items-center justify-center w-full gap-1.5 bg-blue-100/80 py-2 px-3 rounded-xl border border-blue-300 shadow-2xs font-mono">
+                                            <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                                            <span>Payment Done (₹{dispatch.price})</span>
                                           </span>
                                         ) : (
                                           <button
