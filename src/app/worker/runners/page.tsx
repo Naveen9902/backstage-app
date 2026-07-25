@@ -195,6 +195,7 @@ export default function LiveRunnersBoard() {
               You have no active tasks at the moment.
             </div>
           ) : (
+            <div className="space-y-4">
               {myTasks.map(task => {
                 const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
                 const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';

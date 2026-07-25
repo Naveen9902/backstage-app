@@ -325,122 +325,10 @@ export default function RunnersPage() {
 
             </div>
 
-            {/* Bottom Section: Dispatches History */}
-            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-xl shadow-gray-100">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold font-serif text-gray-900">Task Dispatches Live Log</h2>
-                    <p className="text-sm text-gray-500">Real-time tracking of all venue commands and external errands</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Dispatched:</span>
-                  <span className="px-3 py-1 bg-gray-100 text-gray-900 rounded-lg font-bold text-sm">{dispatches.length}</span>
-                </div>
-              </div>
-
-              {dispatches.length === 0 ? (
-                <div className="py-16 text-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                    <Clock className="w-8 h-8 text-gray-300" />
-                  </div>
-                  <h3 className="font-bold text-gray-700 text-lg mb-1">No tasks dispatched yet</h3>
-                  <p className="text-sm text-gray-400 max-w-md mx-auto">Assign a task to an internal event worker or dispatch a nearby quick runner above to start tracking live operations.</p>
-                </div>
-              ) : (
-                <div className="space-y-10">
-                  {Object.entries(
-                    dispatches.reduce((acc: Record<string, any[]>, dispatch) => {
-                      const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
-                      const eventName = dispatch.event?.title || (isExternal ? 'External Quick Errands (Swiggy/Rapido style)' : 'General Venue Commands');
-                      if (!acc[eventName]) acc[eventName] = [];
-                      acc[eventName].push(dispatch);
-                      return acc;
-                    }, {})
-                  ).map(([eventName, items]) => (
-                    <div key={eventName} className="space-y-4 bg-gray-50/40 p-6 rounded-2xl border border-gray-200/60">
-                      <div className="flex items-center justify-between border-b border-gray-200/80 pb-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-3 h-3 rounded-full ${eventName.includes('External') ? 'bg-blue-500 animate-pulse' : 'bg-[#CD7F32]'}`}></span>
-                          <h3 className="text-lg font-bold font-serif text-gray-900 tracking-tight">{eventName}</h3>
-                        </div>
-                        <span className="text-xs bg-white text-gray-700 px-3 py-1 rounded-full font-bold border border-gray-200 shadow-2xs">
-                          {items.length} {items.length === 1 ? 'Task' : 'Tasks'} Dispatched
-                        </span>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-                        {items.map((dispatch) => {
-                          const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
-                          const cleanTask = isExternal ? dispatch.task.replace('[EXTERNAL/ERRAND] ', '') : dispatch.task;
-                          
-                          return (
-                            <motion.div 
-                              key={dispatch.id}
-                              initial={{ opacity: 0, scale: 0.98 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="bg-white hover:bg-gray-50/80 p-5 rounded-2xl border border-gray-200/80 hover:border-gray-300 shadow-sm hover:shadow transition-all duration-200 flex flex-col justify-between"
-                            >
-                              <div>
-                                <div className="flex items-center justify-between gap-2 mb-3">
-                                  <div className="flex items-center gap-1.5">
-                                    {isExternal ? (
-                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
-                                        External
-                                      </span>
-                                    ) : (
-                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
-                                        Internal
-                                      </span>
-                                    )}
-                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                                      dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                      dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
-                                      'bg-amber-100 text-amber-700 border border-amber-200'
-                                    }`}>
-                                      {dispatch.status || 'Pending'}
-                                    </span>
-                                    {dispatch.price !== null && dispatch.price !== undefined && (
-                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs font-mono">
-                                        ₹{dispatch.price}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className={`w-2 h-2 rounded-full ${
-                                    dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
-                                    dispatch.urgency === 'High' ? 'bg-orange-500' : 'bg-gray-300'
-                                  }`} title={`Urgency: ${dispatch.urgency}`}></span>
-                                </div>
-                                
-                                <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
-                                  {cleanTask || 'No description provided'}
-                                </p>
-                              </div>
-                              
-                              <div className="flex items-center justify-between text-xs mt-auto pt-3 border-t border-gray-100">
-                                <div className="text-gray-400 flex items-center gap-1 font-mono">
-                                  <Clock className="w-3 h-3" />
-                                  {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-gray-400">Assigned:</span>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-              </div>
-
-              {/* RIGHT COLUMN: Task Dispatches History (Span 7) */}
-              <div className="lg:col-span-7">
-                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+            {/* Bottom Section: Task Dispatches Live Log */}
+            <div className="mt-8">
+              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
                     <div>
                       <h2 className="text-xl font-extrabold text-gray-900 font-serif flex items-center gap-2">
                         Task Dispatches Live Log
@@ -591,10 +479,8 @@ export default function RunnersPage() {
                     </div>
                   )}
                 </div>
-              </div>
-
             </div>
-      </div>
+        </div>
 
       {/* Assign Modal */}
       {assignModal && (
