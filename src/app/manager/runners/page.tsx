@@ -298,67 +298,92 @@ export default function RunnersPage() {
                   <p className="text-sm text-gray-400 max-w-md mx-auto">Assign a task to an internal event worker or dispatch a nearby quick runner above to start tracking live operations.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {dispatches.map((dispatch) => {
-                    const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
-                    const cleanTask = isExternal ? dispatch.task.replace('[EXTERNAL/ERRAND] ', '') : dispatch.task;
-                    
-                    return (
-                      <motion.div 
-                        key={dispatch.id}
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-gray-50/60 hover:bg-white p-5 rounded-2xl border border-gray-200/70 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2 mb-3">
-                            <span className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate max-w-[140px] bg-white px-2 py-1 rounded-md border border-gray-100 shadow-2xs">
-                              {dispatch.event?.title || 'General Errand'}
-                            </span>
-                            <div className="flex items-center gap-1.5">
-                              {isExternal ? (
-                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
-                                  External
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
-                                  Internal
-                                </span>
-                              )}
-                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                                dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
-                                'bg-amber-100 text-amber-700 border border-amber-200'
-                              }`}>
-                                {dispatch.status || 'Pending'}
-                              </span>
-                            </div>
-                          </div>
+                <div className="space-y-10">
+                  {Object.entries(
+                    dispatches.reduce((acc: Record<string, any[]>, dispatch) => {
+                      const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
+                      const eventName = dispatch.event?.title || (isExternal ? 'External Quick Errands (Swiggy/Rapido style)' : 'General Venue Commands');
+                      if (!acc[eventName]) acc[eventName] = [];
+                      acc[eventName].push(dispatch);
+                      return acc;
+                    }, {})
+                  ).map(([eventName, items]) => (
+                    <div key={eventName} className="space-y-4 bg-gray-50/40 p-6 rounded-2xl border border-gray-200/60">
+                      <div className="flex items-center justify-between border-b border-gray-200/80 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-3 h-3 rounded-full ${eventName.includes('External') ? 'bg-blue-500 animate-pulse' : 'bg-[#CD7F32]'}`}></span>
+                          <h3 className="text-lg font-bold font-serif text-gray-900 tracking-tight">{eventName}</h3>
+                        </div>
+                        <span className="text-xs bg-white text-gray-700 px-3 py-1 rounded-full font-bold border border-gray-200 shadow-2xs">
+                          {items.length} {items.length === 1 ? 'Task' : 'Tasks'} Dispatched
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+                        {items.map((dispatch) => {
+                          const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
+                          const cleanTask = isExternal ? dispatch.task.replace('[EXTERNAL/ERRAND] ', '') : dispatch.task;
                           
-                          <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
-                            {cleanTask || 'No description provided'}
-                          </p>
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-xs mt-auto pt-3 border-t border-gray-200/60">
-                          <div className="text-gray-400 flex items-center gap-1 font-mono">
-                            <Clock className="w-3 h-3" />
-                            {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-gray-400">Assigned:</span>
-                            {dispatch.runner ? (
-                              <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
-                                {dispatch.runner.name}
-                              </span>
-                            ) : (
-                              <span className="font-bold text-gray-400 italic">Unassigned</span>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                          return (
+                            <motion.div 
+                              key={dispatch.id}
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-white hover:bg-gray-50/80 p-5 rounded-2xl border border-gray-200/80 hover:border-gray-300 shadow-sm hover:shadow transition-all duration-200 flex flex-col justify-between"
+                            >
+                              <div>
+                                <div className="flex items-center justify-between gap-2 mb-3">
+                                  <div className="flex items-center gap-1.5">
+                                    {isExternal ? (
+                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
+                                        External
+                                      </span>
+                                    ) : (
+                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
+                                        Internal
+                                      </span>
+                                    )}
+                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                      dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                      dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
+                                      'bg-amber-100 text-amber-700 border border-amber-200'
+                                    }`}>
+                                      {dispatch.status || 'Pending'}
+                                    </span>
+                                  </div>
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
+                                    dispatch.urgency === 'High' ? 'bg-orange-500' : 'bg-gray-300'
+                                  }`} title={`Urgency: ${dispatch.urgency}`}></span>
+                                </div>
+                                
+                                <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
+                                  {cleanTask || 'No description provided'}
+                                </p>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-xs mt-auto pt-3 border-t border-gray-100">
+                                <div className="text-gray-400 flex items-center gap-1 font-mono">
+                                  <Clock className="w-3 h-3" />
+                                  {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-gray-400">Assigned:</span>
+                                  {dispatch.runner ? (
+                                    <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
+                                      {dispatch.runner.name}
+                                    </span>
+                                  ) : (
+                                    <span className="font-bold text-gray-400 italic">Unassigned</span>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
