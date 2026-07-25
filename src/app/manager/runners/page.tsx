@@ -19,6 +19,7 @@ export default function RunnersPage() {
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean} | null>(null);
 
+  const fetchDispatches = () => {
     fetch('/api/manager/runners').then(res => res.json()).then(data => {
       if (data) {
         setDispatches(data.dispatches || []);
@@ -26,6 +27,7 @@ export default function RunnersPage() {
         setNearbyRunners(data.nearbyRunners || []);
       }
     });
+  };
 
   useEffect(() => {
     fetch('/api/manager/events').then(res => res.json()).then(data => {
