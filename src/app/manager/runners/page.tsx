@@ -217,6 +217,29 @@ export default function RunnersPage() {
                     </span>
                   </div>
 
+                  {/* Rapido Open Broadcast Mode Banner */}
+                  <div className="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 border border-blue-400/30">
+                    <div>
+                      <div className="flex items-center gap-1.5 font-extrabold text-sm font-serif">
+                        <span className="bg-white text-blue-600 text-[10px] px-2 py-0.5 rounded-md uppercase font-mono font-bold">Rapido Mode</span>
+                        <span>⚡ Broadcast Open Errand</span>
+                      </div>
+                      <p className="text-xs text-blue-100 mt-1 leading-relaxed">
+                        Post an open task with price to all nearby workers. First runner to select it claims the job automatically!
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setAssignModal({ userId: null, name: 'All Nearby Runners (Rapido Broadcast)', eventId: selectedEvent || null, isExternal: true, isBroadcast: true });
+                        setTask('');
+                        setPrice('');
+                      }}
+                      className="bg-white text-blue-700 hover:bg-blue-50 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-sm shrink-0 transition-transform active:scale-95 whitespace-nowrap flex items-center gap-1.5"
+                    >
+                      <span>⚡ Post Open Task</span>
+                    </button>
+                  </div>
+
                   {nearbyRunners.length === 0 ? (
                     <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-blue-200 text-center my-6">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-blue-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
@@ -556,7 +579,13 @@ export default function RunnersPage() {
             className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
           >
             <div className="p-6 border-b border-gray-100 bg-gray-50">
-              <h3 className="text-xl font-bold text-gray-900">Assign Task to {assignModal.name}</h3>
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                {assignModal.isBroadcast && <span className="text-blue-600">⚡</span>}
+                <span>{assignModal.isBroadcast ? 'Broadcast Open Errand (Rapido Mode)' : `Assign Task to ${assignModal.name}`}</span>
+              </h3>
+              {assignModal.isBroadcast && (
+                <p className="text-xs text-blue-600 mt-1 font-medium">This errand will pop up for all nearby workers. The first runner to accept it claims it automatically!</p>
+              )}
             </div>
             
             <form onSubmit={handleDirectAssign} className="p-6 space-y-5">
@@ -618,9 +647,11 @@ export default function RunnersPage() {
                 <button 
                   disabled={assigning} 
                   type="submit" 
-                  className="flex-1 bg-[#242424] text-white font-bold py-3 rounded-xl hover:bg-black transition-colors disabled:opacity-50"
+                  className={`flex-1 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 text-white shadow-md ${
+                    assignModal.isBroadcast ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-[#242424] hover:bg-black'
+                  }`}
                 >
-                  {assigning ? 'Assigning...' : 'Dispatch'}
+                  {assigning ? 'Dispatching...' : assignModal.isBroadcast ? '⚡ Broadcast to All Nearby' : 'Dispatch'}
                 </button>
               </div>
             </form>

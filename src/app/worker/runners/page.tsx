@@ -195,18 +195,22 @@ export default function LiveRunnersBoard() {
               You have no active tasks at the moment.
             </div>
           ) : (
-            <div className="space-y-4">
-              {myTasks.map(task => (
+              {myTasks.map(task => {
+                const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+                return (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={task.id} 
-                  className="bg-white border-l-4 border-[#CD7F32] shadow-sm rounded-r-xl p-5"
+                  className={`bg-white shadow-sm rounded-r-xl p-5 ${isExternalErrand ? 'border-l-4 border-blue-600' : 'border-l-4 border-[#CD7F32]'}`}
                 >
                   <div className="flex justify-between items-start mb-3 gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32] block truncate">{task.event?.title}</span>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
+                      <span className={`text-xs font-bold uppercase tracking-wider block truncate ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
+                        {isExternalErrand ? (task.event?.title || '⚡ External Errand') : task.event?.title}
+                      </span>
+                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{cleanTask}</h3>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {task.price !== null && task.price !== undefined && (
@@ -261,7 +265,8 @@ export default function LiveRunnersBoard() {
                     )}
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
@@ -279,20 +284,36 @@ export default function LiveRunnersBoard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {pendingTasks.map(task => (
+              {pendingTasks.map(task => {
+                const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+                return (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={task.id} 
-                  className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 hover:border-[#CD7F32] transition-colors"
+                  className={`bg-white shadow-sm rounded-xl p-5 transition-all ${
+                    isExternalErrand ? 'border-2 border-blue-500 shadow-lg shadow-blue-500/10 bg-gradient-to-br from-blue-50/40 via-white to-white' : 'border border-gray-200 hover:border-[#CD7F32]'
+                  }`}
                 >
+                  {isExternalErrand && (
+                    <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold font-mono shadow-sm">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-yellow-300 animate-ping"></span>
+                        <span>⚡ RAPIDO OPEN ERRAND &bull; FIRST TO GRAB WINS</span>
+                      </span>
+                      {task.price !== null && task.price !== undefined && (
+                        <span className="bg-white text-blue-900 px-2.5 py-0.5 rounded-lg font-extrabold text-sm font-mono shadow-2xs">₹{task.price}</span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex justify-between items-start mb-3 gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block truncate">{task.event?.title}</span>
-                      <h3 className="text-lg font-medium text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
+                      <span className={`text-xs font-bold uppercase tracking-wider block truncate ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>{task.event?.title || 'External Errand'}</span>
+                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{cleanTask}</h3>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      {task.price !== null && task.price !== undefined && (
+                      {!isExternalErrand && task.price !== null && task.price !== undefined && (
                         <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-mono shadow-2xs">
                           ₹{task.price} Payout
                         </span>
@@ -310,17 +331,23 @@ export default function LiveRunnersBoard() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
                     <div className="flex items-center gap-4 text-sm text-gray-500 min-w-0">
                       <span className="flex items-center gap-1 shrink-0"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      {isExternalErrand && (
+                        <span className="text-xs text-blue-600 font-semibold italic">⚡ Claim immediately before other runners accept!</span>
+                      )}
                     </div>
                     <button 
                       onClick={() => handleAccept(task.id)}
                       disabled={loadingAction === task.id}
-                      className="bg-[#CD7F32] hover:bg-[#b06a28] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto shrink-0 justify-center"
+                      className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto shrink-0 justify-center shadow-md ${
+                        isExternalErrand ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white active:scale-95 animate-pulse' : 'bg-[#CD7F32] hover:bg-[#b06a28] text-white'
+                      }`}
                     >
-                      {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Accept Task'}
+                      {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : isExternalErrand ? `⚡ Grab Errand (${task.price ? '₹'+task.price : 'Now'})` : 'Accept Task'}
                     </button>
                   </div>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>

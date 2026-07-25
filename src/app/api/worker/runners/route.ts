@@ -33,6 +33,9 @@ export async function GET() {
         OR: [
           // Broadcast to hired staff
           { status: 'Pending', runnerId: null, eventId: { in: hiredEventIds } },
+          // Open broadcast for external errands (Swiggy / Rapido style) to any runner
+          { status: 'Pending', runnerId: null, task: { startsWith: '[EXTERNAL/ERRAND]' } },
+          { status: 'Pending', runnerId: null, price: { not: null } },
           // Directly assigned to this worker
           { runnerId: userId }
         ]
