@@ -351,6 +351,32 @@ export default function RunnersPage() {
                     </span>
                   </div>
 
+                  {/* Broadcast Open Errand Action Bar */}
+                  <div className="mb-5">
+                    <button
+                      type="button"
+                      onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Runners', eventId: null, isExternal: true, isBroadcast: true })}
+                      className="w-full bg-gradient-to-r from-[#242424] via-[#1c1c1c] to-[#242424] hover:from-[#181818] hover:to-[#181818] text-white p-4 rounded-2xl border border-[#CD7F32]/60 shadow-lg hover:shadow-xl flex items-center justify-between group transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-3.5 text-left">
+                        <div className="w-11 h-11 rounded-xl bg-[#CD7F32] text-white flex items-center justify-center text-lg font-bold shadow-md group-hover:scale-110 transition-transform shrink-0">
+                          ⚡
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm text-white group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
+                            <span>Broadcast Open Errand</span>
+                            <span className="text-[10px] bg-[#CD7F32]/20 text-[#CD7F32] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider border border-[#CD7F32]/30">First to Claim</span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">Post an external task & fee for any available nearby worker</p>
+                        </div>
+                      </div>
+                      <div className="bg-[#CD7F32]/20 group-hover:bg-[#CD7F32] text-[#CD7F32] group-hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 border border-[#CD7F32]/30 group-hover:border-transparent">
+                        <span>Broadcast</span>
+                        <Send className="w-3.5 h-3.5" />
+                      </div>
+                    </button>
+                  </div>
+
                   {nearbyRunners.length === 0 ? (
                     <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-gray-200 text-center my-6">
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-[#CD7F32]/60 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
@@ -467,6 +493,13 @@ export default function RunnersPage() {
                         <svg className="w-3.5 h-3.5 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
                         <span>Refresh Data</span>
                       </button>
+                      <button
+                        onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Runners', eventId: null, isExternal: true, isBroadcast: true })}
+                        className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-black hover:to-black text-white px-4 py-2.5 rounded-2xl border border-[#CD7F32]/50 text-xs font-bold transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 group"
+                      >
+                        <span className="text-[#CD7F32] group-hover:scale-110 transition-transform">⚡</span>
+                        <span>Post External Errand</span>
+                      </button>
                     </div>
                   </div>
 
@@ -483,6 +516,17 @@ export default function RunnersPage() {
                           ? 'When an event is completed or closed, its runner dispatch history is stored here as an archived record!'
                           : 'Create an event or dispatch your first errand from the form above to activate your interactive coordination boards!'}
                       </p>
+                      {boardHistoryTab !== 'CLOSED' && (
+                        <div className="mt-6 flex justify-center">
+                          <button
+                            onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Runners', eventId: null, isExternal: true, isBroadcast: true })}
+                            className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-black hover:to-black text-white px-6 py-3 rounded-2xl border border-[#CD7F32]/50 text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 group"
+                          >
+                            <span className="text-[#CD7F32] text-sm group-hover:scale-110 transition-transform">⚡</span>
+                            <span>Post External Errand Broadcast</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -625,7 +669,15 @@ export default function RunnersPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl border border-gray-200/80 flex-wrap">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <button
+                        onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Runners', eventId: null, isExternal: true, isBroadcast: true })}
+                        className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-black hover:to-black text-white px-4 py-2.5 rounded-2xl border border-[#CD7F32]/50 text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group shrink-0"
+                      >
+                        <span className="text-[#CD7F32] group-hover:scale-110 transition-transform">⚡</span>
+                        <span>Post External Errand</span>
+                      </button>
+                      <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl border border-gray-200/80 flex-wrap">
                       {(['ALL', 'In Progress', 'Completed', 'Pending'] as const).map(status => {
                         const count = (eventGroups[selectedEventView] || []).filter((d: any) => {
                           if (status === 'ALL') return true;
@@ -655,6 +707,7 @@ export default function RunnersPage() {
                         );
                       })}
                     </div>
+                  </div>
                   </div>
 
                   {filteredDispatches.length === 0 ? (

@@ -122,6 +122,8 @@ export async function POST(req: Request) {
       }
     }
 
+    const targetRunnerId = (runnerId && runnerId !== 'ALL' && runnerId !== 'BROADCAST') ? runnerId : null;
+
     const dispatch = await prisma.runnerDispatch.create({
       data: {
         managerId: userId,
@@ -129,7 +131,7 @@ export async function POST(req: Request) {
         task,
         urgency,
         price: price !== undefined && price !== null && price !== '' ? parseFloat(price) : null,
-        runnerId: runnerId || null
+        runnerId: targetRunnerId
       },
       include: {
         event: { select: { title: true } },
@@ -137,8 +139,8 @@ export async function POST(req: Request) {
       }
     });
 
-    if (runnerId) {
-      await sendNotification(runnerId, `⚡ You have been assigned a new runner task: "${task}" (₹${price || 0}). Check your Runner board!`);
+    if (targetRunnerId) {
+      await sendNotification(targetRunnerId, `⚡ You have been assigned a new runner task: "${task}" (₹${price || 0}). Check your Runner board!`);
     } else {
       // Notify nearby workers about open errand broadcast
       const nearbyWorkers = await prisma.workerProfile.findMany({
