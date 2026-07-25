@@ -95,70 +95,131 @@ input, textarea {
 /* ==========================================================================
    GLOBAL DARK MODE OVERRIDES FOR DASHBOARDS AND APP
    ========================================================================== */
-html.dark body {
+html.dark body,
+html.dark .min-h-screen,
+html.dark .bg-\[\#F5F5DC\],
+html.dark .from-\[\#F5F5DC\],
+html.dark .via-\[\#f0eadd\],
+html.dark .to-\[\#e6d8b8\] {
+  background: #121212 !important;
   background-color: #121212 !important;
+  background-image: none !important;
   color: #f3f4f6 !important;
+}
+
+/* Override all light gradient cards and containers to deep dark sleek cards */
+html.dark .bg-gradient-to-b.from-white,
+html.dark .bg-gradient-to-br.from-white,
+html.dark .bg-gradient-to-r.from-white,
+html.dark .bg-gradient-to-tr.from-white,
+html.dark .from-white,
+html.dark .via-white,
+html.dark .to-white,
+html.dark .from-gray-50,
+html.dark .to-gray-50\/50,
+html.dark .to-blue-50\/30,
+html.dark .from-blue-50\/40,
+html.dark .to-\[\#fdfcf9\] {
+  background: #1e1e1e !important;
+  background-color: #1e1e1e !important;
+  background-image: none !important;
+  color: #f3f4f6 !important;
+  border-color: #333333 !important;
 }
 
 /* Background overrides for cards, panels, and containers in dark mode */
 html.dark .bg-white,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70,
+html.dark .bg-white\/60,
+html.dark .bg-white\/50,
 html.dark .bg-gray-50,
+html.dark .bg-gray-50\/80,
+html.dark .bg-gray-50\/50,
 html.dark .bg-slate-50,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/50,
 html.dark .bg-neutral-50,
 html.dark .bg-zinc-50 {
+  background: #1e1e1e !important;
   background-color: #1e1e1e !important;
+  background-image: none !important;
   color: #f3f4f6 !important;
 }
 
 html.dark .bg-gray-100,
+html.dark .bg-gray-100\/80,
+html.dark .bg-gray-100\/50,
 html.dark .bg-slate-100,
 html.dark .bg-neutral-100,
 html.dark .bg-zinc-100 {
+  background: #262626 !important;
   background-color: #262626 !important;
+  background-image: none !important;
   color: #e5e7eb !important;
 }
 
 html.dark .bg-gray-200,
 html.dark .bg-slate-200 {
+  background: #333333 !important;
   background-color: #333333 !important;
   color: #e5e7eb !important;
 }
 
-/* Subtle tinted backgrounds in dark mode */
+/* Subtle tinted backgrounds and badges in dark mode */
 html.dark .bg-blue-50,
-html.dark .bg-blue-50\/80 {
-  background-color: rgba(30, 58, 138, 0.4) !important;
+html.dark .bg-blue-50\/80,
+html.dark .bg-blue-50\/30,
+html.dark .bg-blue-100 {
+  background: rgba(30, 58, 138, 0.35) !important;
+  background-color: rgba(30, 58, 138, 0.35) !important;
+  background-image: none !important;
   color: #bfdbfe !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
 html.dark .bg-green-50,
-html.dark .bg-green-50\/80 {
-  background-color: rgba(6, 78, 59, 0.4) !important;
+html.dark .bg-green-50\/80,
+html.dark .bg-green-100,
+html.dark .bg-emerald-100 {
+  background: rgba(6, 78, 59, 0.35) !important;
+  background-color: rgba(6, 78, 59, 0.35) !important;
+  background-image: none !important;
   color: #a7f3d0 !important;
-  border-color: rgba(5, 150, 105, 0.5) !important;
+  border-color: rgba(5, 150, 105, 0.4) !important;
 }
 
 html.dark .bg-purple-50,
-html.dark .bg-purple-50\/80 {
-  background-color: rgba(88, 28, 135, 0.4) !important;
+html.dark .bg-purple-50\/80,
+html.dark .bg-purple-100 {
+  background: rgba(88, 28, 135, 0.35) !important;
+  background-color: rgba(88, 28, 135, 0.35) !important;
+  background-image: none !important;
   color: #e9d5ff !important;
-  border-color: rgba(147, 51, 234, 0.5) !important;
+  border-color: rgba(147, 51, 234, 0.4) !important;
 }
 
 html.dark .bg-amber-50,
 html.dark .bg-amber-50\/80,
-html.dark .bg-yellow-50 {
-  background-color: rgba(120, 53, 15, 0.4) !important;
+html.dark .bg-yellow-50,
+html.dark .bg-amber-100,
+html.dark .bg-yellow-100 {
+  background: rgba(120, 53, 15, 0.35) !important;
+  background-color: rgba(120, 53, 15, 0.35) !important;
+  background-image: none !important;
   color: #fde68a !important;
-  border-color: rgba(217, 119, 6, 0.5) !important;
+  border-color: rgba(217, 119, 6, 0.4) !important;
 }
 
 html.dark .bg-red-50,
-html.dark .bg-red-50\/80 {
-  background-color: rgba(127, 29, 29, 0.4) !important;
+html.dark .bg-red-50\/80,
+html.dark .bg-red-100 {
+  background: rgba(127, 29, 29, 0.35) !important;
+  background-color: rgba(127, 29, 29, 0.35) !important;
+  background-image: none !important;
   color: #fecaca !important;
-  border-color: rgba(220, 38, 38, 0.5) !important;
+  border-color: rgba(220, 38, 38, 0.4) !important;
 }
 
 /* Text color overrides in dark mode */
@@ -181,12 +242,15 @@ html.dark .text-slate-500 {
 }
 
 html.dark .text-blue-700,
-html.dark .text-blue-800 {
+html.dark .text-blue-800,
+html.dark .text-blue-600 {
   color: #93c5fd !important;
 }
 
 html.dark .text-green-700,
-html.dark .text-green-800 {
+html.dark .text-green-800,
+html.dark .text-emerald-700,
+html.dark .text-emerald-800 {
   color: #6ee7b7 !important;
 }
 
@@ -209,11 +273,14 @@ html.dark .text-red-800 {
 
 /* Border overrides in dark mode */
 html.dark .border-gray-100,
+html.dark .border-gray-100\/80,
 html.dark .border-gray-200,
+html.dark .border-gray-200\/80,
 html.dark .border-gray-300,
 html.dark .border-slate-100,
 html.dark .border-slate-200,
-html.dark .border-slate-300 {
+html.dark .border-slate-300,
+html.dark .border-blue-100 {
   border-color: #333333 !important;
 }
 
@@ -248,3 +315,34 @@ html.dark input::placeholder,
 html.dark textarea::placeholder {
   color: #6b7280 !important;
 }
+
+/* Nested cards and list items inside dark containers */
+html.dark .bg-gradient-to-b .bg-white,
+html.dark .bg-gradient-to-br .bg-white,
+html.dark [class*="bg-gradient"] .bg-white,
+html.dark .bg-\[\#1e1e1e\] .bg-white,
+html.dark .bg-white .bg-white {
+  background: #262626 !important;
+  background-color: #262626 !important;
+  background-image: none !important;
+  border-color: #383838 !important;
+}
+
+html.dark .bg-gradient-to-b .bg-white:hover,
+html.dark .bg-gradient-to-br .bg-white:hover,
+html.dark [class*="bg-gradient"] .bg-white:hover,
+html.dark .bg-white .bg-white:hover {
+  background: #2e2e2e !important;
+  background-color: #2e2e2e !important;
+  border-color: #4b5563 !important;
+}
+
+/* Group hover text color adjustments for dark mode */
+html.dark .group:hover .group-hover\:text-blue-600 {
+  color: #93c5fd !important;
+}
+
+html.dark .group:hover .group-hover\:text-\[\#CD7F32\] {
+  color: #f59e0b !important;
+}
+
