@@ -92,6 +92,26 @@ export default function RunnersPage() {
     }
     setAssigning(false);
   };
+
+  const handleSendPayment = async (dispatchId: string) => {
+    try {
+      const res = await fetch('/api/manager/runners', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'pay' })
+      });
+      if (res.ok) {
+        fetchDispatches();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to send payment confirmation');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while sending payment confirmation');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
