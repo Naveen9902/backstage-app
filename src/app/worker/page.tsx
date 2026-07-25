@@ -361,7 +361,7 @@ export default function WorkerDashboard() {
             </div>
           )}
 
-          {/* Open Broadcast Errands (Rapido Mode) */}
+          {/* Open Broadcast Errands */}
           {tasksData.pending.length > 0 && (
             <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-[#1a1a2e] rounded-3xl p-6 md:p-8 text-white shadow-2xl border-2 border-yellow-400/60 relative overflow-hidden">
               <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
@@ -371,7 +371,7 @@ export default function WorkerDashboard() {
                   <span className="w-3 h-3 rounded-full bg-yellow-400 animate-ping"></span>
                   <div>
                     <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-yellow-300 flex items-center gap-2">
-                      ⚡ Rapido Open Broadcasts ({tasksData.pending.length})
+                      ⚡ Open Errand Broadcasts ({tasksData.pending.length})
                     </h2>
                     <p className="text-xs text-blue-200 mt-0.5">First runner to swipe & claim takes the payout!</p>
                   </div>

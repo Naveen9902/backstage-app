@@ -342,7 +342,7 @@ export default function LiveRunnersBoard() {
                     <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold font-mono shadow-sm">
                       <span className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-yellow-300 animate-ping"></span>
-                        <span>⚡ RAPIDO OPEN ERRAND &bull; FIRST TO GRAB WINS</span>
+                        <span>⚡ OPEN ERRAND BROADCAST &bull; FIRST TO GRAB WINS</span>
                       </span>
                       {task.price !== null && task.price !== undefined && (
                         <span className="bg-white text-blue-900 px-2.5 py-0.5 rounded-lg font-extrabold text-sm font-mono shadow-2xs">₹{task.price}</span>

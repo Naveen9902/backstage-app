@@ -105,7 +105,7 @@ export async function POST(req: Request) {
             location: 'Venue / On-Ground',
             date: new Date().toISOString().split('T')[0],
             time: '00:00',
-            description: 'General venue operations, setup, and Rapido / Swiggy style external errands.',
+            description: 'General venue operations, setup, and open broadcast errands.',
             status: 'ONGOING',
             managerId: userId
           }

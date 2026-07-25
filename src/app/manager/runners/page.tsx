@@ -117,7 +117,7 @@ export default function RunnersPage() {
   // Group dispatches by Event vs External Errands
   const eventGroups = dispatches.reduce((acc: Record<string, any[]>, dispatch: any) => {
     const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]') || dispatch.price !== null;
-    const groupKey = isExternal ? '⚡ External Rapido Errands' : (dispatch.event?.title || 'General Venue Operations');
+    const groupKey = isExternal ? '⚡ Open Errands' : (dispatch.event?.title || 'General Venue Operations');
     if (!acc[groupKey]) acc[groupKey] = [];
     acc[groupKey].push(dispatch);
     return acc;
@@ -162,7 +162,7 @@ export default function RunnersPage() {
           </div>
         </div>
 
-        {/* Top Bar: Quick Rapido Broadcast Errand */}
+        {/* Top Bar: Quick Open Errand Broadcast */}
         <div className="mb-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-6 border border-blue-400/30">
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 text-2xl shadow-inner">
@@ -170,8 +170,8 @@ export default function RunnersPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 font-extrabold text-base font-serif">
-                <span className="bg-white text-blue-600 text-xs px-2.5 py-0.5 rounded-lg uppercase font-mono font-extrabold shadow-sm">Rapido Mode</span>
-                <span className="text-xl">Open Broadcast Errand (Swiggy / Rapido Style)</span>
+                <span className="bg-white text-blue-600 text-xs px-2.5 py-0.5 rounded-lg uppercase font-mono font-extrabold shadow-sm">Open Errand</span>
+                <span className="text-xl">Broadcast Errand to All Workers</span>
               </div>
               <p className="text-sm text-blue-100 mt-1 max-w-2xl leading-relaxed">
                 Need quick on-ground help or supplies? Broadcast an open errand with a fixed price to all nearby workers simultaneously. First worker to grab it claims the job automatically!
@@ -180,7 +180,7 @@ export default function RunnersPage() {
           </div>
           <button
             onClick={() => {
-              setAssignModal({ userId: null, name: 'All Nearby Workers (Rapido Broadcast)', eventId: selectedEvent || (events[0]?.id) || null, isExternal: true, isBroadcast: true });
+              setAssignModal({ userId: null, name: 'All Nearby Workers (Open Errand)', eventId: selectedEvent || (events[0]?.id) || null, isExternal: true, isBroadcast: true });
               setTask('');
               setPrice('');
             }}
@@ -194,7 +194,7 @@ export default function RunnersPage() {
         {events.length === 0 && (
           <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 text-sm text-amber-800">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <span><strong>Note:</strong> You have no events yet. Rapido Open Broadcast errands will automatically create a general operations event for you!</span>
+            <span><strong>Note:</strong> You have no events yet. Open Errand broadcasts will automatically create a general operations event for you!</span>
           </div>
         )}
 
@@ -280,7 +280,7 @@ export default function RunnersPage() {
                       </div>
                       <div>
                         <h2 className="text-2xl font-bold font-serif text-gray-900">Nearby Quick Runners</h2>
-                        <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">External Errands &bull; Swiggy / Rapido Style</p>
+                        <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">External Errands &bull; Instant Dispatch</p>
                       </div>
                     </div>
                     <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-200">
@@ -289,11 +289,11 @@ export default function RunnersPage() {
                     </span>
                   </div>
 
-                  {/* Rapido Open Broadcast Mode Banner */}
+                  {/* Open Errand Broadcast Mode Banner */}
                   <div className="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 border border-blue-400/30">
                     <div>
                       <div className="flex items-center gap-1.5 font-extrabold text-sm font-serif">
-                        <span className="bg-white text-blue-600 text-[10px] px-2 py-0.5 rounded-md uppercase font-mono font-bold">Rapido Mode</span>
+                        <span className="bg-white text-blue-600 text-[10px] px-2 py-0.5 rounded-md uppercase font-mono font-bold">Open Errand</span>
                         <span>⚡ Broadcast Open Errand</span>
                       </div>
                       <p className="text-xs text-blue-100 mt-1 leading-relaxed">
@@ -302,7 +302,7 @@ export default function RunnersPage() {
                     </div>
                     <button
                       onClick={() => {
-                        setAssignModal({ userId: null, name: 'All Nearby Runners (Rapido Broadcast)', eventId: selectedEvent || null, isExternal: true, isBroadcast: true });
+                        setAssignModal({ userId: null, name: 'All Nearby Runners (Open Errand)', eventId: selectedEvent || null, isExternal: true, isBroadcast: true });
                         setTask('');
                         setPrice('');
                       }}
@@ -414,7 +414,7 @@ export default function RunnersPage() {
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {Object.entries(eventGroups).map(([groupName, groupDispatches]) => {
-                        const isExternalGroup = groupName.includes('External') || groupName.includes('Rapido');
+                        const isExternalGroup = groupName.includes('External') || groupName.includes('Errands') || groupName.includes('Errand');
                         const totalTasks = groupDispatches.length;
                         const completedTasks = groupDispatches.filter((d: any) => d.status === 'Completed').length;
                         const inProgressTasks = groupDispatches.filter((d: any) => d.status === 'In Progress').length;
@@ -717,7 +717,7 @@ export default function RunnersPage() {
             <div className="p-6 border-b border-gray-100 bg-gray-50">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 {assignModal.isBroadcast && <span className="text-blue-600">⚡</span>}
-                <span>{assignModal.isBroadcast ? 'Broadcast Open Errand (Rapido Mode)' : `Assign Task to ${assignModal.name}`}</span>
+                <span>{assignModal.isBroadcast ? 'Broadcast Open Errand' : `Assign Task to ${assignModal.name}`}</span>
               </h3>
               {assignModal.isBroadcast && (
                 <p className="text-xs text-blue-600 mt-1 font-medium">This errand will pop up for all nearby workers. The first runner to accept it claims it automatically!</p>
