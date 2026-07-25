@@ -539,7 +539,7 @@ export default function MySchedule() {
                     <div className="bg-gray-100 text-gray-700 px-4 py-4 rounded-xl flex flex-col items-center justify-center gap-1 font-bold shadow-inner">
                       <span className="uppercase tracking-wider text-xs text-gray-500">Shift Completed</span>
                       <span className="text-3xl text-[#CD7F32] font-black mt-1 font-serif">
-                        ₹{((new Date(showPassModal.checkOutTime).getTime() - new Date(showPassModal.checkInTime).getTime()) / (1000 * 60 * 60) * showPassModal.staffingRequest.payRate).toFixed(2)}
+                        ₹{showPassModal.staffingRequest.payType === 'FIXED' ? showPassModal.staffingRequest.payRate.toFixed(2) : ((new Date(showPassModal.checkOutTime).getTime() - new Date(showPassModal.checkInTime).getTime()) / (1000 * 60 * 60) * showPassModal.staffingRequest.payRate).toFixed(2)}
                       </span>
                       <span className="text-xs font-normal text-gray-500 mt-1">Total Earnings</span>
                     </div>

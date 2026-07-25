@@ -21,7 +21,8 @@ function StaffingContent() {
     tierTarget: 'Tier 1',
     roleName: 'Labor / Ground Crew',
     quantity: 1,
-    payRate: ''
+    payRate: '',
+    payType: 'HOURLY'
   });
 
   const rolesByTier: Record<string, string[]> = {
@@ -199,7 +200,20 @@ function StaffingContent() {
                 <input required min="1" value={formData.quantity} onChange={e=>setFormData({...formData, quantity: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10)})} type="number" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700">Pay Rate (Total or Hourly)</label>
+                <label className="text-sm font-bold text-gray-700">Pay Type</label>
+                <div className="flex gap-4 mt-2 mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="payType" value="HOURLY" checked={formData.payType === 'HOURLY'} onChange={e => setFormData({...formData, payType: e.target.value})} className="accent-[#CD7F32]" />
+                    <span className="text-sm">Hourly</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="payType" value="FIXED" checked={formData.payType === 'FIXED'} onChange={e => setFormData({...formData, payType: e.target.value})} className="accent-[#CD7F32]" />
+                    <span className="text-sm">Fixed Total</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-bold text-gray-700">{formData.payType === 'HOURLY' ? 'Hourly Rate' : 'Total Fixed Pay'}</label>
                 <input required value={formData.payRate} onChange={e=>setFormData({...formData, payRate: e.target.value})} type="number" step="0.01" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" placeholder="₹" />
               </div>
                 <button type="submit" className="w-full bg-[#CD7F32] text-white py-2.5 rounded-lg font-bold hover:bg-[#a06227] transition-colors mt-2">
@@ -228,7 +242,7 @@ function StaffingContent() {
                     >
                       <div>
                         <h4 className="font-bold text-lg">{req.roleName}</h4>
-                        <p className="text-sm text-gray-600">Need: {req.quantity} person(s) &bull; Pay: ₹{req.payRate}</p>
+                        <p className="text-sm text-gray-600">Need: {req.quantity} person(s) &bull; Pay: ₹{req.payRate} {req.payType === 'FIXED' ? 'Total' : '/ hr'}</p>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
@@ -319,7 +333,7 @@ function StaffingContent() {
                                               
                                               <div className="flex items-center gap-1 text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 font-bold">
                                                 <span className="opacity-70 font-normal">Earned:</span>
-                                                ₹{((new Date(app.checkOutTime).getTime() - new Date(app.checkInTime).getTime()) / (1000 * 60 * 60) * req.payRate).toFixed(2)}
+                                                ₹{req.payType === 'FIXED' ? req.payRate.toFixed(2) : ((new Date(app.checkOutTime).getTime() - new Date(app.checkInTime).getTime()) / (1000 * 60 * 60) * req.payRate).toFixed(2)}
                                               </div>
                                             </>
                                           ) : (

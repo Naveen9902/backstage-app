@@ -153,6 +153,7 @@ model StaffingRequest {
   roleName     String
   quantity     Int
   payRate      Float
+  payType      String        @default("HOURLY") // HOURLY | FIXED
   tier         String?
   applications Application[]
 
