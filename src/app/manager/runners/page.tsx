@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle, Filter, ChevronRight, Layers, DollarSign, Users, Sparkles, FolderOpen, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function RunnersPage() {
@@ -16,9 +16,11 @@ export default function RunnersPage() {
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState(false);
   const [price, setPrice] = useState('');
+  const [selectedEventView, setSelectedEventView] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'In Progress' | 'Completed' | 'Pending'>('ALL');
   
   // Assign to specific worker
-  const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean} | null>(null);
+  const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean, isBroadcast?: boolean} | null>(null);
 
   const fetchDispatches = () => {
     fetch('/api/manager/runners').then(res => res.json()).then(data => {
@@ -111,6 +113,28 @@ export default function RunnersPage() {
       alert('An error occurred while sending payment confirmation');
     }
   };
+
+  // Group dispatches by Event vs External Errands
+  const eventGroups = dispatches.reduce((acc: Record<string, any[]>, dispatch: any) => {
+    const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]') || dispatch.price !== null;
+    const groupKey = isExternal ? '⚡ External Rapido Errands' : (dispatch.event?.title || 'General Venue Operations');
+    if (!acc[groupKey]) acc[groupKey] = [];
+    acc[groupKey].push(dispatch);
+    return acc;
+  }, {});
+
+  // Ensure active events without dispatches also appear as folders
+  events.forEach((ev: any) => {
+    const key = ev.title || 'General Venue Operations';
+    if (!eventGroups[key]) eventGroups[key] = [];
+  });
+
+  const currentEventDispatches = selectedEventView ? (eventGroups[selectedEventView] || []) : [];
+  const filteredDispatches = currentEventDispatches.filter((d: any) => {
+    if (filterStatus === 'ALL') return true;
+    if (filterStatus === 'Pending') return !d.status || d.status === 'Pending' || d.status === 'Assigned';
+    return d.status === filterStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -345,160 +369,340 @@ export default function RunnersPage() {
 
             </div>
 
-            {/* Bottom Section: Task Dispatches Live Log */}
-            <div className="mt-8">
-              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+            {/* Bottom Section: Event Dispatch Centers Grid OR Dedicated Event View */}
+            <div className="mt-10">
+              {!selectedEventView ? (
+                /* VIEW 1: EVENT FOLDERS / CARDS GRID */
+                <div className="space-y-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200">
                     <div>
-                      <h2 className="text-xl font-extrabold text-gray-900 font-serif flex items-center gap-2">
-                        Task Dispatches Live Log
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CD7F32]/10 text-[#CD7F32] rounded-full text-xs font-bold uppercase tracking-widest mb-2 border border-[#CD7F32]/30 shadow-2xs">
+                        <Sparkles className="w-3.5 h-3.5 animate-spin text-[#CD7F32]" style={{ animationDuration: '6s' }} />
+                        <span>Interactive Dispatch Boards</span>
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight flex items-center gap-2.5">
+                        <span>Event Dispatch Centers</span>
+                        <span className="text-xs bg-[#242424] text-[#CD7F32] px-3 py-1 rounded-full font-mono font-bold uppercase tracking-widest shadow-sm border border-[#CD7F32]/30">
+                          {Object.keys(eventGroups).length} Active Boards
+                        </span>
                       </h2>
-                      <p className="text-xs text-gray-400 mt-1">Real-time status of all errands, tasks, and ground assignments</p>
+                      <p className="text-sm text-gray-500 mt-1">Select an event or external errand board below to coordinate staff and confirm payouts.</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-xl">
-                        Total: <span className="text-gray-900 font-mono">{dispatches.length}</span>
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white px-4 py-2 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-2">
+                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Tasks:</span>
+                        <span className="text-base font-extrabold text-gray-900 font-mono">{dispatches.length}</span>
+                      </div>
                       <button 
                         onClick={fetchDispatches}
-                        className="text-xs font-bold text-[#CD7F32] hover:bg-[#CD7F32]/10 px-3 py-1.5 rounded-xl border border-[#CD7F32]/20 transition-all flex items-center gap-1"
+                        className="bg-white hover:bg-gray-50 text-gray-700 hover:text-[#CD7F32] text-xs font-bold px-4 py-2.5 rounded-2xl border border-gray-200 shadow-sm transition-all flex items-center gap-1.5 hover:border-[#CD7F32]/50 hover:shadow-md"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
-                        Refresh
+                        <svg className="w-3.5 h-3.5 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
+                        <span>Refresh Data</span>
                       </button>
                     </div>
                   </div>
 
-                  {dispatches.length === 0 ? (
-                    <div className="text-center py-16 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                  {Object.keys(eventGroups).length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200 shadow-sm p-8">
+                      <div className="w-16 h-16 rounded-3xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center mx-auto mb-4 border border-[#CD7F32]/20 shadow-inner">
+                        <FolderOpen className="w-8 h-8" />
                       </div>
-                      <p className="text-sm text-gray-600 font-bold">No tasks dispatched yet</p>
-                      <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">Assign a task to hired event staff or hire an external runner from the panel on the left.</p>
+                      <h3 className="text-lg font-bold text-gray-900 font-serif">No Event Dispatch Boards Found</h3>
+                      <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Create an event or dispatch your first errand from the form above to activate your interactive coordination boards!</p>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      {Object.entries(
-                        dispatches.reduce((acc: Record<string, any[]>, dispatch: any) => {
-                          const eventName = dispatch.event?.title || 'General / Errand';
-                          if (!acc[eventName]) acc[eventName] = [];
-                          acc[eventName].push(dispatch);
-                          return acc;
-                        }, {})
-                      ).map(([eventName, eventDispatches]) => (
-                        <div key={eventName} className="space-y-3">
-                          <div className="flex items-center gap-2 bg-gray-100/80 px-3.5 py-1.5 rounded-xl w-max">
-                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 font-mono">
-                              🎉 {eventName}
-                            </span>
-                            <span className="text-[10px] bg-white text-gray-600 px-2 py-0.5 rounded-md font-bold shadow-2xs font-mono">
-                              {eventDispatches.length} {eventDispatches.length === 1 ? 'task' : 'tasks'}
-                            </span>
-                          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {Object.entries(eventGroups).map(([groupName, groupDispatches]) => {
+                        const isExternalGroup = groupName.includes('External') || groupName.includes('Rapido');
+                        const totalTasks = groupDispatches.length;
+                        const completedTasks = groupDispatches.filter((d: any) => d.status === 'Completed').length;
+                        const inProgressTasks = groupDispatches.filter((d: any) => d.status === 'In Progress').length;
+                        const pendingTasksCount = totalTasks - completedTasks - inProgressTasks;
+                        const totalPayout = groupDispatches.reduce((sum: number, d: any) => sum + (d.price ? Number(d.price) : 0), 0);
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pl-1">
-                            {eventDispatches.map((dispatch: any) => {
-                              const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]') || dispatch.price !== null;
-                              const cleanTask = dispatch.task?.replace('[EXTERNAL/ERRAND] ', '');
+                        return (
+                          <motion.div
+                            key={groupName}
+                            whileHover={{ scale: 1.025, y: -6 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            onClick={() => { setSelectedEventView(groupName); setFilterStatus('ALL'); }}
+                            className={`group relative overflow-hidden rounded-3xl p-6.5 cursor-pointer transition-all duration-300 flex flex-col justify-between border-2 shadow-lg ${
+                              isExternalGroup 
+                                ? 'bg-gradient-to-br from-blue-900/95 via-indigo-900 to-[#242424] text-white border-blue-500/40 hover:border-blue-400 hover:shadow-[0_20px_40px_rgba(59,130,246,0.25)]' 
+                                : 'bg-gradient-to-br from-[#242424] via-[#2a2a2a] to-[#1f1f1f] text-white border-gray-800 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]'
+                            }`}
+                          >
+                            <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
+                              isExternalGroup ? 'bg-blue-500/20 group-hover:bg-blue-400/30' : 'bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30'
+                            }`} />
 
-                              return (
-                                <motion.div 
-                                  initial={{ opacity: 0, y: 5 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  key={dispatch.id} 
-                                  className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
-                                    dispatch.status === 'Completed' ? 'bg-emerald-50/30 border-emerald-200/80' : 
-                                    dispatch.status === 'In Progress' ? 'bg-sky-50/30 border-sky-200/80' : 
-                                    'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
-                                  }`}
-                                >
-                                  <div>
-                                    <div className="flex items-start justify-between gap-2 mb-2">
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        {isExternal ? (
-                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
-                                            External
-                                          </span>
-                                        ) : (
-                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
-                                            Internal
-                                          </span>
-                                        )}
-                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                                          dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                                          dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
-                                          'bg-amber-100 text-amber-700 border border-amber-200'
-                                        }`}>
-                                          {dispatch.status || 'Pending'}
-                                        </span>
-                                        {dispatch.price !== null && dispatch.price !== undefined && (
-                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs font-mono">
-                                            ₹{dispatch.price}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <span className={`w-2 h-2 rounded-full ${
-                                        dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
-                                        dispatch.urgency === 'High' ? 'bg-orange-500' : 'bg-gray-300'
-                                      }`} title={`Urgency: ${dispatch.urgency}`}></span>
-                                    </div>
-                                    
-                                    <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
-                                      {cleanTask || 'No description provided'}
-                                    </p>
+                            <div>
+                              <div className="flex items-start justify-between gap-3 mb-4">
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner ${
+                                  isExternalGroup 
+                                    ? 'bg-blue-500/20 text-blue-300 border-blue-400/30 text-2xl' 
+                                    : 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30'
+                                }`}>
+                                  {isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
+                                </div>
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border font-mono shadow-2xs ${
+                                  totalTasks > 0 
+                                    ? isExternalGroup ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    : 'bg-gray-700/50 text-gray-400 border-gray-600/50'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${totalTasks > 0 ? (isExternalGroup ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400 animate-pulse') : 'bg-gray-500'}`} />
+                                  {totalTasks > 0 ? 'Active Board' : 'Standby'}
+                                </span>
+                              </div>
+
+                              <h3 className={`text-xl font-bold font-serif tracking-tight leading-snug mb-2 transition-colors ${
+                                isExternalGroup ? 'group-hover:text-blue-300' : 'group-hover:text-[#CD7F32]'
+                              }`}>
+                                {groupName}
+                              </h3>
+
+                              <p className="text-xs text-gray-300 line-clamp-2 mb-6 leading-relaxed">
+                                {isExternalGroup 
+                                  ? 'Open broadcasts & third-party runner tasks dispatched on fixed payouts.' 
+                                  : 'Internal venue crew coordination, VIP requests, and on-ground stage dispatches.'}
+                              </p>
+                            </div>
+
+                            <div>
+                              <div className="grid grid-cols-3 gap-2 py-3 px-3.5 bg-black/40 rounded-2xl border border-white/10 mb-5 font-mono">
+                                <div className="text-center">
+                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Active</div>
+                                  <div className="text-sm font-extrabold text-sky-400 mt-0.5">{inProgressTasks}</div>
+                                </div>
+                                <div className="text-center border-x border-white/10">
+                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Done</div>
+                                  <div className="text-sm font-extrabold text-emerald-400 mt-0.5">{completedTasks}</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Pending</div>
+                                  <div className="text-sm font-extrabold text-amber-400 mt-0.5">{pendingTasksCount}</div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                                {totalPayout > 0 ? (
+                                  <div className="flex items-center gap-1 text-emerald-400 font-mono font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                                    <DollarSign className="w-3.5 h-3.5" />
+                                    <span>₹{totalPayout} Payouts</span>
                                   </div>
-                                  
-                                  <div>
-                                    <div className="flex items-center justify-between text-xs pt-3 border-t border-gray-100">
-                                      <div className="text-gray-400 flex items-center gap-1 font-mono">
-                                        <Clock className="w-3 h-3" />
-                                        {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
-                                      </div>
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-gray-400">Assigned:</span>
-                                        {dispatch.runner ? (
-                                          <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
-                                            {dispatch.runner.name}
-                                          </span>
-                                        ) : (
-                                          <span className="font-bold text-gray-400 italic">Unassigned</span>
-                                        )}
-                                      </div>
-                                    </div>
+                                ) : (
+                                  <span className="text-xs text-gray-400 font-medium">
+                                    {totalTasks} {totalTasks === 1 ? 'Dispatch Task' : 'Total Dispatches'}
+                                  </span>
+                                )}
 
-                                    {dispatch.status === 'Completed' && dispatch.price !== null && dispatch.price !== undefined && (
-                                      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80 -mx-4 -mb-4 p-3 rounded-b-2xl">
-                                        {dispatch.paymentStatus === 'CONFIRMED' ? (
-                                          <span className="text-xs font-bold text-emerald-700 flex items-center justify-center w-full gap-1.5 bg-emerald-100/80 py-2 px-3 rounded-xl border border-emerald-300 shadow-2xs font-mono">
-                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                            <span>Payment Confirmed by Runner (₹{dispatch.price})</span>
-                                          </span>
-                                        ) : dispatch.paymentStatus === 'SENT' ? (
-                                          <span className="text-xs font-bold text-blue-700 flex items-center justify-center w-full gap-1.5 bg-blue-100/80 py-2 px-3 rounded-xl border border-blue-300 shadow-2xs font-mono">
-                                            <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                                            <span>Payment Done (₹{dispatch.price})</span>
-                                          </span>
-                                        ) : (
-                                          <button
-                                            onClick={() => handleSendPayment(dispatch.id)}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5"
-                                          >
-                                            <span>Confirm Payment Sent (₹{dispatch.price})</span>
-                                          </button>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </motion.div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
+                                <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
+                                  isExternalGroup 
+                                    ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
+                                    : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
+                                }`}>
+                                  <span>Open Board</span>
+                                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
+              ) : (
+                /* VIEW 2: DEDICATED EVENT DISPATCHES DETAIL BOARD */
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-3xl p-6 md:p-10 shadow-2xl border border-gray-200/80 relative overflow-hidden"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 mb-8 border-b border-gray-200">
+                    <div>
+                      <button
+                        onClick={() => { setSelectedEventView(null); setFilterStatus('ALL'); }}
+                        className="inline-flex items-center gap-2 bg-[#242424] hover:bg-[#CD7F32] text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest transition-all shadow-sm mb-4 group/back"
+                      >
+                        <ArrowLeft className="w-4 h-4 transform group-hover/back:-translate-x-1 transition-transform" />
+                        <span>Back to All Events Grid</span>
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center border border-[#CD7F32]/20 text-2xl shadow-inner shrink-0">
+                          {selectedEventView.includes('External') ? '⚡' : '🎪'}
+                        </div>
+                        <div>
+                          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight">
+                            {selectedEventView}
+                          </h2>
+                          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">
+                            Live Dispatch Board &bull; Real-time Operations &bull; Payout Management
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-2xl border border-gray-200/80 flex-wrap">
+                      {(['ALL', 'In Progress', 'Completed', 'Pending'] as const).map(status => {
+                        const count = (eventGroups[selectedEventView] || []).filter((d: any) => {
+                          if (status === 'ALL') return true;
+                          if (status === 'Pending') return !d.status || d.status === 'Pending' || d.status === 'Assigned';
+                          return d.status === status;
+                        }).length;
+
+                        const isActive = filterStatus === status;
+
+                        return (
+                          <button
+                            key={status}
+                            onClick={() => setFilterStatus(status)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                              isActive 
+                                ? 'bg-[#242424] text-white shadow-md' 
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
+                            }`}
+                          >
+                            <span>{status === 'ALL' ? 'All Tasks' : status}</span>
+                            <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold ${
+                              isActive ? 'bg-[#CD7F32] text-white' : 'bg-gray-200 text-gray-700'
+                            }`}>
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {filteredDispatches.length === 0 ? (
+                    <div className="text-center py-16 bg-gray-50/70 rounded-3xl border border-dashed border-gray-200 p-8">
+                      <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mx-auto mb-3 text-gray-400 shadow-sm border border-gray-200">
+                        <Filter className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <h4 className="text-base font-bold text-gray-900">No Tasks Match "{filterStatus}"</h4>
+                      <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                        There are currently no task dispatches matching this status filter in this board. Try selecting "All Tasks" or dispatching a new task above!
+                      </p>
+                      {filterStatus !== 'ALL' && (
+                        <button
+                          onClick={() => setFilterStatus('ALL')}
+                          className="mt-4 bg-[#CD7F32] hover:bg-[#b86f2b] text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-sm"
+                        >
+                          Show All Tasks
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {filteredDispatches.map((dispatch: any) => {
+                        const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]') || dispatch.price !== null;
+                        const cleanTask = dispatch.task?.replace('[EXTERNAL/ERRAND] ', '');
+
+                        return (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            whileHover={{ y: -3, scale: 1.01 }}
+                            key={dispatch.id} 
+                            className={`p-5 rounded-3xl border-2 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-lg ${
+                              dispatch.status === 'Completed' ? 'bg-emerald-50/20 border-emerald-200 hover:border-emerald-300' : 
+                              dispatch.status === 'In Progress' ? 'bg-sky-50/20 border-sky-200 hover:border-sky-300' : 
+                              'bg-white border-gray-200 hover:border-[#CD7F32]/50'
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-start justify-between gap-2 mb-3">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {isExternal ? (
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs font-mono">
+                                      ⚡ External Errand
+                                    </span>
+                                  ) : (
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/25 shadow-2xs font-mono">
+                                      🎪 Internal Venue Task
+                                    </span>
+                                  )}
+                                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider shadow-2xs font-mono ${
+                                    dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                    dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-800 border border-sky-300' :
+                                    'bg-amber-100 text-amber-800 border border-amber-300'
+                                  }`}>
+                                    {dispatch.status || 'Pending / Assigned'}
+                                  </span>
+                                  {dispatch.price !== null && dispatch.price !== undefined && (
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-emerald-600 text-white shadow-2xs font-mono flex items-center gap-0.5">
+                                      <span>₹{dispatch.price}</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 shrink-0" title={`Urgency: ${dispatch.urgency}`}>
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
+                                    dispatch.urgency === 'High' ? 'bg-orange-500' : 'bg-gray-400'
+                                  }`}></span>
+                                  <span className="text-[10px] font-extrabold uppercase text-gray-700 font-mono">{dispatch.urgency || 'Normal'}</span>
+                                </div>
+                              </div>
+                              
+                              <p className="font-bold text-gray-900 text-base leading-relaxed mb-6 font-serif">
+                                {cleanTask || 'No description provided'}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <div className="flex items-center justify-between text-xs pt-3 border-t border-gray-100 bg-gray-50/60 -mx-5 px-5 py-2.5 rounded-xl">
+                                <div className="text-gray-500 flex items-center gap-1 font-mono text-[11px]">
+                                  <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                  <span>{dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-gray-400 font-medium text-[11px]">Runner:</span>
+                                  {dispatch.runner ? (
+                                    <span className={`font-extrabold px-2.5 py-0.5 rounded-md text-xs shadow-2xs ${isExternal ? 'bg-blue-600 text-white font-mono' : 'bg-[#242424] text-[#CD7F32]'}`}>
+                                      {dispatch.runner.name}
+                                    </span>
+                                  ) : (
+                                    <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[11px] animate-pulse">
+                                      Awaiting Grab...
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {dispatch.status === 'Completed' && dispatch.price !== null && dispatch.price !== undefined && (
+                                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80 -mx-5 -mb-5 p-4 rounded-b-3xl">
+                                  {dispatch.paymentStatus === 'CONFIRMED' ? (
+                                    <span className="text-xs font-bold text-emerald-700 flex items-center justify-center w-full gap-1.5 bg-emerald-100/90 py-2.5 px-3 rounded-2xl border border-emerald-300 shadow-2xs font-mono">
+                                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                      <span>Payment Confirmed by Runner (₹{dispatch.price})</span>
+                                    </span>
+                                  ) : dispatch.paymentStatus === 'SENT' ? (
+                                    <span className="text-xs font-bold text-blue-700 flex items-center justify-center w-full gap-1.5 bg-blue-100/90 py-2.5 px-3 rounded-2xl border border-blue-300 shadow-2xs font-mono">
+                                      <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                                      <span>Payment Done (₹{dispatch.price})</span>
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleSendPayment(dispatch.id); }}
+                                      className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-2.5 px-4 rounded-2xl text-xs transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 active:scale-95"
+                                    >
+                                      <DollarSign className="w-4 h-4" />
+                                      <span>Confirm Payment Sent (₹{dispatch.price})</span>
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              )}
             </div>
         </div>
 
