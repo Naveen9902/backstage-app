@@ -19,24 +19,6 @@ export default function RunnersPage() {
   const [selectedEventView, setSelectedEventView] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'In Progress' | 'Completed' | 'Pending'>('ALL');
   const [boardHistoryTab, setBoardHistoryTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
-  const [manuallyClosedBoards, setManuallyClosedBoards] = useState<string[]>([]);
-  
-  useEffect(() => {
-    const saved = localStorage.getItem('closed_dispatch_boards');
-    if (saved) {
-      try { setManuallyClosedBoards(JSON.parse(saved)); } catch (e) {}
-    }
-  }, []);
-
-  const toggleBoardClosed = (groupName: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setManuallyClosedBoards(prev => {
-      const isClosed = prev.includes(groupName);
-      const next = isClosed ? prev.filter(n => n !== groupName) : [...prev, groupName];
-      localStorage.setItem('closed_dispatch_boards', JSON.stringify(next));
-      return next;
-    });
-  };
   
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean, isBroadcast?: boolean} | null>(null);
@@ -161,7 +143,6 @@ export default function RunnersPage() {
   });
 
   const isBoardClosed = (groupName: string) => {
-    if (manuallyClosedBoards.includes(groupName)) return true;
     const status = eventStatusMap[groupName];
     return status === 'COMPLETED' || status === 'CLOSED' || status === 'ARCHIVED';
   };
@@ -581,29 +562,15 @@ export default function RunnersPage() {
                                   </span>
                                 )}
 
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={(e) => toggleBoardClosed(groupName, e)}
-                                    title={isClosed ? "Reopen to Active Board" : "Close Event & Store in History"}
-                                    className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold uppercase transition-all border ${
-                                      isClosed
-                                        ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/30'
-                                        : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30'
-                                    }`}
-                                  >
-                                    {isClosed ? '🟢 Reopen' : '🏁 Close Event'}
-                                  </button>
-
-                                  <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
-                                    isClosed
-                                      ? 'bg-purple-700 text-white group-hover:bg-purple-600 shadow-md'
-                                      : isExternalGroup 
-                                      ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
-                                      : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
-                                  }`}>
-                                    <span>{isClosed ? 'History Board' : 'Open Board'}</span>
-                                    <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                                  </div>
+                                <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
+                                  isClosed
+                                    ? 'bg-purple-700 text-white group-hover:bg-purple-600 shadow-md'
+                                    : isExternalGroup 
+                                    ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
+                                    : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
+                                }`}>
+                                  <span>{isClosed ? 'History Board' : 'Open Board'}</span>
+                                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                                 </div>
                               </div>
                             </div>
@@ -649,23 +616,11 @@ export default function RunnersPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                              {isBoardClosed(selectedEventView) 
-                                ? 'Archived Dispatch Board • Historical Record • Completed Operations'
-                                : 'Live Dispatch Board • Real-time Operations • Payout Management'}
-                            </p>
-                            <button
-                              onClick={(e) => toggleBoardClosed(selectedEventView, e)}
-                              className={`text-[11px] font-extrabold underline px-2 py-0.5 rounded transition-colors ${
-                                isBoardClosed(selectedEventView)
-                                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50'
-                                  : 'text-purple-700 hover:text-purple-900 bg-purple-50'
-                              }`}
-                            >
-                              {isBoardClosed(selectedEventView) ? '🟢 Reopen to Active Board' : '🏁 Close Event & Store in History'}
-                            </button>
-                          </div>
+                          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">
+                            {isBoardClosed(selectedEventView) 
+                              ? 'Archived Dispatch Board • Historical Record • Completed Operations'
+                              : 'Live Dispatch Board • Real-time Operations • Payout Management'}
+                          </p>
                         </div>
                       </div>
                     </div>

@@ -288,21 +288,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Billing */}
-        <div>
-          <h2 className="text-2xl font-bold font-serif mb-4 pb-2 border-b border-gray-100">Billing</h2>
-          <div className="p-4 border border-gray-200 rounded-lg flex items-center justify-between bg-gray-50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-6 bg-blue-900 rounded flex items-center justify-center text-white text-xs font-bold italic">VISA</div>
-              <div>
-                <p className="font-bold">•••• •••• •••• 4242</p>
-                <p className="text-xs text-gray-500">Expires 12/28</p>
-              </div>
-            </div>
-            <button className="text-[#CD7F32] font-bold text-sm hover:underline">Edit</button>
-          </div>
-        </div>
-
       </motion.div>
     </div>
   );
