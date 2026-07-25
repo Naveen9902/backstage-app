@@ -143,25 +143,33 @@ export default function EventWorkersPage() {
                   
                   <div className="h-8 w-px bg-gray-200"></div>
                   
-                  <div className="min-w-[80px] text-right">
-                    {worker.status === 'PAID' ? (
-                       <span className="flex items-center justify-end gap-1 text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                         Paid
-                       </span>
-                    ) : worker.checkOutTime ? (
-                       <span className="text-sm font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md inline-block">
-                         Pending Pay
-                       </span>
-                    ) : worker.checkInTime ? (
-                       <span className="text-sm font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md inline-block">
-                         Working
-                       </span>
-                    ) : (
-                       <span className="text-sm font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md inline-block">
-                         Hired
-                       </span>
-                    )}
+                  <div className="flex items-center gap-4">
+                    <Link href={`/manager/events/${eventId}/chat?channel=dm_${[event?.managerId, worker.userId].sort().join('_')}`}>
+                      <button className="text-[#CD7F32] bg-[#CD7F32]/10 hover:bg-[#CD7F32]/20 p-2 rounded-full transition-colors" title="Message Worker">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      </button>
+                    </Link>
+                    
+                    <div className="min-w-[80px] text-right">
+                      {worker.status === 'PAID' ? (
+                         <span className="flex items-center justify-end gap-1 text-sm font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                           Paid
+                         </span>
+                      ) : worker.checkOutTime ? (
+                         <span className="text-sm font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md inline-block">
+                           Pending Pay
+                         </span>
+                      ) : worker.checkInTime ? (
+                         <span className="text-sm font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md inline-block">
+                           Working
+                         </span>
+                      ) : (
+                         <span className="text-sm font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md inline-block">
+                           Hired
+                         </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
