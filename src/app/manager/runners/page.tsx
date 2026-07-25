@@ -64,7 +64,7 @@ export default function RunnersPage() {
     e.preventDefault();
     if (!assignModal || !task) return;
     setAssigning(true);
-
+    try {
       const res = await fetch('/api/manager/runners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -120,7 +120,8 @@ export default function RunnersPage() {
             <p className="text-amber-600">Runner dispatch is only available for <strong>ongoing events</strong>. Go to <Link href="/manager/my-events" className="underline font-bold">My Events</Link> and toggle an event to <strong>Live</strong> first.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Hired Staff List */}
             <div className="space-y-4">
@@ -253,6 +254,7 @@ export default function RunnersPage() {
               )}
             </div>
           </div>
+          </>
         )}
       </div>
 
