@@ -11,6 +11,7 @@ type Event = {
   startTime: string | null;
   location: string;
   status: string | null;
+  coverImageUrl: string | null;
   staffingRequests: any[];
 };
 
@@ -234,6 +235,13 @@ export default function MyEvents() {
                     {/* Left — Event Info */}
                     <Link href={`/manager/events/${event.id}`} className="space-y-4 flex-1 pl-2 block hover:opacity-80 transition-opacity cursor-pointer">
                       <div className="flex flex-wrap items-center gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center text-[#CD7F32] font-bold text-xl">
+                          {event.coverImageUrl ? (
+                            <img src={event.coverImageUrl} alt={event.title} className="w-full h-full object-cover" />
+                          ) : (
+                            event.title.charAt(0).toUpperCase()
+                          )}
+                        </div>
                         {live && (
                           <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-green-100 text-green-700 px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
@@ -244,11 +252,6 @@ export default function MyEvents() {
                           <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-gray-100 text-gray-500 px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                             Closed
-                          </span>
-                        )}
-                        {!live && !completed && (
-                          <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-[#CD7F32]/10 text-[#CD7F32] px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm border border-[#CD7F32]/20">
-                            Upcoming
                           </span>
                         )}
                         <h3 className="text-2xl font-bold font-serif text-gray-900 leading-tight group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
