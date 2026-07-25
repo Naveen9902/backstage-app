@@ -327,14 +327,31 @@ export default function LiveRunnersBoard() {
                   key={task.id} 
                   className={`bg-white shadow-sm rounded-r-xl p-5 ${isExternalErrand ? 'border-l-4 border-blue-600' : 'border-l-4 border-[#CD7F32]'}`}
                 >
-                  <div className="flex justify-between items-start mb-3 gap-3 w-full">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2 sm:gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
-                      <span className={`text-xs font-bold uppercase tracking-wider block truncate ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1 sm:hidden">
+                        <span className={`text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
+                          {isExternalErrand ? (task.event?.title || '⚡ External Errand') : task.event?.title}
+                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {task.price !== null && task.price !== undefined && (
+                            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-extrabold font-mono shadow-2xs">
+                              ₹{task.price} Payout
+                            </span>
+                          )}
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                            task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-700'
+                          }`}>
+                            {task.status}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`hidden sm:block text-xs font-bold uppercase tracking-wider truncate ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
                         {isExternalErrand ? (task.event?.title || '⚡ External Errand') : task.event?.title}
                       </span>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{cleanTask}</h3>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mt-1 break-words leading-snug">{cleanTask}</h3>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="hidden sm:flex items-center gap-2 shrink-0">
                       {task.price !== null && task.price !== undefined && (
                         <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-mono shadow-2xs">
                           ₹{task.price} Payout
@@ -429,12 +446,31 @@ export default function LiveRunnersBoard() {
                       )}
                     </div>
                   )}
-                  <div className="flex justify-between items-start mb-3 gap-3 w-full">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2 sm:gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
-                      <span className={`text-xs font-bold uppercase tracking-wider block truncate ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>{task.event?.title || 'External Errand'}</span>
-                      <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{cleanTask}</h3>
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1 sm:hidden">
+                        <span className={`text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>
+                          {task.event?.title || 'External Errand'}
+                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {!isExternalErrand && task.price !== null && task.price !== undefined && (
+                            <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-extrabold font-mono shadow-2xs">
+                              ₹{task.price} Payout
+                            </span>
+                          )}
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                            task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
+                            task.urgency === 'High' ? 'bg-amber-100 text-amber-700' : 
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {task.urgency}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`hidden sm:block text-xs font-bold uppercase tracking-wider truncate ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>{task.event?.title || 'External Errand'}</span>
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mt-1 break-words leading-snug">{cleanTask}</h3>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="hidden sm:flex items-center gap-2 shrink-0">
                       {!isExternalErrand && task.price !== null && task.price !== undefined && (
                         <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-mono shadow-2xs">
                           ₹{task.price} Payout

@@ -37,7 +37,7 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
       )}
 
       {/* Label Text */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 px-12 text-center">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 px-10 text-center">
         <span className={`text-[11px] sm:text-xs font-extrabold tracking-wider font-mono flex items-center justify-center gap-1.5 leading-tight ${
           isRunnerAvailable ? 'text-emerald-300' : 'text-[#CD7F32]'
         }`}>
@@ -46,11 +46,11 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
           ) : isRunnerAvailable ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-              <span>🟢 ACTIVE — SWIPE OR TAP TO STOP</span>
+              <span className="whitespace-nowrap">ACTIVE • SWIPE TO STOP</span>
             </>
           ) : (
             <>
-              <span>⚡ SWIPE OR TAP FOR RUNNER DUTY</span>
+              <span className="whitespace-nowrap">⚡ SWIPE FOR RUNNER DUTY</span>
             </>
           )}
         </span>
