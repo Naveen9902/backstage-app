@@ -86,7 +86,7 @@ export async function POST(
         roleName,
         quantity: parseInt(quantity, 10),
         payRate: parseFloat(payRate),
-        tier: tierTarget || 'TIER_1'
+        tier: tierTarget || 'Tier 1'
       }
     });
 

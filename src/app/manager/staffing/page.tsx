@@ -18,16 +18,27 @@ function StaffingContent() {
   const [searchTalentReq, setSearchTalentReq] = useState<{ id: string, roleName: string } | null>(null);
   
   const [formData, setFormData] = useState({
-    tierTarget: 'TIER_1',
-    roleName: 'Runner',
+    tierTarget: 'Tier 1',
+    roleName: 'Labor / Ground Crew',
     quantity: 1,
     payRate: ''
   });
 
   const rolesByTier: Record<string, string[]> = {
-    'TIER_1': ['Runner', 'Usher', 'Stagehand', 'Cleaner'],
-    'TIER_2': ['Security', 'VIP Host', 'Technician', 'Bartender'],
-    'TIER_3': ['Event Director', 'Head of Security', 'Executive VIP Host']
+    'Tier 1': [
+      'Labor / Ground Crew', 'Runners', 'Guest Assistance Staff', 'Parking Staff',
+      'Setup/Breakdown Crew', 'Cleaning and Housekeeping Staff', 'Volunteers', 'General Help'
+    ],
+    'Tier 2': [
+      'Event Coordinators', 'MC / Anchor', 'Registration Desk', 'Front of House Staff',
+      'Photographer', 'Videographer', 'Media', 'Press Member', 'Paparazzi',
+      'Technical Crew Member (Sound, Lighting, Ops)', 'Hospitality / Catering',
+      'Stage Manager', 'Backstage Manager'
+    ],
+    'Tier 3': [
+      'Bands / Music Performers', 'Speaker', 'Keynote Guests', 'Comedians',
+      'Startup Performers', 'Celebrity', 'Influencer', 'DJ', 'Other Talents'
+    ]
   };
 
   // Update roleName automatically when tier changes if current role isn't in new tier
@@ -161,9 +172,9 @@ function StaffingContent() {
                   onChange={e => setFormData({...formData, tierTarget: e.target.value})} 
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"
                 >
-                  <option value="TIER_1">Tier 1 (General)</option>
-                  <option value="TIER_2">Tier 2 (Specialized)</option>
-                  <option value="TIER_3">Tier 3 (Premium)</option>
+                  <option value="Tier 1">Tier 1 (General)</option>
+                  <option value="Tier 2">Tier 2 (Skilled)</option>
+                  <option value="Tier 3">Tier 3 (Premium)</option>
                 </select>
               </div>
               <div>
