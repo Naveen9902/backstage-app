@@ -100,7 +100,9 @@ html.dark .min-h-screen,
 html.dark .bg-\[\#F5F5DC\],
 html.dark .from-\[\#F5F5DC\],
 html.dark .via-\[\#f0eadd\],
-html.dark .to-\[\#e6d8b8\] {
+html.dark .to-\[\#e6d8b8\],
+html.dark .bg-\[\#F5F5F5\],
+html.dark .bg-\[\#f3efe5\] {
   background: #121212 !important;
   background-color: #121212 !important;
   background-image: none !important;
@@ -141,11 +143,27 @@ html.dark .bg-slate-50,
 html.dark .bg-slate-50\/80,
 html.dark .bg-slate-50\/50,
 html.dark .bg-neutral-50,
-html.dark .bg-zinc-50 {
+html.dark .bg-zinc-50,
+html.dark .bg-\[\#f8f9fa\],
+html.dark .bg-\[\#fdfbf7\],
+html.dark .bg-\[\#FDFBF7\],
+html.dark .bg-\[\#f5f8fc\],
+html.dark .bg-\[\#fff5f5\],
+html.dark .bg-\[\#f8f6f0\],
+html.dark .bg-\[\#f0f9ff\],
+html.dark .bg-\[\#FFF4E8\],
+html.dark .bg-\[\#FFF9F2\],
+html.dark .bg-\[\#F5F0E6\],
+html.dark .bg-\[\#f0f0f0\],
+html.dark .bg-\[\#f4efe5\],
+html.dark .bg-\[\#fffcf5\],
+html.dark .bg-\[\#fdfdfc\],
+html.dark .bg-\[\#f3ede4\] {
   background: #1e1e1e !important;
   background-color: #1e1e1e !important;
   background-image: none !important;
   color: #f3f4f6 !important;
+  border-color: #333333 !important;
 }
 
 html.dark .bg-gray-100,
