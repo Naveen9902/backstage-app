@@ -6,13 +6,32 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const cookieStore = await cookies();
+    let isManager = false;
     let userId = cookieStore.get('managerUserId')?.value;
-    if (!userId) userId = cookieStore.get('adminUserId')?.value;
-    if (!userId) userId = cookieStore.get('workerUserId')?.value;
-    if (!userId) userId = cookieStore.get('userId')?.value;
+    if (userId) {
+      isManager = true;
+    } else {
+      userId = cookieStore.get('adminUserId')?.value;
+      if (!userId) userId = cookieStore.get('workerUserId')?.value;
+      if (!userId) userId = cookieStore.get('userId')?.value;
+    }
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Enforce manager session concurrency limits
+    if (isManager) {
+      const sessionToken = cookieStore.get('managerSessionToken')?.value;
+      if (!sessionToken) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const activeSession = await prisma.session.findUnique({
+        where: { token: sessionToken }
+      });
+      if (!activeSession || activeSession.userId !== userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     // Fetch user with their profile

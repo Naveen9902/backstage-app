@@ -58,6 +58,7 @@ model User {
   fanEvents        Event[]            @relation("EventFans")
   likedMessages    MessageLike[]
   runnerTasks      RunnerDispatch[]   @relation("RunnerTasks")
+  sessions         Session[]
 }
 
 model ManagerProfile {
@@ -291,3 +292,13 @@ model PaymentTransaction {
   @@index([workerId])
 }
 
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
