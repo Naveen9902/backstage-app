@@ -40,6 +40,8 @@ export async function PATCH(
         },
         staffingRequest: {
           select: { 
+            id: true,
+            quantity: true,
             roleName: true,
             event: { select: { title: true, date: true } }
           }
@@ -49,6 +51,18 @@ export async function PATCH(
 
     if (!application) {
       return NextResponse.json({ error: 'Application not found or unauthorized' }, { status: 404 });
+    }
+
+    if (status === 'ACCEPTED') {
+      const acceptedCount = await prisma.application.count({
+        where: {
+          staffingRequestId: application.staffingRequest.id,
+          status: { in: ['ACCEPTED', 'PAID'] }
+        }
+      });
+      if (acceptedCount >= application.staffingRequest.quantity) {
+        return NextResponse.json({ error: 'Roles are fully filled for this request.' }, { status: 400 });
+      }
     }
 
     const updated = await prisma.application.update({

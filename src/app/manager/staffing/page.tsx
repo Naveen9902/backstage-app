@@ -97,11 +97,15 @@ function StaffingContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
+      const data = await res.json();
       if (res.ok) {
         fetchRequests(); // refresh to show updated status
+      } else {
+        alert(data.error || 'Failed to update status');
       }
     } catch (err) {
       console.error('Failed to update status', err);
+      alert('An error occurred. Please try again.');
     }
   };
 
@@ -331,7 +335,14 @@ function StaffingContent() {
                                   <div className="flex items-center gap-2 self-end md:self-auto">
                                     {app.status === 'PENDING' ? (
                                       <>
-                                        <button onClick={() => handleStatusUpdate(app.id, 'ACCEPTED')} className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-bold uppercase rounded hover:bg-green-200 transition-colors">Accept</button>
+                                        <button 
+                                          onClick={() => handleStatusUpdate(app.id, 'ACCEPTED')} 
+                                          disabled={acceptedCount >= req.quantity}
+                                          className={`px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${acceptedCount >= req.quantity ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                                          title={acceptedCount >= req.quantity ? 'Roles are fully filled' : 'Accept Applicant'}
+                                        >
+                                          Accept
+                                        </button>
                                         <button onClick={() => handleStatusUpdate(app.id, 'REJECTED')} className="px-3 py-1.5 bg-red-100 text-red-700 text-xs font-bold uppercase rounded hover:bg-red-200 transition-colors">Reject</button>
                                       </>
                                     ) : (
