@@ -88,6 +88,39 @@ const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: 
   );
 };
 
+const triggerTopUpNotification = (title: string, body: string) => {
+  if (typeof window === 'undefined') return;
+  
+  import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+    Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+  }).catch(() => {});
+
+  import('@capacitor/local-notifications').then(({ LocalNotifications }) => {
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id: Math.floor(Math.random() * 100000),
+          schedule: { at: new Date(Date.now() + 100) },
+          sound: undefined,
+          attachments: [],
+          actionTypeId: '',
+          extra: null
+        }
+      ]
+    }).catch(() => {});
+  }).catch(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/logo.jpg' });
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(perm => {
+        if (perm === 'granted') new Notification(title, { body, icon: '/logo.jpg' });
+      });
+    }
+  });
+};
+
 export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
@@ -220,7 +253,13 @@ export default function WorkerDashboard() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'RunnerDispatch' },
-        () => {
+        (payload) => {
+          if (payload && payload.eventType === 'INSERT') {
+            triggerTopUpNotification(
+              '⚡ New Errand Dispatch!',
+              'A new runner task is available near you! Swipe to claim now before someone else grabs it.'
+            );
+          }
           fetchData();
         }
       )
@@ -238,6 +277,9 @@ export default function WorkerDashboard() {
   const completedShifts = acceptedApps.filter(app => app.staffingRequest?.event?.status === 'COMPLETED').length;
   const upcomingShifts = acceptedApps.filter(app => !app.staffingRequest?.event?.status || app.staffingRequest?.event?.status === 'UPCOMING').length;
   const rating = profile?.workerProfile?.rating || 0;
+
+  const activeMyTasks = tasksData.myTasks.filter(t => t.status !== 'Completed');
+  const completedMyTasks = tasksData.myTasks.filter(t => t.status === 'Completed');
 
   const stats = [
     {
@@ -296,16 +338,16 @@ export default function WorkerDashboard() {
       </div>
 
       {/* ACTIVE TASKS & ERRANDS POP-UP AT TOP OF DASHBOARD */}
-      {(tasksData.myTasks.length > 0 || tasksData.pending.length > 0) && (
+      {(activeMyTasks.length > 0 || tasksData.pending.length > 0) && (
         <div className="mb-10 space-y-6">
           {/* Active Tasks Assigned to Me */}
-          {tasksData.myTasks.length > 0 && (
+          {activeMyTasks.length > 0 && (
             <div className="bg-gradient-to-r from-[#242424] to-gray-900 rounded-3xl p-6 md:p-8 text-white shadow-2xl border border-yellow-500/30 relative overflow-hidden">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10 flex-wrap gap-2">
                 <div className="flex items-center gap-3">
                   <span className="w-3 h-3 rounded-full bg-yellow-400 animate-ping"></span>
                   <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-white flex items-center gap-2">
-                    🎯 My Active Ground Tasks ({tasksData.myTasks.length})
+                    🎯 My Active Ground Tasks ({activeMyTasks.length})
                   </h2>
                 </div>
                 <Link href="/worker/runners">
@@ -316,7 +358,7 @@ export default function WorkerDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {tasksData.myTasks.map((task) => {
+                {activeMyTasks.map((task) => {
                   const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
                   const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
 
@@ -462,6 +504,104 @@ export default function WorkerDashboard() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Day-Wise Completed Tasks & Errand History */}
+      {completedMyTasks.length > 0 && (
+        <div className="bg-white rounded-3xl p-6 md:p-8 text-gray-900 shadow-xl border border-gray-200 mb-10">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-gray-900 flex items-center gap-2">
+                📜 Completed Runner Tasks & Errand History
+              </h2>
+            </div>
+            <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-mono">
+              {completedMyTasks.length} Completed Total
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            {Object.entries(
+              completedMyTasks.reduce((acc: { [key: string]: any[] }, task) => {
+                const dateStr = new Date(task.updatedAt || task.createdAt).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+                if (!acc[dateStr]) acc[dateStr] = [];
+                acc[dateStr].push(task);
+                return acc;
+              }, {})
+            ).map(([dayLabel, dayTasks]) => (
+              <div key={dayLabel} className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-extrabold text-gray-500 uppercase tracking-widest bg-gray-100 px-3.5 py-1.5 rounded-xl w-fit font-mono">
+                  <span>📅 {dayLabel}</span>
+                  <span className="text-gray-400">({dayTasks.length})</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {dayTasks.map((task) => {
+                    const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                    const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+
+                    return (
+                      <div
+                        key={task.id}
+                        className="bg-gray-50 hover:bg-white rounded-2xl p-4.5 border border-gray-200 hover:border-emerald-500/50 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex justify-between items-start mb-2 gap-2">
+                            <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                              isExternalErrand ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'
+                            }`}>
+                              {isExternalErrand ? '⚡ External Errand' : task.event?.title || 'Event Task'}
+                            </span>
+                            <span className="text-[11px] font-mono text-gray-400 flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {new Date(task.updatedAt || task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-extrabold text-gray-900 mb-2 line-clamp-2 leading-snug">{cleanTask}</h4>
+                        </div>
+
+                        <div className="pt-3 border-t border-gray-200/60 mt-2 flex items-center justify-between gap-2 flex-wrap">
+                          {task.price !== null && task.price !== undefined ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-black text-emerald-700 font-mono">₹{task.price}</span>
+                              {task.paymentStatus === 'CONFIRMED' ? (
+                                <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md text-[10px] font-extrabold font-mono">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Confirmed
+                                </span>
+                              ) : task.paymentStatus === 'SENT' ? (
+                                <button
+                                  onClick={() => handleConfirmPayment(task.id)}
+                                  disabled={loadingAction === task.id}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-1 px-2.5 rounded-lg text-[10px] transition-all shadow-2xs flex items-center gap-1 animate-pulse cursor-pointer"
+                                >
+                                  <CheckCircle2 className="w-3 h-3" /> Confirm Received (₹{task.price})
+                                </button>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                  Awaiting Payment
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs font-bold text-gray-500">No fee specified</span>
+                          )}
+                          <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                            ✅ Completed
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

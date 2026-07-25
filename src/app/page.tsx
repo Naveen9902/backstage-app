@@ -162,13 +162,15 @@ export default function AppGateway() {
         <div className="absolute bottom-0 right-0 w-[250px] h-[250px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         {/* Top Minimal Header */}
-        <header className="relative z-10 flex items-center justify-between py-2">
-          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest bg-[#CD7F32]/20 text-[#CD7F32] px-2.5 py-1 rounded-full border border-[#CD7F32]/30">
-            <Sparkles className="w-3 h-3 animate-spin" /> Mobile Access Portal
+        <header className="relative z-10 flex items-center justify-between py-3 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <Link href="/register" className="text-xs font-extrabold text-[#CD7F32] hover:underline bg-[#CD7F32]/15 px-3.5 py-1.5 rounded-full border border-[#CD7F32]/40 flex items-center gap-1.5 shadow-sm transition-all hover:scale-105 active:scale-95">
+              <span>Create Account / Sign Up</span>
+            </Link>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400">
+            <Sparkles className="w-3 h-3 text-[#CD7F32] animate-spin" /> Access Portal
           </span>
-          <Link href="/register" className="text-xs font-bold text-[#CD7F32] hover:underline">
-            New Talent? Sign Up &rarr;
-          </Link>
         </header>
 
         {/* Perfectly Boxed Login Form */}
@@ -181,12 +183,13 @@ export default function AppGateway() {
             {/* Top Luxury Accent Line */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-[#CD7F32] to-transparent opacity-90" />
 
-            {/* FIRST LOGO THEN DASHBOARDS: PERFECTLY FITTED IN BOX */}
-            <div className="flex flex-col items-center justify-center text-center mb-6 pb-6 border-b border-white/10">
-              <div className="relative mb-3 transform hover:scale-105 transition-transform duration-300">
+            {/* FIRST LOGO THEN DASHBOARDS: PERFECTLY FITTED IN BOX WITH FULL HOVER EFFECT */}
+            <div className="flex flex-col items-center justify-center text-center mb-6 pb-6 border-b border-white/10 group cursor-pointer">
+              <div className="w-full bg-black/50 group-hover:bg-[#242424]/90 p-5 rounded-2xl border border-white/10 group-hover:border-[#CD7F32] transition-all duration-500 shadow-inner group-hover:shadow-[0_0_35px_rgba(205,127,50,0.4)] flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#CD7F32]/0 via-[#CD7F32]/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 <Logo size="xl" showText={true} />
               </div>
-              <p className="text-gray-400 text-xs mt-1 font-medium">Enter your credentials to launch your dashboard</p>
+              <p className="text-gray-400 text-xs mt-3 font-medium">Enter your credentials to launch your dashboard</p>
             </div>
 
             {error && (

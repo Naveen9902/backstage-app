@@ -43,8 +43,8 @@ export default function Logo({ size = 'md', showText = true, className = '', tex
       </div>
 
       {showText && (
-        <span className={`${textSizes[size]} text-white transition-colors group-hover:text-amber-100 ${textClassName}`}>
-          Back<span className="text-[#CD7F32] font-black drop-shadow-[0_0_10px_rgba(205,127,50,0.3)]">Stage</span>
+        <span className={`${textSizes[size]} text-[#CD7F32] font-black tracking-wide font-serif transition-colors group-hover:text-[#e59445] drop-shadow-[0_0_12px_rgba(205,127,50,0.4)] ${textClassName}`}>
+          BackStage
         </span>
       )}
     </div>

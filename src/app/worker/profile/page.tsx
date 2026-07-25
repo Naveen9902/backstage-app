@@ -650,17 +650,6 @@ export default function WorkerProfile() {
               
               <div className="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-800">Runner Availability</h3>
-                  <p className="text-sm text-gray-500">Opt-in to receive last-minute on-demand runner requests for quick tasks.</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" checked={formData.isRunnerAvailable} onChange={e=>setFormData({...formData, isRunnerAvailable: e.target.checked})} />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#CD7F32]"></div>
-                </label>
-              </div>
-
-              <div className="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between">
-                <div>
                   <h3 className="font-bold text-gray-800">In-App Notifications</h3>
                   <p className="text-sm text-gray-500">Receive alerts when your applications are accepted, when you get a new review, etc.</p>
                 </div>
@@ -672,33 +661,6 @@ export default function WorkerProfile() {
 
               <div className="md:col-span-2">
                 <PushNotificationManager />
-              </div>
-
-              {/* Stripe Integration */}
-              <div className="md:col-span-2 bg-[#f4f6fc] p-6 rounded-xl border border-[#d6e0f5] space-y-4">
-                <h3 className="font-bold text-lg border-b border-[#d6e0f5] pb-2 text-[#3b5998] flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                  Payout Details (Stripe)
-                </h3>
-                <p className="text-sm text-gray-600">Connect your Stripe account to receive payouts securely when you complete events.</p>
-                
-                <div className="flex items-center gap-4 mt-4">
-                  {formData.stripeAccountId ? (
-                    <span className="px-4 py-2 bg-green-100 text-green-800 font-bold rounded-lg text-sm flex items-center gap-2 border border-green-200">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Stripe Connected
-                    </span>
-                  ) : (
-                    <button 
-                      type="button" 
-                      onClick={handleStripeConnect}
-                      disabled={saving}
-                      className="bg-[#635BFF] hover:bg-[#4B45D6] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors shadow-sm flex items-center gap-2"
-                    >
-                      Connect with Stripe
-                    </button>
-                  )}
-                </div>
               </div>
 
             </div>

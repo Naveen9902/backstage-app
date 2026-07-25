@@ -87,6 +87,38 @@ const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: 
   );
 };
 
+const triggerTopUpNotification = (title: string, body: string) => {
+  if (typeof window === 'undefined') return;
+  
+  import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+    Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+  }).catch(() => {});
+
+  import('@capacitor/local-notifications').then(({ LocalNotifications }) => {
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id: Math.floor(Math.random() * 100000),
+          schedule: { at: new Date(Date.now() + 100) },
+          sound: undefined,
+          attachments: [],
+          actionTypeId: '',
+          extra: null
+        }
+      ]
+    }).catch(() => {});
+  }).catch(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/logo.jpg' });
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(perm => {
+        if (perm === 'granted') new Notification(title, { body, icon: '/logo.jpg' });
+      });
+    }
+  });
+};
 
 export default function LiveRunnersBoard() {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
@@ -141,7 +173,13 @@ export default function LiveRunnersBoard() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'RunnerDispatch' },
-        () => {
+        (payload) => {
+          if (payload && payload.eventType === 'INSERT') {
+            triggerTopUpNotification(
+              '⚡ New Errand Dispatch!',
+              'A new runner task is available near you! Swipe to claim now before someone else grabs it.'
+            );
+          }
           fetchTasks(); // Instantly refresh data when any dispatch changes
         }
       )
