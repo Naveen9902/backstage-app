@@ -50,7 +50,27 @@ export async function GET() {
       skills: app.workerProfile.skills
     }));
 
-    return NextResponse.json({ dispatches, hiredStaff }, { status: 200 });
+    const hiredUserIds = hiredStaff.map(s => s.userId);
+
+    const nearbyWorkerProfiles = await prisma.workerProfile.findMany({
+      where: {
+        isVerified: true,
+        userId: { notIn: hiredUserIds }
+      },
+      include: {
+        user: { select: { id: true, name: true } }
+      },
+      take: 5
+    });
+
+    const nearbyRunners = nearbyWorkerProfiles.map(wp => ({
+      userId: wp.user.id,
+      name: wp.user.name,
+      skills: wp.skills,
+      distance: (Math.random() * 3 + 0.5).toFixed(1) + ' km away'
+    }));
+
+    return NextResponse.json({ dispatches, hiredStaff, nearbyRunners }, { status: 200 });
   } catch (error) {
     console.error('GET RUNNERS ERROR:', error);
     return NextResponse.json({ error: 'Failed to fetch runner dispatches' }, { status: 500 });

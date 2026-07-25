@@ -12,20 +12,20 @@ export default function RunnersPage() {
   const [task, setTask] = useState('');
   const [dispatches, setDispatches] = useState<any[]>([]);
   const [hiredStaff, setHiredStaff] = useState<any[]>([]);
+  const [nearbyRunners, setNearbyRunners] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState(false);
   
   // Assign to specific worker
-  const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string} | null>(null);
+  const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean} | null>(null);
 
-  const fetchDispatches = () => {
     fetch('/api/manager/runners').then(res => res.json()).then(data => {
       if (data) {
         setDispatches(data.dispatches || []);
         setHiredStaff(data.hiredStaff || []);
+        setNearbyRunners(data.nearbyRunners || []);
       }
     });
-  };
 
   useEffect(() => {
     fetch('/api/manager/events').then(res => res.json()).then(data => {
@@ -65,13 +65,12 @@ export default function RunnersPage() {
     if (!assignModal || !task) return;
     setAssigning(true);
 
-    try {
       const res = await fetch('/api/manager/runners', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          eventId: assignModal.eventId,
-          task,
+          eventId: assignModal.eventId || selectedEvent,
+          task: assignModal.isExternal ? `[EXTERNAL/ERRAND] ${task}` : task,
           urgency,
           runnerId: assignModal.userId
         })
@@ -147,10 +146,10 @@ export default function RunnersPage() {
                         <div className="text-sm text-gray-500">{staff.roleName} &bull; {staff.eventName}</div>
                       </div>
                       <button 
-                        onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId })}
+                        onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId, isExternal: false })}
                         className="bg-[#242424] hover:bg-[#CD7F32] text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                       >
-                        <Send className="w-4 h-4" /> Assign Task
+                        <Send className="w-4 h-4" /> Assign Internal Task
                       </button>
                     </motion.div>
                   ))}
@@ -158,29 +157,76 @@ export default function RunnersPage() {
               )}
             </div>
 
-            {/* Dispatched Tasks */}
+            {/* Nearby External Runners */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                Nearby Quick Runners (External)
+              </h2>
+              {nearbyRunners.length === 0 ? (
+                <div className="bg-white p-8 rounded-xl border border-gray-100 text-center text-gray-500 shadow-sm">
+                  No active runners found nearby.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {nearbyRunners.map((runner, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white p-5 rounded-xl border border-gray-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500 rounded-bl-full opacity-5"></div>
+                      <div>
+                        <div className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                          {runner.name}
+                          <span className="flex items-center gap-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Active
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                          {runner.distance} &bull; {runner.skills || 'Quick Errands'}
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 z-10"
+                      >
+                        <Send className="w-4 h-4" /> Quick Errand
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          <div className="mt-12">
+
             <div className="space-y-4">
               <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
                 <CheckCircle2 className="text-[#CD7F32] w-6 h-6" />
-                Task Dispatches
+                Task Dispatches History
               </h2>
               {dispatches.length === 0 ? (
                 <div className="bg-white p-8 rounded-xl border border-gray-100 text-center text-gray-500 shadow-sm">
                   No runners dispatched yet.
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {dispatches.map((dispatch, i) => (
                     <motion.div 
                       key={dispatch.id}
                       initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"
+                      className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col"
                       style={{ borderLeft: `4px solid ${dispatch.urgency === 'Critical' ? '#ef4444' : dispatch.urgency === 'High' ? '#f97316' : '#CD7F32'}` }}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500">{dispatch.event?.title}</span>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate max-w-[120px]">{dispatch.event?.title}</span>
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
                           dispatch.status === 'Completed' ? 'bg-green-100 text-green-700' :
                           dispatch.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
                           'bg-amber-100 text-amber-700'
@@ -188,17 +234,17 @@ export default function RunnersPage() {
                           {dispatch.status}
                         </span>
                       </div>
-                      <p className="font-medium text-gray-900 mb-3">{dispatch.task}</p>
+                      <p className="font-medium text-gray-900 mb-4 flex-1">{dispatch.task}</p>
                       
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="text-gray-500 flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
+                      <div className="flex items-center justify-between text-sm mt-auto pt-4 border-t border-gray-50">
+                        <div className="text-gray-500 flex items-center gap-1 text-xs">
+                          <Clock className="w-3 h-3" />
                           {new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </div>
                         {dispatch.runner ? (
-                          <div className="font-bold text-[#CD7F32]">Assigned to: {dispatch.runner.name}</div>
+                          <div className={`font-bold text-xs ${dispatch.task.startsWith('[EXTERNAL/ERRAND]') ? 'text-blue-600' : 'text-[#CD7F32]'}`}>{dispatch.runner.name}</div>
                         ) : (
-                          <div className="font-bold text-gray-400">Unassigned (Broadcast)</div>
+                          <div className="font-bold text-gray-400 text-xs">Unassigned</div>
                         )}
                       </div>
                     </motion.div>
