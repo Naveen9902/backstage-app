@@ -143,9 +143,10 @@ export default function MyEvents() {
   // Sort and filter events
   const filteredEvents = events.filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.location.toLowerCase().includes(searchQuery.toLowerCase()));
   
-  const activeEvents = filteredEvents.filter(e => e.status !== 'COMPLETED').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const liveEvents = filteredEvents.filter(e => e.status === 'ONGOING').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcomingEvents = filteredEvents.filter(e => e.status !== 'ONGOING' && e.status !== 'COMPLETED').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const completedEvents = filteredEvents.filter(e => e.status === 'COMPLETED').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const sortedEvents = [...activeEvents, ...completedEvents];
+  const sortedEvents = [...liveEvents, ...upcomingEvents, ...completedEvents];
 
   return (
     <div className="relative text-[#242424] min-h-screen pb-24 overflow-hidden">
