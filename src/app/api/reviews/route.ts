@@ -33,8 +33,22 @@ export async function POST(req: Request) {
     }
 
     if (event.status !== 'COMPLETED') {
-      console.log('[DEBUG REVIEWS] 400: Event not COMPLETED. Status:', event.status);
-      return NextResponse.json({ error: 'Reviews can only be submitted for completed events' }, { status: 400 });
+      const completedDispatch = await prisma.runnerDispatch.findFirst({
+        where: {
+          eventId,
+          status: 'Completed',
+          OR: [
+            { managerId: userId, runnerId: revieweeId },
+            { managerId: revieweeId, runnerId: userId },
+            { event: { managerId: userId }, runnerId: revieweeId },
+            { event: { managerId: revieweeId }, runnerId: userId }
+          ]
+        }
+      });
+      if (!completedDispatch) {
+        console.log('[DEBUG REVIEWS] 400: Event not COMPLETED and no completed runner dispatch found. Status:', event.status);
+        return NextResponse.json({ error: 'Reviews can only be submitted for completed events or completed runner tasks' }, { status: 400 });
+      }
     }
 
     // Prevent duplicate reviews

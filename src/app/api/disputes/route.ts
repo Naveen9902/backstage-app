@@ -31,7 +31,12 @@ export async function POST(req: Request) {
       }
     });
 
-    await sendNotification(targetId, `An issue report was filed against you.`);
+    await sendNotification(targetId, `⚠️ An issue report / dispute was filed against you regarding event/task.`);
+
+    const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { id: true } });
+    for (const adm of admins) {
+      await sendNotification(adm.id, `⚠️ New Dispute Filed: "${reason}" (ID: #${dispute.id.slice(0, 8)})`);
+    }
 
     return NextResponse.json(dispute, { status: 201 });
   } catch (error) {

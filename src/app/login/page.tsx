@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
@@ -15,6 +15,21 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.user) {
+          const role = data.user.role || data.role;
+          if (role === 'ADMIN') window.location.href = '/admin';
+          else if (role === 'MANAGER') window.location.href = '/manager/dashboard';
+          else if (role === 'USER') window.location.href = '/user';
+          else window.location.href = '/worker';
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogin = async () => {
     if (!formData.email || !formData.password) return;

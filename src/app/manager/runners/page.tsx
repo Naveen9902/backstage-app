@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle, Filter, ChevronRight, Layers, DollarSign, Users, Sparkles, FolderOpen, ArrowLeft } from 'lucide-react';
+import { Briefcase, Send, CheckCircle2, Clock, AlertTriangle, Filter, ChevronRight, Layers, DollarSign, Users, Sparkles, FolderOpen, ArrowLeft, Star, MessageSquare } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function RunnersPage() {
@@ -22,6 +22,17 @@ export default function RunnersPage() {
   
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean, isBroadcast?: boolean} | null>(null);
+
+  // Review and Dispute modals
+  const [reviewModal, setReviewModal] = useState<{eventId: string, revieweeId: string, name: string, task: string} | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const [disputeModal, setDisputeModal] = useState<{eventId: string, targetId: string, name: string, task: string} | null>(null);
+  const [disputeReason, setDisputeReason] = useState('No Show / Task Abandonment');
+  const [disputeDesc, setDisputeDesc] = useState('');
+  const [submittingDispute, setSubmittingDispute] = useState(false);
 
   const fetchDispatches = () => {
     fetch('/api/manager/runners').then(res => res.json()).then(data => {
@@ -113,6 +124,68 @@ export default function RunnersPage() {
       console.error(err);
       alert('An error occurred while sending payment confirmation');
     }
+  };
+
+  const handleSubmittingReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewModal) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: reviewModal.eventId,
+          revieweeId: reviewModal.revieweeId,
+          rating: reviewRating,
+          comment: reviewComment
+        })
+      });
+      if (res.ok) {
+        alert(`Review submitted successfully for ${reviewModal.name}! ⭐`);
+        setReviewModal(null);
+        setReviewComment('');
+        setReviewRating(5);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to submit review');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while submitting review');
+    }
+    setSubmittingReview(false);
+  };
+
+  const handleSubmittingDispute = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disputeModal || !disputeDesc) return;
+    setSubmittingDispute(true);
+    try {
+      const res = await fetch('/api/disputes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: disputeModal.eventId,
+          targetId: disputeModal.targetId,
+          reason: `${disputeReason} (Task: ${disputeModal.task})`,
+          description: disputeDesc
+        })
+      });
+      if (res.ok) {
+        alert(`Dispute filed against ${disputeModal.name}. Our admin team has been notified.`);
+        setDisputeModal(null);
+        setDisputeDesc('');
+        setDisputeReason('No Show / Task Abandonment');
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to file dispute');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while filing dispute');
+    }
+    setSubmittingDispute(false);
   };
 
   // Group dispatches by Event vs External Errands
@@ -775,6 +848,43 @@ export default function RunnersPage() {
                                   )}
                                 </div>
                               )}
+
+                              {dispatch.runnerId && (
+                                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-end gap-2 bg-gray-50/90 -mx-5 -mb-5 p-3 rounded-b-3xl">
+                                  {dispatch.status === 'Completed' && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setReviewModal({
+                                          eventId: dispatch.eventId,
+                                          revieweeId: dispatch.runnerId,
+                                          name: dispatch.runner?.name || 'Runner',
+                                          task: dispatch.task || 'Errand'
+                                        });
+                                      }}
+                                      className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-bold py-1.5 px-3 rounded-xl text-[11px] flex items-center gap-1 transition-all shadow-2xs hover:shadow-xs active:scale-95"
+                                    >
+                                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                                      <span>Review Runner</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDisputeModal({
+                                        eventId: dispatch.eventId,
+                                        targetId: dispatch.runnerId,
+                                        name: dispatch.runner?.name || 'Runner',
+                                        task: dispatch.task || 'Errand'
+                                      });
+                                    }}
+                                    className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 font-bold py-1.5 px-3 rounded-xl text-[11px] flex items-center gap-1 transition-all shadow-2xs hover:shadow-xs active:scale-95"
+                                  >
+                                    <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                                    <span>Dispute</span>
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </motion.div>
                         );
@@ -868,6 +978,139 @@ export default function RunnersPage() {
                   }`}
                 >
                   {assigning ? 'Dispatching...' : assignModal.isBroadcast ? '⚡ Broadcast to All Nearby' : 'Dispatch'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+          >
+            <div className="p-6 border-b border-gray-100 bg-amber-50/50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <span>Review {reviewModal.name}</span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1 font-medium truncate">Task: {reviewModal.task}</p>
+            </div>
+            
+            <form onSubmit={handleSubmittingReview} className="p-6 space-y-5">
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Rating (1 to 5 Stars)</label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      className="p-1 hover:scale-110 transition-transform"
+                    >
+                      <Star 
+                        className={`w-8 h-8 ${star <= reviewRating ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} 
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm font-bold text-gray-700">({reviewRating} / 5)</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Feedback / Comments (Optional)</label>
+                <textarea 
+                  rows={3} 
+                  value={reviewComment} 
+                  onChange={e => setReviewComment(e.target.value)} 
+                  className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:border-amber-500 outline-none shadow-inner text-gray-900 text-sm" 
+                  placeholder="Great job, prompt delivery, very professional..."
+                ></textarea>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setReviewModal(null); setReviewComment(''); setReviewRating(5); }}
+                  className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  disabled={submittingReview} 
+                  type="submit" 
+                  className="flex-1 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 text-white shadow-md bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-sm"
+                >
+                  {submittingReview ? 'Submitting...' : 'Submit Review ⭐'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Dispute Modal */}
+      {disputeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+          >
+            <div className="p-6 border-b border-gray-100 bg-red-50/50">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <span>Raise Dispute: {disputeModal.name}</span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-1 font-medium truncate">Task: {disputeModal.task}</p>
+            </div>
+            
+            <form onSubmit={handleSubmittingDispute} className="p-6 space-y-5">
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Reason</label>
+                <select
+                  value={disputeReason}
+                  onChange={e => setDisputeReason(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 outline-none text-gray-900 text-sm font-medium"
+                >
+                  <option value="No Show / Task Abandonment">No Show / Task Abandonment</option>
+                  <option value="Poor Quality of Work / Mistakes">Poor Quality of Work / Mistakes</option>
+                  <option value="Unprofessional Conduct / Misbehavior">Unprofessional Conduct / Misbehavior</option>
+                  <option value="Payment / Fee Dispute">Payment / Fee Dispute</option>
+                  <option value="Other Issue">Other Issue</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-1 block">Detailed Description</label>
+                <textarea 
+                  required
+                  rows={3} 
+                  value={disputeDesc} 
+                  onChange={e => setDisputeDesc(e.target.value)} 
+                  className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 outline-none shadow-inner text-gray-900 text-sm" 
+                  placeholder="Please provide details of what happened so our admin team can investigate..."
+                ></textarea>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setDisputeModal(null); setDisputeDesc(''); setDisputeReason('No Show / Task Abandonment'); }}
+                  className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  disabled={submittingDispute} 
+                  type="submit" 
+                  className="flex-1 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 text-white shadow-md bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-sm"
+                >
+                  {submittingDispute ? 'Filing...' : 'File Dispute ⚠️'}
                 </button>
               </div>
             </form>
