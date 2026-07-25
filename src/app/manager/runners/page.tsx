@@ -18,6 +18,25 @@ export default function RunnersPage() {
   const [price, setPrice] = useState('');
   const [selectedEventView, setSelectedEventView] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'In Progress' | 'Completed' | 'Pending'>('ALL');
+  const [boardHistoryTab, setBoardHistoryTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
+  const [manuallyClosedBoards, setManuallyClosedBoards] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('closed_dispatch_boards');
+    if (saved) {
+      try { setManuallyClosedBoards(JSON.parse(saved)); } catch (e) {}
+    }
+  }, []);
+
+  const toggleBoardClosed = (groupName: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setManuallyClosedBoards(prev => {
+      const isClosed = prev.includes(groupName);
+      const next = isClosed ? prev.filter(n => n !== groupName) : [...prev, groupName];
+      localStorage.setItem('closed_dispatch_boards', JSON.stringify(next));
+      return next;
+    });
+  };
   
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean, isBroadcast?: boolean} | null>(null);
@@ -128,6 +147,29 @@ export default function RunnersPage() {
     const key = ev.title || 'General Venue Operations';
     if (!eventGroups[key]) eventGroups[key] = [];
   });
+
+  // Map event titles to their database status
+  const eventStatusMap = events.reduce((acc: Record<string, string>, ev: any) => {
+    acc[ev.title || 'General Venue Operations'] = ev.status || 'ONGOING';
+    return acc;
+  }, {});
+
+  dispatches.forEach((d: any) => {
+    if (d.event?.title && d.event?.status) {
+      eventStatusMap[d.event.title] = d.event.status;
+    }
+  });
+
+  const isBoardClosed = (groupName: string) => {
+    if (manuallyClosedBoards.includes(groupName)) return true;
+    const status = eventStatusMap[groupName];
+    return status === 'COMPLETED' || status === 'CLOSED' || status === 'ARCHIVED';
+  };
+
+  const allGroupNames = Object.keys(eventGroups);
+  const activeBoardNames = allGroupNames.filter(name => !isBoardClosed(name));
+  const closedBoardNames = allGroupNames.filter(name => isBoardClosed(name));
+  const displayedGroupNames = boardHistoryTab === 'ACTIVE' ? activeBoardNames : closedBoardNames;
 
   const currentEventDispatches = selectedEventView ? (eventGroups[selectedEventView] || []) : [];
   const filteredDispatches = currentEventDispatches.filter((d: any) => {
@@ -378,17 +420,45 @@ export default function RunnersPage() {
                     <div>
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CD7F32]/10 text-[#CD7F32] rounded-full text-xs font-bold uppercase tracking-widest mb-2 border border-[#CD7F32]/30 shadow-2xs">
                         <Sparkles className="w-3.5 h-3.5 animate-spin text-[#CD7F32]" style={{ animationDuration: '6s' }} />
-                        <span>Interactive Dispatch Boards</span>
+                        <span>Interactive Dispatch Boards &bull; History Archive</span>
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight flex items-center gap-2.5">
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight flex items-center gap-2.5 flex-wrap">
                         <span>Event Dispatch Centers</span>
-                        <span className="text-xs bg-[#242424] text-[#CD7F32] px-3 py-1 rounded-full font-mono font-bold uppercase tracking-widest shadow-sm border border-[#CD7F32]/30">
-                          {Object.keys(eventGroups).length} Active Boards
-                        </span>
                       </h2>
-                      <p className="text-sm text-gray-500 mt-1">Select an event or external errand board below to coordinate staff and confirm payouts.</p>
+                      <p className="text-sm text-gray-500 mt-1">Select an active event board or review closed operations in your dispatch history.</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* Active vs Closed History Tabs */}
+                      <div className="flex items-center gap-1 bg-gray-100 p-1.5 rounded-2xl border border-gray-200">
+                        <button
+                          onClick={() => setBoardHistoryTab('ACTIVE')}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                            boardHistoryTab === 'ACTIVE'
+                              ? 'bg-[#242424] text-[#CD7F32] shadow-md'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
+                          }`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Active Boards</span>
+                          <span className="px-1.5 py-0.2 bg-white/20 text-current rounded font-mono text-[10px]">
+                            {activeBoardNames.length}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setBoardHistoryTab('CLOSED')}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+                            boardHistoryTab === 'CLOSED'
+                              ? 'bg-purple-900 text-purple-200 shadow-md'
+                              : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
+                          }`}
+                        >
+                          <span>🏁 Closed History</span>
+                          <span className="px-1.5 py-0.2 bg-white/20 text-current rounded font-mono text-[10px]">
+                            {closedBoardNames.length}
+                          </span>
+                        </button>
+                      </div>
+
                       <div className="bg-white px-4 py-2 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-2">
                         <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Tasks:</span>
                         <span className="text-base font-extrabold text-gray-900 font-mono">{dispatches.length}</span>
@@ -403,18 +473,26 @@ export default function RunnersPage() {
                     </div>
                   </div>
 
-                  {Object.keys(eventGroups).length === 0 ? (
+                  {displayedGroupNames.length === 0 ? (
                     <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200 shadow-sm p-8">
                       <div className="w-16 h-16 rounded-3xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center mx-auto mb-4 border border-[#CD7F32]/20 shadow-inner">
-                        <FolderOpen className="w-8 h-8" />
+                        {boardHistoryTab === 'CLOSED' ? <span className="text-3xl">🏁</span> : <FolderOpen className="w-8 h-8" />}
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900 font-serif">No Event Dispatch Boards Found</h3>
-                      <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Create an event or dispatch your first errand from the form above to activate your interactive coordination boards!</p>
+                      <h3 className="text-lg font-bold text-gray-900 font-serif">
+                        {boardHistoryTab === 'CLOSED' ? 'No Closed Dispatch Boards in History' : 'No Active Dispatch Boards Found'}
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                        {boardHistoryTab === 'CLOSED'
+                          ? 'When an event is completed or closed, its runner dispatch history is stored here as an archived record!'
+                          : 'Create an event or dispatch your first errand from the form above to activate your interactive coordination boards!'}
+                      </p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {Object.entries(eventGroups).map(([groupName, groupDispatches]) => {
+                      {displayedGroupNames.map(groupName => {
+                        const groupDispatches = eventGroups[groupName] || [];
                         const isExternalGroup = groupName.includes('External') || groupName.includes('Errands') || groupName.includes('Errand');
+                        const isClosed = isBoardClosed(groupName);
                         const totalTasks = groupDispatches.length;
                         const completedTasks = groupDispatches.filter((d: any) => d.status === 'Completed').length;
                         const inProgressTasks = groupDispatches.filter((d: any) => d.status === 'In Progress').length;
@@ -428,31 +506,37 @@ export default function RunnersPage() {
                             transition={{ type: "spring", stiffness: 300, damping: 20 }}
                             onClick={() => { setSelectedEventView(groupName); setFilterStatus('ALL'); }}
                             className={`group relative overflow-hidden rounded-3xl p-6.5 cursor-pointer transition-all duration-300 flex flex-col justify-between border-2 shadow-lg ${
-                              isExternalGroup 
+                              isClosed
+                                ? 'bg-gradient-to-br from-slate-900 via-purple-950 to-[#1e1a24] text-purple-100 border-purple-500/40 hover:border-purple-300 hover:shadow-[0_20px_40px_rgba(168,85,247,0.25)]'
+                                : isExternalGroup 
                                 ? 'bg-gradient-to-br from-blue-900/95 via-indigo-900 to-[#242424] text-white border-blue-500/40 hover:border-blue-400 hover:shadow-[0_20px_40px_rgba(59,130,246,0.25)]' 
                                 : 'bg-gradient-to-br from-[#242424] via-[#2a2a2a] to-[#1f1f1f] text-white border-gray-800 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]'
                             }`}
                           >
                             <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
-                              isExternalGroup ? 'bg-blue-500/20 group-hover:bg-blue-400/30' : 'bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30'
+                              isClosed ? 'bg-purple-500/20 group-hover:bg-purple-400/30' : isExternalGroup ? 'bg-blue-500/20 group-hover:bg-blue-400/30' : 'bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30'
                             }`} />
 
                             <div>
                               <div className="flex items-start justify-between gap-3 mb-4">
                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner ${
-                                  isExternalGroup 
+                                  isClosed
+                                    ? 'bg-purple-500/20 text-purple-300 border-purple-400/30 text-2xl'
+                                    : isExternalGroup 
                                     ? 'bg-blue-500/20 text-blue-300 border-blue-400/30 text-2xl' 
                                     : 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30'
                                 }`}>
-                                  {isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
+                                  {isClosed ? '🏁' : isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
                                 </div>
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border font-mono shadow-2xs ${
-                                  totalTasks > 0 
+                                  isClosed
+                                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                                    : totalTasks > 0 
                                     ? isExternalGroup ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                                     : 'bg-gray-700/50 text-gray-400 border-gray-600/50'
                                 }`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${totalTasks > 0 ? (isExternalGroup ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400 animate-pulse') : 'bg-gray-500'}`} />
-                                  {totalTasks > 0 ? 'Active Board' : 'Standby'}
+                                  <span className={`w-1.5 h-1.5 rounded-full ${isClosed ? 'bg-purple-400' : totalTasks > 0 ? (isExternalGroup ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400 animate-pulse') : 'bg-gray-500'}`} />
+                                  {isClosed ? '🏁 Closed History' : totalTasks > 0 ? 'Active Board' : 'Standby'}
                                 </span>
                               </div>
 
@@ -497,13 +581,29 @@ export default function RunnersPage() {
                                   </span>
                                 )}
 
-                                <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
-                                  isExternalGroup 
-                                    ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
-                                    : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
-                                }`}>
-                                  <span>Open Board</span>
-                                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => toggleBoardClosed(groupName, e)}
+                                    title={isClosed ? "Reopen to Active Board" : "Close Event & Store in History"}
+                                    className={`px-2.5 py-1.5 rounded-xl text-[10px] font-extrabold uppercase transition-all border ${
+                                      isClosed
+                                        ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/30'
+                                        : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border-purple-500/30'
+                                    }`}
+                                  >
+                                    {isClosed ? '🟢 Reopen' : '🏁 Close Event'}
+                                  </button>
+
+                                  <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
+                                    isClosed
+                                      ? 'bg-purple-700 text-white group-hover:bg-purple-600 shadow-md'
+                                      : isExternalGroup 
+                                      ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
+                                      : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
+                                  }`}>
+                                    <span>{isClosed ? 'History Board' : 'Open Board'}</span>
+                                    <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -531,16 +631,41 @@ export default function RunnersPage() {
                         <span>Back to All Events Grid</span>
                       </button>
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center border border-[#CD7F32]/20 text-2xl shadow-inner shrink-0">
-                          {selectedEventView.includes('External') ? '⚡' : '🎪'}
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl shadow-inner shrink-0 ${
+                          isBoardClosed(selectedEventView)
+                            ? 'bg-purple-500/20 text-purple-600 border-purple-500/30'
+                            : 'bg-[#CD7F32]/10 text-[#CD7F32] border-[#CD7F32]/20'
+                        }`}>
+                          {isBoardClosed(selectedEventView) ? '🏁' : selectedEventView.includes('External') || selectedEventView.includes('Errand') ? '⚡' : '🎪'}
                         </div>
                         <div>
-                          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight">
-                            {selectedEventView}
-                          </h2>
-                          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">
-                            Live Dispatch Board &bull; Real-time Operations &bull; Payout Management
-                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 font-serif tracking-tight">
+                              {selectedEventView}
+                            </h2>
+                            {isBoardClosed(selectedEventView) && (
+                              <span className="px-2.5 py-0.5 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold uppercase tracking-wider border border-purple-300 font-mono">
+                                🏁 Closed History Archive
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 flex-wrap">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                              {isBoardClosed(selectedEventView) 
+                                ? 'Archived Dispatch Board • Historical Record • Completed Operations'
+                                : 'Live Dispatch Board • Real-time Operations • Payout Management'}
+                            </p>
+                            <button
+                              onClick={(e) => toggleBoardClosed(selectedEventView, e)}
+                              className={`text-[11px] font-extrabold underline px-2 py-0.5 rounded transition-colors ${
+                                isBoardClosed(selectedEventView)
+                                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50'
+                                  : 'text-purple-700 hover:text-purple-900 bg-purple-50'
+                              }`}
+                            >
+                              {isBoardClosed(selectedEventView) ? '🟢 Reopen to Active Board' : '🏁 Close Event & Store in History'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

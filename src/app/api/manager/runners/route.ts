@@ -15,7 +15,7 @@ export async function GET() {
     const dispatches = await prisma.runnerDispatch.findMany({
       where: { managerId: userId },
       include: {
-        event: { select: { title: true } },
+        event: { select: { title: true, status: true, id: true } },
         runner: { select: { name: true } }
       },
       orderBy: { createdAt: 'desc' }
