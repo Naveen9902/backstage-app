@@ -31,14 +31,14 @@ export default function Logo({ size = 'md', showText = true, className = '', tex
         <div className="absolute -inset-0.5 bg-gradient-to-tr from-[#CD7F32] via-amber-400 to-[#CD7F32] rounded-[inherit] blur-[3px] opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 pointer-events-none" />
         
         {/* Luxury Badge Container */}
-        <div className={`relative bg-gradient-to-b from-[#2a2a2a] to-[#121212] border border-[#CD7F32]/60 shadow-xl flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-[1.02] ${sizeClasses[size]}`}>
+        <div className={`relative bg-white border border-[#CD7F32]/50 shadow-xl flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-[1.02] ${sizeClasses[size]}`}>
           <img 
             src="/logo.jpg" 
             alt="BackStage Logo" 
-            className="w-full h-full object-cover filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" 
+            className="w-full h-full object-cover object-center scale-[1.08] transition-transform duration-500 group-hover:scale-[1.12]" 
           />
           {/* Internal Glass Shine Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/30 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/25 pointer-events-none" />
         </div>
       </div>
 

@@ -12,8 +12,18 @@ export default function EventDetails({ params }: { params: Promise<{ eventId: st
   const [loading, setLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('backstage_saved_events') || '[]');
+        const joined = JSON.parse(localStorage.getItem('backstage_joined_communities') || '[]');
+        if (Array.isArray(saved) && saved.includes(eventId)) setIsSaved(true);
+        if (Array.isArray(joined) && joined.includes(eventId)) setHasJoined(true);
+      } catch (e) {}
+    }
+
     fetch(`/api/user/events/${eventId}`)
       .then(res => res.json())
       .then(data => {
@@ -24,6 +34,22 @@ export default function EventDetails({ params }: { params: Promise<{ eventId: st
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [eventId]);
+
+  const handleSaveEvent = () => {
+    setIsSaved(prev => {
+      const nextVal = !prev;
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = JSON.parse(localStorage.getItem('backstage_saved_events') || '[]');
+          const nextArr = nextVal 
+            ? (saved.includes(eventId) ? saved : [...saved, eventId])
+            : saved.filter((id: string) => id !== eventId);
+          localStorage.setItem('backstage_saved_events', JSON.stringify(nextArr));
+        } catch (e) {}
+      }
+      return nextVal;
+    });
+  };
 
   const handleJoinCommunity = async () => {
     setIsJoining(true);
@@ -37,6 +63,17 @@ export default function EventDetails({ params }: { params: Promise<{ eventId: st
           ...event,
           fans: [...(event.fans || []), { id: 'temp' }]
         });
+        if (typeof window !== 'undefined') {
+          try {
+            const joined = JSON.parse(localStorage.getItem('backstage_joined_communities') || '[]');
+            if (!joined.includes(eventId)) localStorage.setItem('backstage_joined_communities', JSON.stringify([...joined, eventId]));
+            const saved = JSON.parse(localStorage.getItem('backstage_saved_events') || '[]');
+            if (!saved.includes(eventId)) {
+              localStorage.setItem('backstage_saved_events', JSON.stringify([...saved, eventId]));
+              setIsSaved(true);
+            }
+          } catch (e) {}
+        }
       }
     } catch (error) {
       console.error(error);
@@ -181,11 +218,23 @@ export default function EventDetails({ params }: { params: Promise<{ eventId: st
             </div>
           </div>
           
-          <div className="w-full md:w-auto shrink-0">
+          <div className="w-full md:w-auto shrink-0 flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleSaveEvent}
+              className={`w-full sm:w-auto px-8 py-5 rounded-2xl font-bold text-lg transition-all shadow-xl flex items-center justify-center gap-2 border ${
+                isSaved
+                  ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20'
+                  : 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <svg className={`w-6 h-6 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              {isSaved ? "♥ Saved in Upcoming" : "♥ Save Event"}
+            </button>
+
             <button 
               onClick={handleJoinCommunity}
               disabled={isJoining || hasJoined}
-              className={`w-full md:w-auto relative group overflow-hidden rounded-2xl font-bold py-5 px-10 transition-all duration-300 shadow-xl flex items-center justify-center gap-3 ${
+              className={`w-full sm:w-auto relative group overflow-hidden rounded-2xl font-bold py-5 px-10 transition-all duration-300 shadow-xl flex items-center justify-center gap-3 ${
                 hasJoined 
                   ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed shadow-none' 
                   : 'bg-[#242424] text-[#CD7F32] hover:shadow-2xl hover:shadow-[#242424]/20 hover:-translate-y-1'

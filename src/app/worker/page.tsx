@@ -175,6 +175,7 @@ export default function WorkerDashboard() {
         const data = await res.json();
         setIsRunnerAvailable(data.isRunnerAvailable);
         fetchData();
+        window.dispatchEvent(new Event('profileUpdated'));
       } else {
         alert('Failed to update runner state');
       }

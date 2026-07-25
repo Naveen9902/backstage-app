@@ -68,6 +68,46 @@ export default function PushNotificationManager() {
     }
   }
 
+  async function enableDeviceNotifications() {
+    setMessage('Requesting notification permissions...');
+    try {
+      if (isNative) {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        const perm = await LocalNotifications.requestPermissions();
+        if (perm.display === 'granted') {
+          setMessage('📱 Mobile Device Notifications Enabled!');
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title: '📱 Device Alerts Enabled!',
+                body: 'You are now ready to receive instant notifications on your mobile device.',
+                id: Math.floor(Math.random() * 100000),
+                schedule: { at: new Date(Date.now() + 100) },
+              }
+            ]
+          });
+        } else {
+          setMessage('Permission denied in mobile app settings.');
+        }
+      } else {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            setMessage('📱 Mobile & Browser Notifications Enabled!');
+            subscribeToPush();
+          } else {
+            setMessage('Permission denied in browser settings.');
+          }
+        } else {
+          setMessage('Notifications enabled via fallback alerting.');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage('Failed to request permissions. Enabled via fallback.');
+    }
+  }
+
   async function unsubscribeFromPush() {
     await subscription?.unsubscribe();
     setSubscription(null);
@@ -150,6 +190,14 @@ export default function PushNotificationManager() {
       </p>
 
       <div className="flex flex-wrap items-center gap-2.5 pt-1 w-full sm:w-auto">
+        <button
+          onClick={enableDeviceNotifications}
+          type="button"
+          className="w-full sm:w-auto px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs md:text-sm transition-all shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/40"
+        >
+          <span>📱 Enable Device Notifications</span>
+        </button>
+
         <button
           onClick={testSystemNotification}
           type="button"

@@ -13,7 +13,6 @@ export default function EventsFilters({ events }: { events: any[] }) {
   
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({
     Categories: true,
-    Categories: true,
     Date: true,
     Venues: false,
   });

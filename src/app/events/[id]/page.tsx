@@ -214,9 +214,18 @@ export default async function EventDetailsPage({ params }: Props) {
                   </button>
                 </Link>
               ) : (
-                <button className="w-full bg-[#CD7F32] hover:bg-[#b56e29] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/30 transition-transform active:scale-95 text-lg">
-                  Book Now
-                </button>
+                <div className="w-full space-y-3">
+                  <Link href={userId ? `/user/community/${id}` : `/login`} className="block w-full">
+                    <button className="w-full bg-[#242424] hover:bg-black text-[#CD7F32] border border-[#CD7F32]/40 px-6 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base">
+                      👥 Join Community
+                    </button>
+                  </Link>
+                  <Link href={`/user`} className="block w-full">
+                    <button className="w-full bg-[#CD7F32] hover:bg-[#b56e29] text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/30 transition-transform active:scale-95 flex items-center justify-center gap-2 text-base">
+                      ♥ Save to Upcoming Events
+                    </button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -232,7 +241,7 @@ export default async function EventDetailsPage({ params }: Props) {
               View All <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <p className="text-gray-500 text-[15px] mb-8">Events around you, book now</p>
+          <p className="text-gray-500 text-[15px] mb-8">Events around you — join community &amp; save to your schedule</p>
           
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {relatedEvents.map((related) => (

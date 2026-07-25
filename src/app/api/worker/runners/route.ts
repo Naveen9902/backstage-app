@@ -7,7 +7,10 @@ import { sendNotification } from '@/lib/notifications';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    let userId = cookieStore.get('workerUserId')?.value;
+    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -71,7 +74,10 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    let userId = cookieStore.get('workerUserId')?.value;
+    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -169,10 +175,18 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    let userId = cookieStore.get('workerUserId')?.value;
+    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const { isRunnerAvailable } = await req.json();

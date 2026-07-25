@@ -155,6 +155,7 @@ export default function LiveRunnersBoard() {
         const data = await res.json();
         setIsRunnerAvailable(data.isRunnerAvailable);
         fetchTasks();
+        window.dispatchEvent(new Event('profileUpdated'));
       } else {
         alert('Failed to update runner state');
       }
@@ -258,7 +259,7 @@ export default function LiveRunnersBoard() {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
-      <div className="mb-10 relative overflow-hidden bg-gradient-to-r from-[#242424] to-[#1a1a1a] rounded-3xl p-8 md:p-10 text-white shadow-xl">
+      <div className="mb-10 relative overflow-hidden bg-gradient-to-r from-[#242424] to-[#1a1a1a] rounded-3xl p-6 sm:p-8 md:p-10 text-white shadow-xl border border-white/10">
         <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
           <div className="absolute top-0 right-10 w-32 h-full bg-gradient-to-b from-[#CD7F32] to-transparent transform rotate-45 animate-pulse"></div>
           <div className="absolute -bottom-10 right-32 w-64 h-64 bg-[#CD7F32] rounded-full blur-[80px]"></div>
@@ -271,32 +272,34 @@ export default function LiveRunnersBoard() {
               Live Errand Portal
             </div>
             <h1 className="text-3xl md:text-5xl font-extrabold font-serif tracking-tight">On-Ground Operations</h1>
-            <p className="text-gray-400 mt-2 text-sm md:text-base max-w-md">
+            <p className="text-gray-400 mt-2 text-sm md:text-base max-w-md leading-relaxed">
               Accept live broadcast tasks, run external errands, and swipe to mark tasks as completed in real-time.
             </p>
           </div>
           
-          <div className="flex gap-4">
-            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px]">
+          <div className="flex gap-4 self-start md:self-auto w-full sm:w-auto justify-start sm:justify-end">
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center flex-1 sm:flex-initial sm:min-w-[110px]">
               <div className="text-3xl font-bold text-[#CD7F32] mb-1">{myTasks.filter(t => t.status !== 'Completed').length}</div>
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Active</div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Active</div>
             </div>
-            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[100px]">
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center flex-1 sm:flex-initial sm:min-w-[110px]">
               <div className="text-3xl font-bold text-white mb-1">{pendingTasks.length}</div>
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Open</div>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">Open</div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-gray-300 text-center sm:text-left">
-            <span className="font-bold text-white">Runner Duty Mode:</span> Swipe to go online and receive external errands from nearby events
+        <div className="mt-8 pt-6 border-t border-white/15 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+          <div className="text-xs sm:text-sm text-gray-300 text-center lg:text-left leading-relaxed">
+            <span className="font-bold text-white uppercase tracking-wider font-mono">Runner Duty Mode:</span> Swipe or tap to go online and receive external errands from nearby events
           </div>
-          <SwipeToToggleRunner
-            isRunnerAvailable={isRunnerAvailable}
-            onToggle={handleToggleRunner}
-            loading={togglingRunner}
-          />
+          <div className="flex justify-center lg:justify-end w-full lg:w-auto">
+            <SwipeToToggleRunner
+              isRunnerAvailable={isRunnerAvailable}
+              onToggle={handleToggleRunner}
+              loading={togglingRunner}
+            />
+          </div>
         </div>
       </div>
 

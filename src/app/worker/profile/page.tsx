@@ -145,23 +145,6 @@ export default function WorkerProfile() {
     }
   };
 
-  const handleStripeConnect = async () => {
-    try {
-      setSaving(true);
-      const res = await fetch('/api/stripe/connect', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setMessage('Failed to connect Stripe.');
-        setSaving(false);
-      }
-    } catch (err) {
-      setMessage('An error occurred.');
-      setSaving(false);
-    }
-  };
-
   const handleVerifyIdentity = async () => {
     try {
       setSaving(true);
@@ -444,7 +427,7 @@ export default function WorkerProfile() {
                     </div>
                   ) : (
                     <button type="button" onClick={handleVerifyIdentity} disabled={saving} className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors shadow-sm flex items-center gap-1">
-                      {formData.verificationStatus === 'PENDING' && !formData.isVerified && formData.name ? 'Verify Identity (Stripe)' : 'Verification Failed - Retry'}
+                      {formData.verificationStatus === 'PENDING' && !formData.isVerified && formData.name ? 'Verify Identity & Background Check' : 'Verification Failed - Retry'}
                     </button>
                   )}
                   {formData.rating > 0 && (

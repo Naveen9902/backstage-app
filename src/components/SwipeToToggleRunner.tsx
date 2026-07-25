@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -9,8 +10,23 @@ interface SwipeToToggleRunnerProps {
 }
 
 export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loading = false }: SwipeToToggleRunnerProps) {
+  const isDraggingRef = useRef(false);
+
+  const handleContainerClick = () => {
+    if (!loading && !isDraggingRef.current) {
+      if (typeof window !== 'undefined') {
+        import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+          Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+        }).catch(() => {});
+      }
+      onToggle(!isRunnerAvailable);
+    }
+  };
+
   return (
-    <div className={`relative w-full max-w-[320px] sm:max-w-[340px] h-14 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all duration-500 shadow-xl select-none mx-auto md:mx-0 ${
+    <div 
+      onClick={handleContainerClick}
+      className={`relative w-full max-w-[320px] sm:max-w-[340px] h-14 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all duration-500 shadow-xl select-none mx-auto md:mx-0 cursor-pointer ${
       isRunnerAvailable 
         ? 'bg-gradient-to-r from-emerald-950 via-emerald-900 to-[#121212] border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' 
         : 'bg-gradient-to-r from-[#1a1a1a] via-[#242424] to-[#121212] border-[#CD7F32] shadow-[0_0_15px_rgba(205,127,50,0.2)]'
@@ -30,11 +46,11 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
           ) : isRunnerAvailable ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-              <span>🟢 ACTIVE RUNNER — SWIPE LEFT TO STOP</span>
+              <span>🟢 ACTIVE — SWIPE OR TAP TO STOP</span>
             </>
           ) : (
             <>
-              <span>⚡ SWIPE RIGHT FOR RUNNER ERRANDS</span>
+              <span>⚡ SWIPE OR TAP FOR RUNNER DUTY</span>
             </>
           )}
         </span>
@@ -47,15 +63,17 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
           dragConstraints={isRunnerAvailable ? { left: -260, right: 0 } : { left: 0, right: 260 }}
           dragElastic={0.05}
           dragSnapToOrigin
+          onDragStart={() => { isDraggingRef.current = true; }}
           onDragEnd={(e, info) => {
-            if (!isRunnerAvailable && info.offset.x > 140) {
+            setTimeout(() => { isDraggingRef.current = false; }, 150);
+            if (!isRunnerAvailable && info.offset.x > 45) {
               if (typeof window !== 'undefined') {
                 import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
                   Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
                 }).catch(() => {});
               }
               onToggle(true);
-            } else if (isRunnerAvailable && info.offset.x < -140) {
+            } else if (isRunnerAvailable && info.offset.x < -45) {
               if (typeof window !== 'undefined') {
                 import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
                   Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
