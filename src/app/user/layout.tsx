@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationBell from '@/components/NotificationBell';
 import ThemeToggle from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -48,7 +49,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         
         {/* Logo */}
         <div className="px-6 py-8">
-          <Link href="/" className="flex items-center gap-3 group"> <div className={`flex items-center gap-2.5 ${"text-xl font-bold font-serif tracking-wide group-hover:text-white transition-colors"}`}><img src="/logo.jpg" alt="Logo" className="w-16 h-16 object-contain drop-shadow-md" /><span>Back <span className="text-[#CD7F32]">Stage</span></span></div>
+          <Link href="/" className="flex items-center gap-3 group">
+            <Logo size="md" />
           </Link>
         </div>
 
@@ -120,7 +122,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
         <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
           {/* Mobile Header Logo */}
-          <Link href="/" className="md:hidden flex items-center gap-2"> <span className="font-serif font-bold tracking-wide text-[#CD7F32]">BackStage</span>
+          <Link href="/" className="md:hidden flex items-center gap-2">
+            <Logo size="sm" />
           </Link>
           
           <div className="flex items-center gap-2 md:gap-4">

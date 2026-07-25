@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
+import Logo from '@/components/Logo';
 
 export default function MySchedule() {
   const [schedule, setSchedule] = useState<any[]>([]);
@@ -513,7 +514,9 @@ export default function MySchedule() {
             
             <div className="bg-[#111111] p-8 pb-12 text-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32] rounded-full blur-[60px] opacity-20"></div>
-              <div className={`flex items-center gap-2.5 ${"text-2xl font-bold font-serif text-white mb-1 tracking-wide"}`}><img src="/logo.jpg" alt="Logo" className="w-24 h-24 object-contain drop-shadow-md" /><h2>Back <span className="text-[#CD7F32]">Stage</span></h2></div>
+              <div className="flex justify-center mb-2">
+                <Logo size="lg" />
+              </div>
               <p className="text-[#CD7F32] text-xs font-bold uppercase tracking-widest mb-6">Digital Event Pass</p>
               
               <h3 className="text-xl font-bold text-white leading-tight">

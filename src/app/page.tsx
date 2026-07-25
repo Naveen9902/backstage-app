@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Logo from '@/components/Logo';
 
 export default function AppGateway() {
   const router = useRouter();
@@ -106,11 +107,9 @@ export default function AppGateway() {
           className="relative z-10 flex flex-col items-center text-center max-w-sm"
         >
           <div className="relative mb-6">
-            <div className="w-24 h-24 rounded-3xl bg-[#242424] border border-white/10 shadow-2xl flex items-center justify-center p-3 overflow-hidden relative">
-              <img src="/logo.jpg" alt="BackStage Logo" className="w-full h-full object-contain drop-shadow-md relative z-10" />
-            </div>
-            <div className="absolute -inset-2 rounded-3xl border border-[#CD7F32]/40 animate-[spin_4s_linear_infinite]" />
-            <div className="absolute -inset-4 rounded-3xl border border-[#CD7F32]/20 animate-[spin_6s_linear_infinite_reverse]" />
+            <Logo size="xl" showText={false} />
+            <div className="absolute -inset-2 rounded-3xl border border-[#CD7F32]/40 animate-[spin_4s_linear_infinite] pointer-events-none" />
+            <div className="absolute -inset-4 rounded-3xl border border-[#CD7F32]/20 animate-[spin_6s_linear_infinite_reverse] pointer-events-none" />
           </div>
           
           <h2 className="text-2xl font-bold font-serif text-white tracking-wide mb-2">Back<span className="text-[#CD7F32]">Stage</span> Portal</h2>
@@ -133,10 +132,7 @@ export default function AppGateway() {
       {/* Top Header Bar */}
       <header className="relative z-10 max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#242424] border border-white/10 flex items-center justify-center p-1 shadow-md overflow-hidden">
-            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain" />
-          </div>
-          <span className="text-xl font-bold font-serif tracking-wide">Back<span className="text-[#CD7F32]">Stage</span></span>
+          <Logo size="md" />
           <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-widest bg-[#CD7F32]/20 text-[#CD7F32] px-2.5 py-0.5 rounded-full border border-[#CD7F32]/30 ml-2">
             <Sparkles className="w-3 h-3" /> App Gateway
           </span>
