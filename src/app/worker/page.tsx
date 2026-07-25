@@ -2,27 +2,121 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+
+const SwipeToComplete = ({ onComplete, loading }: { onComplete: () => void, loading: boolean }) => {
+  const [isCompleted, setIsCompleted] = useState(false);
+  
+  return (
+    <div className="relative w-56 h-12 bg-gray-100 rounded-full overflow-hidden flex items-center justify-center border border-gray-200 shadow-inner group">
+      <span className="text-xs font-bold text-gray-400 select-none pointer-events-none tracking-widest z-0">
+        {loading ? 'COMPLETING...' : isCompleted ? 'DONE' : 'SWIPE TO COMPLETE'}
+      </span>
+      {!isCompleted && !loading && (
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 176 }}
+          dragElastic={0.05}
+          dragSnapToOrigin
+          onDragEnd={(e, info) => {
+            if (info.offset.x > 120) {
+              if (typeof window !== 'undefined') {
+                import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+                  Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+                }).catch(() => {});
+              }
+              setIsCompleted(true);
+              onComplete();
+            }
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-[#242424] to-black rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </motion.div>
+      )}
+      <div className={`absolute top-0 left-0 h-full bg-green-500 transition-all duration-500 ease-out z-10 ${isCompleted ? 'w-full' : 'w-0'}`}></div>
+      {isCompleted && (
+        <div className="absolute inset-0 flex items-center justify-center text-white font-bold z-20">
+          <CheckCircle2 className="w-5 h-5 mr-2" /> DONE
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: boolean, price?: number | null }) => {
+  const [isTaken, setIsTaken] = useState(false);
+  
+  return (
+    <div className="relative w-full sm:w-64 h-12 bg-blue-50/80 rounded-full overflow-hidden flex items-center justify-center border-2 border-blue-400 shadow-inner group">
+      <span className="text-xs font-extrabold text-blue-700 select-none pointer-events-none tracking-widest z-0 font-mono">
+        {loading ? 'GRABBING TASK...' : isTaken ? 'CLAIMED! ⚡' : `SWIPE TO TAKE ${price ? '(₹'+price+')' : 'TASK'}`}
+      </span>
+      {!isTaken && !loading && (
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 208 }}
+          dragElastic={0.05}
+          dragSnapToOrigin
+          onDragEnd={(e, info) => {
+            if (info.offset.x > 140) {
+              if (typeof window !== 'undefined') {
+                import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+                  Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+                }).catch(() => {});
+              }
+              setIsTaken(true);
+              onTake();
+            }
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-yellow-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="yellow" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </motion.div>
+      )}
+      <div className={`absolute top-0 left-0 h-full bg-blue-600 transition-all duration-500 ease-out z-10 ${isTaken ? 'w-full' : 'w-0'}`}></div>
+      {isTaken && (
+        <div className="absolute inset-0 flex items-center justify-center text-white font-bold z-20">
+          ⚡ TAKEN!
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [platformLiveEvents, setPlatformLiveEvents] = useState<any[]>([]);
+  const [tasksData, setTasksData] = useState<{ pending: any[]; myTasks: any[] }>({ pending: [], myTasks: [] });
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
-      const [profRes, appsRes, liveRes] = await Promise.all([
+      const [profRes, appsRes, liveRes, runnersRes] = await Promise.all([
         fetch('/api/worker/profile', { cache: 'no-store' }),
         fetch('/api/worker/applications', { cache: 'no-store' }),
-        fetch('/api/events/live', { cache: 'no-store' })
+        fetch('/api/events/live', { cache: 'no-store' }),
+        fetch('/api/worker/runners', { cache: 'no-store' })
       ]);
       const profData = await profRes.json();
       const appsData = await appsRes.json();
       const liveData = await liveRes.json();
+      const runnersData = await runnersRes.json();
       
       if (profData && !profData.error) setProfile(profData);
       if (Array.isArray(appsData)) setApplications(appsData);
       if (Array.isArray(liveData)) setPlatformLiveEvents(liveData);
+      if (runnersData && !runnersData.error) {
+        setTasksData({
+          pending: runnersData.pending || [],
+          myTasks: runnersData.myTasks || []
+        });
+      }
     } catch (err) {
       console.error('Dashboard fetch error', err);
     } finally {
@@ -30,10 +124,84 @@ export default function WorkerDashboard() {
     }
   };
 
+  const handleAccept = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'accept' })
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to claim task (someone else might have grabbed it)');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingAction(null);
+  };
+
+  const handleComplete = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'complete' })
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to complete task');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingAction(null);
+  };
+
+  const handleConfirmPayment = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'confirm_payment' })
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to confirm payment');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingAction(null);
+  };
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 5000); // Poll every 5s
-    return () => clearInterval(interval);
+
+    const channel = supabase.channel('worker_dashboard_dispatches')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'RunnerDispatch' },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const acceptedApps = applications.filter(app => app.status === 'ACCEPTED');
@@ -91,6 +259,176 @@ export default function WorkerDashboard() {
           </motion.button>
         </Link>
       </div>
+
+      {/* ACTIVE TASKS & ERRANDS POP-UP AT TOP OF DASHBOARD */}
+      {(tasksData.myTasks.length > 0 || tasksData.pending.length > 0) && (
+        <div className="mb-10 space-y-6">
+          {/* Active Tasks Assigned to Me */}
+          {tasksData.myTasks.length > 0 && (
+            <div className="bg-gradient-to-r from-[#242424] to-gray-900 rounded-3xl p-6 md:p-8 text-white shadow-2xl border border-yellow-500/30 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10 flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-3 h-3 rounded-full bg-yellow-400 animate-ping"></span>
+                  <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-white flex items-center gap-2">
+                    🎯 My Active Ground Tasks ({tasksData.myTasks.length})
+                  </h2>
+                </div>
+                <Link href="/worker/runners">
+                  <span className="text-xs font-bold text-yellow-400 hover:underline flex items-center gap-1 font-mono">
+                    Open Full Board →
+                  </span>
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tasksData.myTasks.map((task) => {
+                  const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                  const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+
+                  return (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={`bg-white text-gray-900 rounded-2xl p-5 shadow-lg border-2 flex flex-col justify-between ${
+                        isExternalErrand ? 'border-blue-500 shadow-blue-500/10' : 'border-[#CD7F32]'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex justify-between items-start mb-3 gap-2">
+                          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${
+                            isExternalErrand ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {isExternalErrand ? '⚡ External Errand' : task.event?.title || 'Event Task'}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {task.price !== null && task.price !== undefined && (
+                              <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-md text-xs font-extrabold font-mono shadow-2xs">
+                                ₹{task.price}
+                              </span>
+                            )}
+                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                              task.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-700'
+                            }`}>
+                              {task.status}
+                            </span>
+                          </div>
+                        </div>
+                        <h3 className="text-base font-extrabold text-gray-900 mb-3 leading-snug whitespace-pre-wrap">{cleanTask}</h3>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 mt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+
+                        {task.status !== 'Completed' ? (
+                          <SwipeToComplete
+                            onComplete={() => handleComplete(task.id)}
+                            loading={loadingAction === task.id}
+                          />
+                        ) : task.price !== null && task.price !== undefined ? (
+                          <div className="w-full sm:w-auto">
+                            {task.paymentStatus === 'CONFIRMED' ? (
+                              <span className="inline-flex items-center justify-center w-full gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-2 rounded-xl text-xs font-bold font-mono shadow-2xs">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                Confirmed (₹{task.price})
+                              </span>
+                            ) : task.paymentStatus === 'SENT' ? (
+                              <button
+                                onClick={() => handleConfirmPayment(task.id)}
+                                disabled={loadingAction === task.id}
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2 px-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5 animate-pulse disabled:opacity-50 cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                                <span>{loadingAction === task.id ? 'Confirming...' : `Confirm Received (₹${task.price})`}</span>
+                              </button>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-full gap-1 bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                                <Clock className="w-3.5 h-3.5" />
+                                Awaiting Payment
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs font-bold text-emerald-600">✅ Completed</span>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Open Broadcast Errands (Rapido Mode) */}
+          {tasksData.pending.length > 0 && (
+            <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-[#1a1a2e] rounded-3xl p-6 md:p-8 text-white shadow-2xl border-2 border-yellow-400/60 relative overflow-hidden">
+              <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
+              
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10 flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-3 h-3 rounded-full bg-yellow-400 animate-ping"></span>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-yellow-300 flex items-center gap-2">
+                      ⚡ Rapido Open Broadcasts ({tasksData.pending.length})
+                    </h2>
+                    <p className="text-xs text-blue-200 mt-0.5">First runner to swipe & claim takes the payout!</p>
+                  </div>
+                </div>
+                <Link href="/worker/runners">
+                  <span className="text-xs font-bold text-blue-300 hover:underline font-mono">
+                    View All Open →
+                  </span>
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tasksData.pending.map((task) => {
+                  const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                  const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+
+                  return (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white/95 backdrop-blur-md text-gray-900 rounded-2xl p-5 shadow-xl border-2 border-yellow-400 flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex justify-between items-start mb-3 gap-2">
+                          <span className="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-yellow-300 text-yellow-950 font-mono shadow-2xs">
+                            ⚡ OPEN BROADCAST
+                          </span>
+                          {task.price !== null && task.price !== undefined && (
+                            <span className="bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm font-extrabold font-mono shadow-sm">
+                              ₹{task.price} PAYOUT
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-lg font-extrabold text-gray-900 mb-2 leading-snug whitespace-pre-wrap">{cleanTask}</h3>
+                        <p className="text-xs text-gray-500 font-medium">{task.event?.title || 'General Venue & External Errands'}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-200 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <span className="text-xs text-gray-500 font-mono flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+
+                        <SwipeToTake
+                          onTake={() => handleAccept(task.id)}
+                          loading={loadingAction === task.id}
+                          price={task.price}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* LIVE EVENT ALERT */}
       {liveShifts.length > 0 && (

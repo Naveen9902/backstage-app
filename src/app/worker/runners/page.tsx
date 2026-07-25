@@ -45,6 +45,47 @@ const SwipeToComplete = ({ onComplete, loading }: { onComplete: () => void, load
   );
 };
 
+const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: boolean, price?: number | null }) => {
+  const [isTaken, setIsTaken] = useState(false);
+  
+  return (
+    <div className="relative w-full sm:w-64 h-12 bg-blue-50/80 rounded-full overflow-hidden flex items-center justify-center border-2 border-blue-400 shadow-inner group">
+      <span className="text-xs font-extrabold text-blue-700 select-none pointer-events-none tracking-widest z-0 font-mono">
+        {loading ? 'GRABBING TASK...' : isTaken ? 'CLAIMED! ⚡' : `SWIPE TO TAKE ${price ? '(₹'+price+')' : 'TASK'}`}
+      </span>
+      {!isTaken && !loading && (
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 208 }} // 256 (w-64) - 48 (w-12)
+          dragElastic={0.05}
+          dragSnapToOrigin
+          onDragEnd={(e, info) => {
+            if (info.offset.x > 140) {
+              if (typeof window !== 'undefined') {
+                import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+                  Haptics.impact({ style: ImpactStyle.Heavy }).catch(() => {});
+                }).catch(() => {});
+              }
+              setIsTaken(true);
+              onTake();
+            }
+          }}
+          whileTap={{ scale: 0.95 }}
+          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-yellow-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="yellow" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </motion.div>
+      )}
+      <div className={`absolute top-0 left-0 h-full bg-blue-600 transition-all duration-500 ease-out z-10 ${isTaken ? 'w-full' : 'w-0'}`}></div>
+      {isTaken && (
+        <div className="absolute inset-0 flex items-center justify-center text-white font-bold z-20">
+          ⚡ TAKEN!
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 export default function LiveRunnersBoard() {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
@@ -336,15 +377,11 @@ export default function LiveRunnersBoard() {
                         <span className="text-xs text-blue-600 font-semibold italic">⚡ Claim immediately before other runners accept!</span>
                       )}
                     </div>
-                    <button 
-                      onClick={() => handleAccept(task.id)}
-                      disabled={loadingAction === task.id}
-                      className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto shrink-0 justify-center shadow-md ${
-                        isExternalErrand ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white active:scale-95 animate-pulse' : 'bg-[#CD7F32] hover:bg-[#b06a28] text-white'
-                      }`}
-                    >
-                      {loadingAction === task.id ? <Loader2 className="w-4 h-4 animate-spin" /> : isExternalErrand ? `⚡ Grab Errand (${task.price ? '₹'+task.price : 'Now'})` : 'Accept Task'}
-                    </button>
+                    <SwipeToTake 
+                      onTake={() => handleAccept(task.id)}
+                      loading={loadingAction === task.id}
+                      price={task.price}
+                    />
                   </div>
                 </motion.div>
                 );
