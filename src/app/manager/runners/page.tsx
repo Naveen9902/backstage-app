@@ -377,23 +377,171 @@ export default function RunnersPage() {
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-gray-400">Assigned:</span>
-                                  {dispatch.runner ? (
-                                    <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
-                                      {dispatch.runner.name}
-                                    </span>
-                                  ) : (
-                                    <span className="font-bold text-gray-400 italic">Unassigned</span>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
+
+              </div>
+
+              {/* RIGHT COLUMN: Task Dispatches History (Span 7) */}
+              <div className="lg:col-span-7">
+                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+                    <div>
+                      <h2 className="text-xl font-extrabold text-gray-900 font-serif flex items-center gap-2">
+                        Task Dispatches Live Log
+                      </h2>
+                      <p className="text-xs text-gray-400 mt-1">Real-time status of all errands, tasks, and ground assignments</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-xl">
+                        Total: <span className="text-gray-900 font-mono">{dispatches.length}</span>
+                      </span>
+                      <button 
+                        onClick={fetchDispatches}
+                        className="text-xs font-bold text-[#CD7F32] hover:bg-[#CD7F32]/10 px-3 py-1.5 rounded-xl border border-[#CD7F32]/20 transition-all flex items-center gap-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
+                        Refresh
+                      </button>
+                    </div>
+                  </div>
+
+                  {dispatches.length === 0 ? (
+                    <div className="text-center py-16 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                      </div>
+                      <p className="text-sm text-gray-600 font-bold">No tasks dispatched yet</p>
+                      <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">Assign a task to hired event staff or hire an external runner from the panel on the left.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {Object.entries(
+                        dispatches.reduce((acc: Record<string, any[]>, dispatch: any) => {
+                          const eventName = dispatch.event?.title || 'General / Errand';
+                          if (!acc[eventName]) acc[eventName] = [];
+                          acc[eventName].push(dispatch);
+                          return acc;
+                        }, {})
+                      ).map(([eventName, eventDispatches]) => (
+                        <div key={eventName} className="space-y-3">
+                          <div className="flex items-center gap-2 bg-gray-100/80 px-3.5 py-1.5 rounded-xl w-max">
+                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-700 font-mono">
+                              🎉 {eventName}
+                            </span>
+                            <span className="text-[10px] bg-white text-gray-600 px-2 py-0.5 rounded-md font-bold shadow-2xs font-mono">
+                              {eventDispatches.length} {eventDispatches.length === 1 ? 'task' : 'tasks'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pl-1">
+                            {eventDispatches.map((dispatch: any) => {
+                              const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]') || dispatch.price !== null;
+                              const cleanTask = dispatch.task?.replace('[EXTERNAL/ERRAND] ', '');
+
+                              return (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  key={dispatch.id} 
+                                  className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                                    dispatch.status === 'Completed' ? 'bg-emerald-50/30 border-emerald-200/80' : 
+                                    dispatch.status === 'In Progress' ? 'bg-sky-50/30 border-sky-200/80' : 
+                                    'bg-white border-gray-200 hover:border-gray-300 shadow-2xs'
+                                  }`}
+                                >
+                                  <div>
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {isExternal ? (
+                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
+                                            External
+                                          </span>
+                                        ) : (
+                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
+                                            Internal
+                                          </span>
+                                        )}
+                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                          dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                          dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
+                                          'bg-amber-100 text-amber-700 border border-amber-200'
+                                        }`}>
+                                          {dispatch.status || 'Pending'}
+                                        </span>
+                                        {dispatch.price !== null && dispatch.price !== undefined && (
+                                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs font-mono">
+                                            ₹{dispatch.price}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <span className={`w-2 h-2 rounded-full ${
+                                        dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
+                                        dispatch.urgency === 'High' ? 'bg-orange-500' : 'bg-gray-300'
+                                      }`} title={`Urgency: ${dispatch.urgency}`}></span>
+                                    </div>
+                                    
+                                    <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
+                                      {cleanTask || 'No description provided'}
+                                    </p>
+                                  </div>
+                                  
+                                  <div>
+                                    <div className="flex items-center justify-between text-xs pt-3 border-t border-gray-100">
+                                      <div className="text-gray-400 flex items-center gap-1 font-mono">
+                                        <Clock className="w-3 h-3" />
+                                        {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-gray-400">Assigned:</span>
+                                        {dispatch.runner ? (
+                                          <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
+                                            {dispatch.runner.name}
+                                          </span>
+                                        ) : (
+                                          <span className="font-bold text-gray-400 italic">Unassigned</span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {dispatch.status === 'Completed' && dispatch.price !== null && dispatch.price !== undefined && (
+                                      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80 -mx-4 -mb-4 p-3 rounded-b-2xl">
+                                        {dispatch.paymentStatus === 'CONFIRMED' ? (
+                                          <span className="text-xs font-bold text-emerald-700 flex items-center justify-center w-full gap-1 bg-emerald-100/60 py-1.5 rounded-lg border border-emerald-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                            Payment Confirmed (₹{dispatch.price})
+                                          </span>
+                                        ) : dispatch.paymentStatus === 'SENT' ? (
+                                          <span className="text-xs font-semibold text-amber-700 flex items-center justify-center w-full gap-1.5 bg-amber-100/60 py-1.5 px-2 rounded-lg border border-amber-200 text-center">
+                                            <svg className="animate-spin h-3.5 w-3.5 text-amber-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <span>Payment Sent - Awaiting Runner</span>
+                                          </span>
+                                        ) : (
+                                          <button
+                                            onClick={() => handleSendPayment(dispatch.id)}
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                                          >
+                                            <span>Confirm Payment Sent (₹{dispatch.price})</span>
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           </>
         )}

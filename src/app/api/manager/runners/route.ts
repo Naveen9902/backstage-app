@@ -135,15 +135,43 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { dispatchId, runnerId } = await req.json();
+    const { dispatchId, runnerId, action } = await req.json();
 
-    if (!dispatchId || !runnerId) {
+    if (!dispatchId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const dispatch = await prisma.runnerDispatch.findUnique({ where: { id: dispatchId } });
     if (!dispatch || dispatch.managerId !== userId) {
       return NextResponse.json({ error: 'Task not found or unauthorized' }, { status: 404 });
+    }
+
+    if (action === 'pay') {
+      if (dispatch.status !== 'Completed') {
+        return NextResponse.json({ error: 'Task must be completed before sending payment' }, { status: 400 });
+      }
+      const updated = await prisma.runnerDispatch.update({
+        where: { id: dispatchId },
+        data: { paymentStatus: 'SENT' },
+        include: {
+          event: { select: { title: true } },
+          runner: { select: { name: true } }
+        }
+      });
+      
+      if (dispatch.runnerId) {
+        await prisma.notification.create({
+          data: {
+            userId: dispatch.runnerId,
+            message: `Manager has sent payment of ₹${dispatch.price || 0} for task: "${dispatch.task}". Please confirm receipt in your Runner board.`
+          }
+        });
+      }
+      return NextResponse.json(updated, { status: 200 });
+    }
+
+    if (!runnerId) {
+      return NextResponse.json({ error: 'Missing runnerId for assignment' }, { status: 400 });
     }
 
     if (dispatch.status !== 'Pending') {

@@ -129,6 +129,32 @@ export async function POST(req: Request) {
       return NextResponse.json(updated, { status: 200 });
     }
 
+    if (action === 'confirm_payment') {
+      if (dispatch.runnerId !== userId) {
+        return NextResponse.json({ error: 'Unauthorized to confirm payment for this task' }, { status: 403 });
+      }
+      if (dispatch.paymentStatus !== 'SENT') {
+        return NextResponse.json({ error: 'Payment has not been marked as sent by Manager yet' }, { status: 400 });
+      }
+      const updated = await prisma.runnerDispatch.update({
+        where: { id: dispatchId },
+        data: { paymentStatus: 'CONFIRMED' },
+        include: {
+          runner: true,
+          event: true
+        }
+      });
+      if (updated.event?.managerId) {
+        await prisma.notification.create({
+          data: {
+            userId: updated.event.managerId,
+            message: `Runner ${updated.runner?.name || 'Worker'} has confirmed receipt of ₹${updated.price || 0} for task: "${updated.task}"`
+          }
+        });
+      }
+      return NextResponse.json(updated, { status: 200 });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('ACTION RUNNER ERROR:', error);

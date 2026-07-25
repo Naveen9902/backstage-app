@@ -181,11 +181,12 @@ model RunnerDispatch {
   eventId   String
   event     Event    @relation(fields: [eventId], references: [id])
   managerId String
-  task      String
-  urgency   String
-  price     Float?
-  status    String   @default("Pending")
-  runnerId  String?
+  task          String
+  urgency       String
+  price         Float?
+  paymentStatus String?  @default("UNPAID")
+  status        String   @default("Pending")
+  runnerId      String?
   runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 

@@ -129,6 +129,26 @@ export default function LiveRunnersBoard() {
     setLoadingAction(null);
   };
 
+  const handleConfirmPayment = async (dispatchId: string) => {
+    setLoadingAction(dispatchId);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispatchId, action: 'confirm_payment' })
+      });
+      if (res.ok) {
+        fetchTasks();
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to confirm payment');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingAction(null);
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-10 relative overflow-hidden bg-gradient-to-r from-[#242424] to-[#1a1a1a] rounded-3xl p-8 md:p-10 text-white shadow-xl">
@@ -139,13 +159,13 @@ export default function LiveRunnersBoard() {
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CD7F32]/20 text-[#CD7F32] rounded-full text-xs font-bold uppercase tracking-widest mb-4 border border-[#CD7F32]/30">
-              <MapPin className="w-3 h-3" />
-              On-Ground Operations
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] text-xs font-bold mb-4">
+              <span className="w-2 h-2 rounded-full bg-[#CD7F32] animate-pulse"></span>
+              Live Errand Portal
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold font-serif tracking-tight mb-2 text-white">Your Task Board</h1>
-            <p className="text-gray-400 max-w-md">
-              View your direct assignments or grab open requests to assist the team.
+            <h1 className="text-3xl md:text-5xl font-extrabold font-serif tracking-tight">On-Ground Operations</h1>
+            <p className="text-gray-400 mt-2 text-sm md:text-base max-w-md">
+              Accept live broadcast tasks, run external errands, and swipe to mark tasks as completed in real-time.
             </p>
           </div>
           
@@ -167,7 +187,7 @@ export default function LiveRunnersBoard() {
         <section>
           <h2 className="text-xl font-bold font-serif flex items-center gap-2 mb-4 text-gray-800">
             <CheckCircle2 className="text-[#CD7F32] w-5 h-5" />
-            My Active Tasks
+            My Active Tasks &amp; Errands
           </h2>
           
           {myTasks.length === 0 ? (
@@ -194,7 +214,9 @@ export default function LiveRunnersBoard() {
                           ₹{task.price} Payout
                         </span>
                       )}
-                      <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+                        task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-700'
+                      }`}>
                         {task.status}
                       </span>
                     </div>
@@ -208,11 +230,34 @@ export default function LiveRunnersBoard() {
                       </span>
                     </div>
                     
-                    {task.status !== 'Completed' && (
+                    {task.status !== 'Completed' ? (
                       <SwipeToComplete 
                         onComplete={() => handleComplete(task.id)} 
                         loading={loadingAction === task.id} 
                       />
+                    ) : task.price !== null && task.price !== undefined && (
+                      <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                        {task.paymentStatus === 'CONFIRMED' ? (
+                          <span className="inline-flex items-center justify-center w-full sm:w-auto gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 px-4 py-2 rounded-xl text-xs font-bold font-mono shadow-2xs">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            Payment Confirmed (₹{task.price})
+                          </span>
+                        ) : task.paymentStatus === 'SENT' ? (
+                          <button
+                            onClick={() => handleConfirmPayment(task.id)}
+                            disabled={loadingAction === task.id}
+                            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5 animate-pulse disabled:opacity-50"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>{loadingAction === task.id ? 'Confirming...' : `Confirm Payment Received (₹${task.price})`}</span>
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-full sm:w-auto gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-3.5 py-2 rounded-xl text-xs font-semibold">
+                            <Clock className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+                            Waiting for Manager Payout (₹{task.price})
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </motion.div>
