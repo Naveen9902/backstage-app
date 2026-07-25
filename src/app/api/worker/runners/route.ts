@@ -182,8 +182,8 @@ export async function PATCH(req: Request) {
       update: { isRunnerAvailable: Boolean(isRunnerAvailable) },
       create: {
         userId,
-        name: 'Worker',
-        bio: 'Event staff & runner',
+        skills: 'General Event Staff, Runner',
+        experience: '1+ year event experience',
         isRunnerAvailable: Boolean(isRunnerAvailable)
       }
     });

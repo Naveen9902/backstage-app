@@ -723,34 +723,8 @@ export default function WorkerProfile() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Active Events & Wallet */}
+        {/* RIGHT COLUMN: Active Events */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Earnings Wallet (Premium UI) */}
-          <div className="bg-gradient-to-br from-[#111] via-[#222] to-[#000] rounded-[2rem] p-6 text-white shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32]/20 blur-[40px] rounded-full group-hover:bg-[#CD7F32]/30 transition-colors"></div>
-            
-            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Available to Withdraw</h3>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-2xl font-medium text-gray-400 mb-1">$</span>
-              <span className="text-4xl font-black tracking-tight">1,240.00</span>
-            </div>
-            
-            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-6">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold text-gray-300">Pending Payouts</span>
-                <span className="text-sm font-bold text-[#CD7F32]">₹29,000</span>
-              </div>
-              <div className="w-full bg-black/50 rounded-full h-1.5 mt-2 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#CD7F32] to-yellow-500 w-[60%] h-full rounded-full"></div>
-              </div>
-            </div>
-            
-            <button className="w-full bg-white text-black font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Withdraw to Bank
-            </button>
-          </div>
-
           <div className="bg-gradient-to-b from-white to-[#fdfcf9] rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#EAE6DF] p-6 sticky top-24">
             <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>

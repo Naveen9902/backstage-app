@@ -11,10 +11,10 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', showText = true, className = '', textClassName = '' }: LogoProps) {
   const sizeClasses = {
-    sm: 'w-8 h-8 rounded-lg p-1',
-    md: 'w-10 h-10 md:w-11 md:h-11 rounded-xl p-1.5',
-    lg: 'w-16 h-16 md:w-20 md:h-20 rounded-2xl p-2',
-    xl: 'w-24 h-24 md:w-28 md:h-28 rounded-3xl p-3'
+    sm: 'w-8 h-8 rounded-lg',
+    md: 'w-10 h-10 md:w-11 md:h-11 rounded-xl',
+    lg: 'w-16 h-16 md:w-20 md:h-20 rounded-2xl',
+    xl: 'w-24 h-24 md:w-28 md:h-28 rounded-3xl'
   };
 
   const textSizes = {
@@ -35,7 +35,7 @@ export default function Logo({ size = 'md', showText = true, className = '', tex
           <img 
             src="/logo.jpg" 
             alt="BackStage Logo" 
-            className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" 
+            className="w-full h-full object-cover filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" 
           />
           {/* Internal Glass Shine Overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/30 pointer-events-none" />
