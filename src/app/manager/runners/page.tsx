@@ -123,139 +123,245 @@ export default function RunnersPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Top Two-Halves Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             
-            {/* Hired Staff List */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
-                <Briefcase className="text-[#CD7F32] w-6 h-6" />
-                Hired Staff
-              </h2>
-              {hiredStaff.length === 0 ? (
-                <div className="bg-white p-8 rounded-xl border border-gray-100 text-center text-gray-500 shadow-sm">
-                  No hired staff found for your ongoing events.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {hiredStaff.map((staff, i) => (
-                    <motion.div 
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white p-5 rounded-xl border border-gray-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div>
-                        <div className="font-bold text-lg text-gray-900">{staff.name}</div>
-                        <div className="text-sm text-gray-500">{staff.roleName} &bull; {staff.eventName}</div>
+              {/* Left Half: Hired Internal Staff */}
+              <div className="bg-gradient-to-b from-white to-gray-50/50 p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-lg shadow-gray-200/50 flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32]/10 rounded-bl-full pointer-events-none blur-xl"></div>
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-[#242424] text-[#CD7F32] flex items-center justify-center shadow-md">
+                        <Briefcase className="w-6 h-6" />
                       </div>
-                      <button 
-                        onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId, isExternal: false })}
-                        className="bg-[#242424] hover:bg-[#CD7F32] text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-                      >
-                        <Send className="w-4 h-4" /> Assign Internal Task
-                      </button>
-                    </motion.div>
-                  ))}
+                      <div>
+                        <h2 className="text-2xl font-bold font-serif text-gray-900">Hired Event Runners</h2>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Internal Venue Crew &bull; Live Tasks</p>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold uppercase tracking-wider border border-amber-200">
+                      {hiredStaff.length} On Duty
+                    </span>
+                  </div>
+
+                  {hiredStaff.length === 0 ? (
+                    <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-gray-200 text-center my-6">
+                      <Briefcase className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 font-medium">No internal runners assigned to ongoing events.</p>
+                      <p className="text-xs text-gray-400 mt-1">Hire staff in the Staffing tab first.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 my-2 max-h-[450px] overflow-y-auto pr-1">
+                      {hiredStaff.map((staff, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="group bg-white p-4 rounded-2xl border border-gray-100/80 hover:border-[#CD7F32]/40 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-gray-900 to-gray-700 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                              {staff.name ? staff.name.charAt(0).toUpperCase() : 'R'}
+                            </div>
+                            <div>
+                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
+                                {staff.name}
+                                <span className="text-[10px] bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-md">Internal</span>
+                              </div>
+                              <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                {staff.roleName} &bull; <span className="text-gray-400 truncate max-w-[140px]">{staff.eventName}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId, isExternal: false })}
+                            className="bg-[#242424] hover:bg-[#CD7F32] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow flex items-center gap-1.5 group/btn"
+                          >
+                            <span>Assign</span>
+                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+                  <span>Venue operations &bull; Equipment &bull; VIP Escorts</span>
+                  <span className="font-mono">INTERNAL DISPATCH</span>
+                </div>
+              </div>
+
+              {/* Right Half: Nearby External Runners */}
+              <div className="bg-gradient-to-b from-white to-blue-50/30 p-6 md:p-8 rounded-3xl border border-blue-100 shadow-lg shadow-blue-500/5 flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-bl-full pointer-events-none blur-xl"></div>
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold font-serif text-gray-900">Nearby Quick Runners</h2>
+                        <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">External Errands &bull; Swiggy / Rapido Style</p>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-200">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                      {nearbyRunners.length} Nearby
+                    </span>
+                  </div>
+
+                  {nearbyRunners.length === 0 ? (
+                    <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-blue-200 text-center my-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-blue-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                      <p className="text-gray-500 font-medium">No active nearby runners detected right now.</p>
+                      <p className="text-xs text-gray-400 mt-1">Runners will appear when active in your vicinity.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 my-2 max-h-[450px] overflow-y-auto pr-1">
+                      {nearbyRunners.map((runner, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="group bg-white p-4 rounded-2xl border border-gray-100 hover:border-blue-300 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                              {runner.name ? runner.name.charAt(0).toUpperCase() : 'Q'}
+                            </div>
+                            <div>
+                              <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                                {runner.name}
+                                <span className="flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase">
+                                  <span className="w-1 h-1 bg-emerald-500 rounded-full animate-ping"></span> Live
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                <span className="flex items-center gap-1 font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                  {runner.distance}
+                                </span>
+                                <span className="text-gray-400">&bull;</span>
+                                <span className="truncate max-w-[120px] text-gray-500">{runner.skills || 'Quick Delivery & Errands'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/20 hover:shadow-md flex items-center gap-1.5 group/btn"
+                          >
+                            <span>Dispatch</span>
+                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                          </button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 pt-4 border-t border-blue-100/60 flex items-center justify-between text-xs text-blue-400">
+                  <span>External pickups &bull; Deliveries &bull; Emergency Supplies</span>
+                  <span className="font-mono font-bold text-blue-500">RAPID SERVICE</span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Nearby External Runners */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                Nearby Quick Runners (External)
-              </h2>
-              {nearbyRunners.length === 0 ? (
-                <div className="bg-white p-8 rounded-xl border border-gray-100 text-center text-gray-500 shadow-sm">
-                  No active runners found nearby.
+            {/* Bottom Section: Dispatches History */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-xl shadow-gray-100">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold font-serif text-gray-900">Task Dispatches Live Log</h2>
+                    <p className="text-sm text-gray-500">Real-time tracking of all venue commands and external errands</p>
+                  </div>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {nearbyRunners.map((runner, i) => (
-                    <motion.div 
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white p-5 rounded-xl border border-gray-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500 rounded-bl-full opacity-5"></div>
-                      <div>
-                        <div className="font-bold text-lg text-gray-900 flex items-center gap-2">
-                          {runner.name}
-                          <span className="flex items-center gap-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Active
-                          </span>
-                        </div>
-                        <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                          {runner.distance} &bull; {runner.skills || 'Quick Errands'}
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 z-10"
-                      >
-                        <Send className="w-4 h-4" /> Quick Errand
-                      </button>
-                    </motion.div>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Dispatched:</span>
+                  <span className="px-3 py-1 bg-gray-100 text-gray-900 rounded-lg font-bold text-sm">{dispatches.length}</span>
                 </div>
-              )}
-            </div>
+              </div>
 
-          </div>
-
-          <div className="mt-12">
-
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
-                <CheckCircle2 className="text-[#CD7F32] w-6 h-6" />
-                Task Dispatches History
-              </h2>
               {dispatches.length === 0 ? (
-                <div className="bg-white p-8 rounded-xl border border-gray-100 text-center text-gray-500 shadow-sm">
-                  No runners dispatched yet.
+                <div className="py-16 text-center">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                    <Clock className="w-8 h-8 text-gray-300" />
+                  </div>
+                  <h3 className="font-bold text-gray-700 text-lg mb-1">No tasks dispatched yet</h3>
+                  <p className="text-sm text-gray-400 max-w-md mx-auto">Assign a task to an internal event worker or dispatch a nearby quick runner above to start tracking live operations.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {dispatches.map((dispatch, i) => (
-                    <motion.div 
-                      key={dispatch.id}
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col"
-                      style={{ borderLeft: `4px solid ${dispatch.urgency === 'Critical' ? '#ef4444' : dispatch.urgency === 'High' ? '#f97316' : '#CD7F32'}` }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate max-w-[120px]">{dispatch.event?.title}</span>
-                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
-                          dispatch.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                          dispatch.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
-                          'bg-amber-100 text-amber-700'
-                        }`}>
-                          {dispatch.status}
-                        </span>
-                      </div>
-                      <p className="font-medium text-gray-900 mb-4 flex-1">{dispatch.task}</p>
-                      
-                      <div className="flex items-center justify-between text-sm mt-auto pt-4 border-t border-gray-50">
-                        <div className="text-gray-500 flex items-center gap-1 text-xs">
-                          <Clock className="w-3 h-3" />
-                          {new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {dispatches.map((dispatch) => {
+                    const isExternal = dispatch.task?.startsWith('[EXTERNAL/ERRAND]');
+                    const cleanTask = isExternal ? dispatch.task.replace('[EXTERNAL/ERRAND] ', '') : dispatch.task;
+                    
+                    return (
+                      <motion.div 
+                        key={dispatch.id}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-gray-50/60 hover:bg-white p-5 rounded-2xl border border-gray-200/70 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-gray-500 truncate max-w-[140px] bg-white px-2 py-1 rounded-md border border-gray-100 shadow-2xs">
+                              {dispatch.event?.title || 'General Errand'}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {isExternal ? (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
+                                  External
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/20">
+                                  Internal
+                                </span>
+                              )}
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                dispatch.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                dispatch.status === 'In Progress' ? 'bg-sky-100 text-sky-700 border border-sky-200' :
+                                'bg-amber-100 text-amber-700 border border-amber-200'
+                              }`}>
+                                {dispatch.status || 'Pending'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <p className="font-semibold text-gray-900 text-sm leading-relaxed mb-4 line-clamp-3">
+                            {cleanTask || 'No description provided'}
+                          </p>
                         </div>
-                        {dispatch.runner ? (
-                          <div className={`font-bold text-xs ${dispatch.task.startsWith('[EXTERNAL/ERRAND]') ? 'text-blue-600' : 'text-[#CD7F32]'}`}>{dispatch.runner.name}</div>
-                        ) : (
-                          <div className="font-bold text-gray-400 text-xs">Unassigned</div>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
+                        
+                        <div className="flex items-center justify-between text-xs mt-auto pt-3 border-t border-gray-200/60">
+                          <div className="text-gray-400 flex items-center gap-1 font-mono">
+                            <Clock className="w-3 h-3" />
+                            {dispatch.createdAt ? new Date(dispatch.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-gray-400">Assigned:</span>
+                            {dispatch.runner ? (
+                              <span className={`font-bold px-2 py-0.5 rounded ${isExternal ? 'bg-blue-50 text-blue-700 font-mono' : 'bg-gray-100 text-gray-900'}`}>
+                                {dispatch.runner.name}
+                              </span>
+                            ) : (
+                              <span className="font-bold text-gray-400 italic">Unassigned</span>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>
-          </div>
           </>
         )}
       </div>
