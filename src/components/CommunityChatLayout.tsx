@@ -30,7 +30,7 @@ type CommunityChatLayoutProps = {
   initialChannel?: string;
 };
 
-const ALL_CHANNELS = ['announcements', 'general', 'staff-chat', 'networking', 'q-and-a'];
+const ALL_CHANNELS = ['announcements', 'general', 'networking', 'q-and-a'];
 
 export default function CommunityChatLayout({ eventId, event, currentUser, otherEvents = [], returnHref = "/user/community", initialChannel }: CommunityChatLayoutProps) {
   const [messages, setMessages] = useState<Message[]>([]);
