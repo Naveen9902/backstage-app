@@ -188,9 +188,16 @@ export default function LiveRunnersBoard() {
                       <span className="text-xs font-bold uppercase tracking-wider text-[#CD7F32] block truncate">{task.event?.title}</span>
                       <h3 className="text-lg font-bold text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
                     </div>
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">
-                      {task.status}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {task.price !== null && task.price !== undefined && (
+                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-mono shadow-2xs">
+                          ₹{task.price} Payout
+                        </span>
+                      )}
+                      <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">
+                        {task.status}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">
@@ -239,13 +246,20 @@ export default function LiveRunnersBoard() {
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block truncate">{task.event?.title}</span>
                       <h3 className="text-lg font-medium text-gray-900 mt-1 break-words break-all whitespace-pre-wrap">{task.task}</h3>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
-                      task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
-                      task.urgency === 'High' ? 'bg-amber-100 text-amber-700' : 
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {task.urgency}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {task.price !== null && task.price !== undefined && (
+                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-mono shadow-2xs">
+                          ₹{task.price} Payout
+                        </span>
+                      )}
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+                        task.urgency === 'Critical' ? 'bg-red-100 text-red-700' : 
+                        task.urgency === 'High' ? 'bg-amber-100 text-amber-700' : 
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {task.urgency}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4">

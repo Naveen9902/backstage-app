@@ -15,6 +15,7 @@ export default function RunnersPage() {
   const [nearbyRunners, setNearbyRunners] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [assigning, setAssigning] = useState(false);
+  const [price, setPrice] = useState('');
   
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean} | null>(null);
@@ -74,6 +75,7 @@ export default function RunnersPage() {
           eventId: assignModal.eventId || selectedEvent,
           task: assignModal.isExternal ? `[EXTERNAL/ERRAND] ${task}` : task,
           urgency,
+          price: assignModal.isExternal && price ? price : null,
           runnerId: assignModal.userId
         })
       });
@@ -81,6 +83,7 @@ export default function RunnersPage() {
         fetchDispatches();
         setAssignModal(null);
         setTask('');
+        setPrice('');
       }
     } catch (err) {
       console.error(err);
@@ -350,6 +353,11 @@ export default function RunnersPage() {
                                     }`}>
                                       {dispatch.status || 'Pending'}
                                     </span>
+                                    {dispatch.price !== null && dispatch.price !== undefined && (
+                                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs font-mono">
+                                        ₹{dispatch.price}
+                                      </span>
+                                    )}
                                   </div>
                                   <span className={`w-2 h-2 rounded-full ${
                                     dispatch.urgency === 'Critical' ? 'bg-red-500 animate-ping' :
@@ -415,6 +423,27 @@ export default function RunnersPage() {
                   placeholder="e.g. Need more ice at the main stage VIP bar immediately."
                 ></textarea>
               </div>
+              {assignModal.isExternal && (
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-1 flex items-center justify-between">
+                    <span>Task Payout Price (₹ / $)</span>
+                    <span className="text-[10px] font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-mono font-bold">External Errand Fee</span>
+                  </label>
+                  <div className="relative mt-1">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-gray-400">₹</span>
+                    <input 
+                      type="number" 
+                      min="0"
+                      step="any"
+                      value={price} 
+                      onChange={e=>setPrice(e.target.value)} 
+                      className="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-4 py-2.5 focus:border-blue-600 outline-none shadow-inner text-gray-900 font-bold font-mono" 
+                      placeholder="e.g. 250"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-1">Set the payout amount for buying/hiring this runner for the task.</p>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-bold text-gray-700 mb-2 block">Urgency</label>
                 <div className="flex gap-2 flex-wrap">
@@ -433,7 +462,7 @@ export default function RunnersPage() {
               <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
-                  onClick={() => { setAssignModal(null); setTask(''); }}
+                  onClick={() => { setAssignModal(null); setTask(''); setPrice(''); }}
                   className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors"
                 >
                   Cancel

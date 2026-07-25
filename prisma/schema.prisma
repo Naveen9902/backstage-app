@@ -183,6 +183,7 @@ model RunnerDispatch {
   managerId String
   task      String
   urgency   String
+  price     Float?
   status    String   @default("Pending")
   runnerId  String?
   runner    User?    @relation("RunnerTasks", fields: [runnerId], references: [id], onDelete: Cascade)

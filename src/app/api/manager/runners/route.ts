@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { eventId, task, urgency, runnerId } = await req.json();
+    const { eventId, task, urgency, runnerId, price } = await req.json();
 
     if (!eventId || !task || !urgency) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -110,6 +110,7 @@ export async function POST(req: Request) {
         eventId,
         task,
         urgency,
+        price: price !== undefined && price !== null && price !== '' ? parseFloat(price) : null,
         runnerId: runnerId || null
       },
       include: {
