@@ -26,7 +26,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`/api/chat/${eventId}`);
+      const res = await fetch(`/api/chat/${eventId}?channel=staff-chat`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -45,8 +45,10 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'EventChatMessage', filter: `eventId=eq.${eventId}` },
-        () => {
-          fetchMessages();
+        (payload) => {
+          if (payload.new.channel === 'staff-chat') {
+            fetchMessages();
+          }
         }
       )
       .subscribe();
@@ -86,7 +88,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
       const res = await fetch(`/api/chat/${eventId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: messageText })
+        body: JSON.stringify({ text: messageText, channel: 'staff-chat' })
       });
       if (res.ok) {
         fetchMessages(); // Refresh to get official timestamp & ID
