@@ -258,41 +258,7 @@ export default function RunnersPage() {
           </div>
         </div>
 
-        {/* Top Bar: Quick Open Errand Broadcast */}
-        <div className="mb-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-6 border border-blue-400/30">
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 text-2xl shadow-inner">
-              ⚡
-            </div>
-            <div>
-              <div className="flex items-center gap-2 font-extrabold text-base font-serif">
-                <span className="bg-white text-blue-600 text-xs px-2.5 py-0.5 rounded-lg uppercase font-mono font-extrabold shadow-sm">Open Errand</span>
-                <span className="text-xl">Broadcast Errand to All Workers</span>
-              </div>
-              <p className="text-sm text-blue-100 mt-1 max-w-2xl leading-relaxed">
-                Need quick on-ground help or supplies? Broadcast an open errand with a fixed price to all nearby workers simultaneously. First worker to grab it claims the job automatically!
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              setAssignModal({ userId: null, name: 'All Nearby Workers (Open Errand)', eventId: selectedEvent || (events[0]?.id) || null, isExternal: true, isBroadcast: true });
-              setTask('');
-              setPrice('');
-            }}
-            className="bg-white text-blue-700 hover:bg-blue-50 font-extrabold text-sm px-6 py-3.5 rounded-2xl shadow-lg shrink-0 transition-all hover:scale-105 active:scale-95 whitespace-nowrap flex items-center gap-2 border border-blue-100"
-          >
-            <span className="text-lg">⚡</span>
-            <span>Post Open Errand (₹)</span>
-          </button>
-        </div>
 
-        {events.length === 0 && (
-          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 text-sm text-amber-800">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <span><strong>Note:</strong> You have no events yet. Open Errand broadcasts will automatically create a general operations event for you!</span>
-          </div>
-        )}
 
         {/* Top Two-Halves Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
@@ -366,51 +332,28 @@ export default function RunnersPage() {
               </div>
 
               {/* Right Half: Nearby External Runners */}
-              <div className="bg-gradient-to-b from-white to-blue-50/30 p-6 md:p-8 rounded-3xl border border-blue-100 shadow-lg shadow-blue-500/5 flex flex-col justify-between relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-bl-full pointer-events-none blur-xl"></div>
+              <div className="bg-gradient-to-b from-white to-gray-50/50 p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-lg shadow-gray-200/50 flex flex-col justify-between relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#CD7F32]/10 rounded-bl-full pointer-events-none blur-xl"></div>
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+                      <div className="w-12 h-12 rounded-2xl bg-[#242424] text-[#CD7F32] flex items-center justify-center shadow-md border border-[#CD7F32]/30">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                       </div>
                       <div>
                         <h2 className="text-2xl font-bold font-serif text-gray-900">Nearby Quick Runners</h2>
-                        <p className="text-xs text-blue-600 uppercase tracking-wider font-semibold">External Errands &bull; Instant Dispatch</p>
+                        <p className="text-xs text-[#CD7F32] uppercase tracking-wider font-semibold">External Errands &bull; Instant Dispatch</p>
                       </div>
                     </div>
-                    <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-200">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-[#CD7F32]/10 text-[#CD7F32] rounded-full text-xs font-bold uppercase tracking-wider border border-[#CD7F32]/20 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-[#CD7F32] animate-pulse"></span>
                       {nearbyRunners.length} Nearby
                     </span>
                   </div>
 
-                  {/* Open Errand Broadcast Mode Banner */}
-                  <div className="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 border border-blue-400/30">
-                    <div>
-                      <div className="flex items-center gap-1.5 font-extrabold text-sm font-serif">
-                        <span className="bg-white text-blue-600 text-[10px] px-2 py-0.5 rounded-md uppercase font-mono font-bold">Open Errand</span>
-                        <span>⚡ Broadcast Open Errand</span>
-                      </div>
-                      <p className="text-xs text-blue-100 mt-1 leading-relaxed">
-                        Post an open task with price to all nearby workers. First runner to select it claims the job automatically!
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setAssignModal({ userId: null, name: 'All Nearby Runners (Open Errand)', eventId: selectedEvent || null, isExternal: true, isBroadcast: true });
-                        setTask('');
-                        setPrice('');
-                      }}
-                      className="bg-white text-blue-700 hover:bg-blue-50 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-sm shrink-0 transition-transform active:scale-95 whitespace-nowrap flex items-center gap-1.5"
-                    >
-                      <span>⚡ Post Open Task</span>
-                    </button>
-                  </div>
-
                   {nearbyRunners.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-blue-200 text-center my-6">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-blue-300 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-gray-200 text-center my-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-[#CD7F32]/60 mx-auto mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                       <p className="text-gray-500 font-medium">No active nearby runners detected right now.</p>
                       <p className="text-xs text-gray-400 mt-1">Runners will appear when active in your vicinity.</p>
                     </div>
@@ -422,14 +365,14 @@ export default function RunnersPage() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className="group bg-white p-4 rounded-2xl border border-gray-100 hover:border-blue-300 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
+                          className="group bg-white p-4 rounded-2xl border border-gray-100 hover:border-[#CD7F32]/50 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
                         >
                           <div className="flex items-center gap-3.5">
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                            <div className="w-11 h-11 rounded-full bg-[#242424] text-[#CD7F32] font-bold flex items-center justify-center text-sm shadow-inner border border-[#CD7F32]/30">
                               {runner.name ? runner.name.charAt(0).toUpperCase() : 'Q'}
                             </div>
                             <div>
-                              <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
                                 {runner.name}
                                 <span className="flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase">
                                   <span className="w-1 h-1 bg-emerald-500 rounded-full animate-ping"></span> Live
@@ -447,19 +390,19 @@ export default function RunnersPage() {
                           </div>
                           <button 
                             onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/20 hover:shadow-md flex items-center gap-1.5 group/btn"
+                            className="bg-[#242424] hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 group/btn border border-gray-800"
                           >
                             <span>Dispatch</span>
-                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform" />
+                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform text-[#CD7F32]" />
                           </button>
                         </motion.div>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="mt-4 pt-4 border-t border-blue-100/60 flex items-center justify-between text-xs text-blue-400">
+                <div className="mt-4 pt-4 border-t border-gray-200/60 flex items-center justify-between text-xs text-gray-400">
                   <span>External pickups &bull; Deliveries &bull; Emergency Supplies</span>
-                  <span className="font-mono font-bold text-blue-500">RAPID SERVICE</span>
+                  <span className="font-mono font-bold text-[#CD7F32]">RAPID SERVICE</span>
                 </div>
               </div>
 
@@ -502,7 +445,7 @@ export default function RunnersPage() {
                           onClick={() => setBoardHistoryTab('CLOSED')}
                           className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
                             boardHistoryTab === 'CLOSED'
-                              ? 'bg-purple-900 text-purple-200 shadow-md'
+                              ? 'bg-[#242424] text-white shadow-md border border-[#CD7F32]/40'
                               : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
                           }`}
                         >
@@ -561,42 +504,32 @@ export default function RunnersPage() {
                             onClick={() => { setSelectedEventView(groupName); setFilterStatus('ALL'); }}
                             className={`group relative overflow-hidden rounded-3xl p-6.5 cursor-pointer transition-all duration-300 flex flex-col justify-between border-2 shadow-lg ${
                               isClosed
-                                ? 'bg-gradient-to-br from-slate-900 via-purple-950 to-[#1e1a24] text-purple-100 border-purple-500/40 hover:border-purple-300 hover:shadow-[0_20px_40px_rgba(168,85,247,0.25)]'
+                                ? 'bg-[#181818] text-white border-gray-800 hover:border-[#CD7F32]/80 hover:shadow-[0_20px_40px_rgba(205,127,50,0.15)]'
                                 : isExternalGroup 
-                                ? 'bg-gradient-to-br from-blue-900/95 via-indigo-900 to-[#242424] text-white border-blue-500/40 hover:border-blue-400 hover:shadow-[0_20px_40px_rgba(59,130,246,0.25)]' 
+                                ? 'bg-gradient-to-br from-[#242424] via-[#2a241f] to-[#181818] text-white border-[#CD7F32]/40 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]' 
                                 : 'bg-gradient-to-br from-[#242424] via-[#2a2a2a] to-[#1f1f1f] text-white border-gray-800 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]'
                             }`}
                           >
-                            <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
-                              isClosed ? 'bg-purple-500/20 group-hover:bg-purple-400/30' : isExternalGroup ? 'bg-blue-500/20 group-hover:bg-blue-400/30' : 'bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30'
-                            }`} />
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30" />
 
                             <div>
                               <div className="flex items-start justify-between gap-3 mb-4">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner ${
-                                  isClosed
-                                    ? 'bg-purple-500/20 text-purple-300 border-purple-400/30 text-2xl'
-                                    : isExternalGroup 
-                                    ? 'bg-blue-500/20 text-blue-300 border-blue-400/30 text-2xl' 
-                                    : 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30'
-                                }`}>
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30 text-2xl">
                                   {isClosed ? '🏁' : isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
                                 </div>
                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border font-mono shadow-2xs ${
                                   isClosed
-                                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                                    ? 'bg-[#242424] text-gray-300 border-gray-700'
                                     : totalTasks > 0 
-                                    ? isExternalGroup ? 'bg-blue-500/20 text-blue-300 border-blue-400/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    ? 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/40'
                                     : 'bg-gray-700/50 text-gray-400 border-gray-600/50'
                                 }`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${isClosed ? 'bg-purple-400' : totalTasks > 0 ? (isExternalGroup ? 'bg-blue-400 animate-pulse' : 'bg-emerald-400 animate-pulse') : 'bg-gray-500'}`} />
+                                  <span className={`w-1.5 h-1.5 rounded-full ${isClosed ? 'bg-gray-400' : totalTasks > 0 ? 'bg-[#CD7F32] animate-pulse' : 'bg-gray-500'}`} />
                                   {isClosed ? '🏁 Closed History' : totalTasks > 0 ? 'Active Board' : 'Standby'}
                                 </span>
                               </div>
 
-                              <h3 className={`text-xl font-bold font-serif tracking-tight leading-snug mb-2 transition-colors ${
-                                isExternalGroup ? 'group-hover:text-blue-300' : 'group-hover:text-[#CD7F32]'
-                              }`}>
+                              <h3 className="text-xl font-bold font-serif tracking-tight leading-snug mb-2 transition-colors group-hover:text-[#CD7F32]">
                                 {groupName}
                               </h3>
 
@@ -637,9 +570,7 @@ export default function RunnersPage() {
 
                                 <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
                                   isClosed
-                                    ? 'bg-purple-700 text-white group-hover:bg-purple-600 shadow-md'
-                                    : isExternalGroup 
-                                    ? 'bg-blue-600 text-white group-hover:bg-blue-500 shadow-md' 
+                                    ? 'bg-[#242424] text-white border border-[#CD7F32]/50 group-hover:bg-[#CD7F32]'
                                     : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
                                 }`}>
                                   <span>{isClosed ? 'History Board' : 'Open Board'}</span>
@@ -671,11 +602,7 @@ export default function RunnersPage() {
                         <span>Back to All Events Grid</span>
                       </button>
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl shadow-inner shrink-0 ${
-                          isBoardClosed(selectedEventView)
-                            ? 'bg-purple-500/20 text-purple-600 border-purple-500/30'
-                            : 'bg-[#CD7F32]/10 text-[#CD7F32] border-[#CD7F32]/20'
-                        }`}>
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl shadow-inner shrink-0 bg-[#CD7F32]/10 text-[#CD7F32] border-[#CD7F32]/20">
                           {isBoardClosed(selectedEventView) ? '🏁' : selectedEventView.includes('External') || selectedEventView.includes('Errand') ? '⚡' : '🎪'}
                         </div>
                         <div>
@@ -684,7 +611,7 @@ export default function RunnersPage() {
                               {selectedEventView}
                             </h2>
                             {isBoardClosed(selectedEventView) && (
-                              <span className="px-2.5 py-0.5 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold uppercase tracking-wider border border-purple-300 font-mono">
+                              <span className="px-2.5 py-0.5 bg-[#242424] text-[#CD7F32] rounded-lg text-xs font-bold uppercase tracking-wider border border-[#CD7F32]/40 font-mono">
                                 🏁 Closed History Archive
                               </span>
                             )}
@@ -770,7 +697,7 @@ export default function RunnersPage() {
                               <div className="flex items-start justify-between gap-2 mb-3">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   {isExternal ? (
-                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 shadow-2xs font-mono">
+                                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/30 shadow-2xs font-mono">
                                       ⚡ External Errand
                                     </span>
                                   ) : (
@@ -814,7 +741,7 @@ export default function RunnersPage() {
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-gray-400 font-medium text-[11px]">Runner:</span>
                                   {dispatch.runner ? (
-                                    <span className={`font-extrabold px-2.5 py-0.5 rounded-md text-xs shadow-2xs ${isExternal ? 'bg-blue-600 text-white font-mono' : 'bg-[#242424] text-[#CD7F32]'}`}>
+                                    <span className="font-extrabold px-2.5 py-0.5 rounded-md text-xs shadow-2xs bg-[#242424] text-[#CD7F32]">
                                       {dispatch.runner.name}
                                     </span>
                                   ) : (
@@ -833,8 +760,8 @@ export default function RunnersPage() {
                                       <span>Payment Confirmed by Runner (₹{dispatch.price})</span>
                                     </span>
                                   ) : dispatch.paymentStatus === 'SENT' ? (
-                                    <span className="text-xs font-bold text-blue-700 flex items-center justify-center w-full gap-1.5 bg-blue-100/90 py-2.5 px-3 rounded-2xl border border-blue-300 shadow-2xs font-mono">
-                                      <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                                    <span className="text-xs font-bold text-[#CD7F32] flex items-center justify-center w-full gap-1.5 bg-[#CD7F32]/10 py-2.5 px-3 rounded-2xl border border-[#CD7F32]/30 shadow-2xs font-mono">
+                                      <CheckCircle2 className="w-4 h-4 text-[#CD7F32] shrink-0" />
                                       <span>Payment Done (₹{dispatch.price})</span>
                                     </span>
                                   ) : (
@@ -906,11 +833,11 @@ export default function RunnersPage() {
           >
             <div className="p-6 border-b border-gray-100 bg-gray-50">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                {assignModal.isBroadcast && <span className="text-blue-600">⚡</span>}
+                {assignModal.isBroadcast && <span className="text-[#CD7F32]">⚡</span>}
                 <span>{assignModal.isBroadcast ? 'Broadcast Open Errand' : `Assign Task to ${assignModal.name}`}</span>
               </h3>
               {assignModal.isBroadcast && (
-                <p className="text-xs text-blue-600 mt-1 font-medium">This errand will pop up for all nearby workers. The first runner to accept it claims it automatically!</p>
+                <p className="text-xs text-[#CD7F32] mt-1 font-medium">This errand will pop up for all nearby workers. The first runner to accept it claims it automatically!</p>
               )}
             </div>
             
@@ -930,7 +857,7 @@ export default function RunnersPage() {
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-1 flex items-center justify-between">
                     <span>Task Payout Price (₹ / $)</span>
-                    <span className="text-[10px] font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-mono font-bold">External Errand Fee</span>
+                    <span className="text-[10px] font-normal text-[#CD7F32] bg-[#CD7F32]/10 px-2 py-0.5 rounded border border-[#CD7F32]/30 font-mono font-bold">External Errand Fee</span>
                   </label>
                   <div className="relative mt-1">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-gray-400">₹</span>
@@ -940,7 +867,7 @@ export default function RunnersPage() {
                       step="any"
                       value={price} 
                       onChange={e=>setPrice(e.target.value)} 
-                      className="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-4 py-2.5 focus:border-blue-600 outline-none shadow-inner text-gray-900 font-bold font-mono" 
+                      className="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-4 py-2.5 focus:border-[#CD7F32] outline-none shadow-inner text-gray-900 font-bold font-mono" 
                       placeholder="e.g. 250"
                     />
                   </div>
@@ -974,7 +901,7 @@ export default function RunnersPage() {
                   disabled={assigning} 
                   type="submit" 
                   className={`flex-1 font-bold py-3 rounded-xl transition-colors disabled:opacity-50 text-white shadow-md ${
-                    assignModal.isBroadcast ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-[#242424] hover:bg-black'
+                    assignModal.isBroadcast ? 'bg-[#CD7F32] hover:bg-[#b86f2b]' : 'bg-[#242424] hover:bg-black'
                   }`}
                 >
                   {assigning ? 'Dispatching...' : assignModal.isBroadcast ? '⚡ Broadcast to All Nearby' : 'Dispatch'}

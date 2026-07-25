@@ -50,8 +50,8 @@ const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: 
   const [isTaken, setIsTaken] = useState(false);
   
   return (
-    <div className="relative w-full sm:w-64 h-12 bg-blue-50/80 rounded-full overflow-hidden flex items-center justify-center border-2 border-blue-400 shadow-inner group">
-      <span className="text-xs font-extrabold text-blue-700 select-none pointer-events-none tracking-widest z-0 font-mono">
+    <div className="relative w-full sm:w-64 h-12 bg-[#242424] rounded-full overflow-hidden flex items-center justify-center border-2 border-[#CD7F32]/60 shadow-inner group">
+      <span className="text-xs font-extrabold text-[#CD7F32] select-none pointer-events-none tracking-widest z-0 font-mono">
         {loading ? 'GRABBING TASK...' : isTaken ? 'CLAIMED! ⚡' : `SWIPE TO TAKE ${price ? '(₹'+price+')' : 'TASK'}`}
       </span>
       {!isTaken && !loading && (
@@ -72,12 +72,12 @@ const SwipeToTake = ({ onTake, loading, price }: { onTake: () => void, loading: 
             }
           }}
           whileTap={{ scale: 0.95 }}
-          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-yellow-300"
+          className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-[#CD7F32] to-[#b86f2b] rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing z-10 border-2 border-white"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="yellow" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </motion.div>
       )}
-      <div className={`absolute top-0 left-0 h-full bg-blue-600 transition-all duration-500 ease-out z-10 ${isTaken ? 'w-full' : 'w-0'}`}></div>
+      <div className={`absolute top-0 left-0 h-full bg-[#CD7F32] transition-all duration-500 ease-out z-10 ${isTaken ? 'w-full' : 'w-0'}`}></div>
       {isTaken && (
         <div className="absolute inset-0 flex items-center justify-center text-white font-bold z-20">
           ⚡ TAKEN!
@@ -325,12 +325,12 @@ export default function LiveRunnersBoard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={task.id} 
-                  className={`bg-white shadow-sm rounded-r-xl p-5 ${isExternalErrand ? 'border-l-4 border-blue-600' : 'border-l-4 border-[#CD7F32]'}`}
+                  className="bg-white shadow-sm rounded-r-xl p-5 border-l-4 border-[#CD7F32]"
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2 sm:gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1 sm:hidden">
-                        <span className={`text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
+                        <span className="text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] text-[#CD7F32]">
                           {isExternalErrand ? (task.event?.title || '⚡ External Errand') : task.event?.title}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
@@ -340,13 +340,13 @@ export default function LiveRunnersBoard() {
                             </span>
                           )}
                           <span className={`px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
-                            task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-700'
+                            task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/30'
                           }`}>
                             {task.status}
                           </span>
                         </div>
                       </div>
-                      <span className={`hidden sm:block text-xs font-bold uppercase tracking-wider truncate ${isExternalErrand ? 'text-blue-600' : 'text-[#CD7F32]'}`}>
+                      <span className="hidden sm:block text-xs font-bold uppercase tracking-wider truncate text-[#CD7F32]">
                         {isExternalErrand ? (task.event?.title || '⚡ External Errand') : task.event?.title}
                       </span>
                       <h3 className="text-base sm:text-lg font-bold text-gray-900 mt-1 break-words leading-snug">{cleanTask}</h3>
@@ -358,7 +358,7 @@ export default function LiveRunnersBoard() {
                         </span>
                       )}
                       <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
-                        task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-700'
+                        task.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/30'
                       }`}>
                         {task.status}
                       </span>
@@ -432,24 +432,24 @@ export default function LiveRunnersBoard() {
                   animate={{ opacity: 1, y: 0 }}
                   key={task.id} 
                   className={`bg-white shadow-sm rounded-xl p-5 transition-all ${
-                    isExternalErrand ? 'border-2 border-blue-500 shadow-lg shadow-blue-500/10 bg-gradient-to-br from-blue-50/40 via-white to-white' : 'border border-gray-200 hover:border-[#CD7F32]'
+                    isExternalErrand ? 'border-2 border-[#CD7F32] shadow-lg shadow-[#CD7F32]/10 bg-gradient-to-br from-[#CD7F32]/5 via-white to-white' : 'border border-gray-200 hover:border-[#CD7F32]'
                   }`}
                 >
                   {isExternalErrand && (
-                    <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold font-mono shadow-sm">
+                    <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 bg-[#242424] text-white px-3.5 py-2 rounded-xl text-xs font-bold font-mono shadow-sm border border-[#CD7F32]/50">
                       <span className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-yellow-300 animate-ping"></span>
-                        <span>⚡ OPEN ERRAND BROADCAST &bull; FIRST TO GRAB WINS</span>
+                        <span className="w-2 h-2 rounded-full bg-[#CD7F32] animate-ping"></span>
+                        <span className="text-[#CD7F32]">⚡ OPEN ERRAND BROADCAST &bull; FIRST TO GRAB WINS</span>
                       </span>
                       {task.price !== null && task.price !== undefined && (
-                        <span className="bg-white text-blue-900 px-2.5 py-0.5 rounded-lg font-extrabold text-sm font-mono shadow-2xs">₹{task.price}</span>
+                        <span className="bg-[#CD7F32] text-white px-2.5 py-0.5 rounded-lg font-extrabold text-sm font-mono shadow-2xs">₹{task.price}</span>
                       )}
                     </div>
                   )}
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2 sm:gap-3 w-full">
                     <div className="min-w-0 w-full overflow-hidden flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1 sm:hidden">
-                        <span className={`text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <span className={`text-xs font-extrabold uppercase tracking-wider truncate max-w-[180px] ${isExternalErrand ? 'text-[#CD7F32]' : 'text-gray-500'}`}>
                           {task.event?.title || 'External Errand'}
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
@@ -467,7 +467,7 @@ export default function LiveRunnersBoard() {
                           </span>
                         </div>
                       </div>
-                      <span className={`hidden sm:block text-xs font-bold uppercase tracking-wider truncate ${isExternalErrand ? 'text-blue-600' : 'text-gray-500'}`}>{task.event?.title || 'External Errand'}</span>
+                      <span className={`hidden sm:block text-xs font-bold uppercase tracking-wider truncate ${isExternalErrand ? 'text-[#CD7F32]' : 'text-gray-500'}`}>{task.event?.title || 'External Errand'}</span>
                       <h3 className="text-base sm:text-lg font-bold text-gray-900 mt-1 break-words leading-snug">{cleanTask}</h3>
                     </div>
                     <div className="hidden sm:flex items-center gap-2 shrink-0">
@@ -490,7 +490,7 @@ export default function LiveRunnersBoard() {
                     <div className="flex items-center gap-4 text-sm text-gray-500 min-w-0">
                       <span className="flex items-center gap-1 shrink-0"><Clock className="w-4 h-4"/> {new Date(task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                       {isExternalErrand && (
-                        <span className="text-xs text-blue-600 font-semibold italic">⚡ Claim immediately before other runners accept!</span>
+                        <span className="text-xs text-[#CD7F32] font-semibold italic">⚡ Claim immediately before other runners accept!</span>
                       )}
                     </div>
                     <SwipeToTake 
