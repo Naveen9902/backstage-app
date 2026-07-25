@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import SwipeToToggleRunner from '@/components/SwipeToToggleRunner';
 
 const SwipeToComplete = ({ onComplete, loading }: { onComplete: () => void, loading: boolean }) => {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -91,6 +92,8 @@ export default function LiveRunnersBoard() {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [isRunnerAvailable, setIsRunnerAvailable] = useState(false);
+  const [togglingRunner, setTogglingRunner] = useState(false);
 
   const fetchTasks = async () => {
     try {
@@ -99,9 +102,34 @@ export default function LiveRunnersBoard() {
         const data = await res.json();
         setPendingTasks(data.pending || []);
         setMyTasks(data.myTasks || []);
+        if (typeof data.isRunnerAvailable === 'boolean') {
+          setIsRunnerAvailable(data.isRunnerAvailable);
+        }
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleToggleRunner = async (newVal: boolean) => {
+    setTogglingRunner(true);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isRunnerAvailable: newVal })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsRunnerAvailable(data.isRunnerAvailable);
+        fetchTasks();
+      } else {
+        alert('Failed to update runner state');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTogglingRunner(false);
     }
   };
 
@@ -220,6 +248,17 @@ export default function LiveRunnersBoard() {
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Open</div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-gray-300 text-center sm:text-left">
+            <span className="font-bold text-white">Runner Duty Mode:</span> Swipe to go online and receive external errands from nearby events
+          </div>
+          <SwipeToToggleRunner
+            isRunnerAvailable={isRunnerAvailable}
+            onToggle={handleToggleRunner}
+            loading={togglingRunner}
+          />
         </div>
       </div>
 

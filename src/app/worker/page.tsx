@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import SwipeToToggleRunner from '@/components/SwipeToToggleRunner';
 
 const SwipeToComplete = ({ onComplete, loading }: { onComplete: () => void, loading: boolean }) => {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -94,6 +95,8 @@ export default function WorkerDashboard() {
   const [platformLiveEvents, setPlatformLiveEvents] = useState<any[]>([]);
   const [tasksData, setTasksData] = useState<{ pending: any[]; myTasks: any[] }>({ pending: [], myTasks: [] });
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [isRunnerAvailable, setIsRunnerAvailable] = useState(false);
+  const [togglingRunner, setTogglingRunner] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -116,11 +119,36 @@ export default function WorkerDashboard() {
           pending: runnersData.pending || [],
           myTasks: runnersData.myTasks || []
         });
+        if (typeof runnersData.isRunnerAvailable === 'boolean') {
+          setIsRunnerAvailable(runnersData.isRunnerAvailable);
+        }
       }
     } catch (err) {
       console.error('Dashboard fetch error', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleRunner = async (newVal: boolean) => {
+    setTogglingRunner(true);
+    try {
+      const res = await fetch('/api/worker/runners', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isRunnerAvailable: newVal })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsRunnerAvailable(data.isRunnerAvailable);
+        fetchData();
+      } else {
+        alert('Failed to update runner state');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTogglingRunner(false);
     }
   };
 
@@ -242,22 +270,29 @@ export default function WorkerDashboard() {
 
   return (
     <div className="text-[#242424]">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-10 gap-4">
+      {/* Header with Runner Toggle */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-10 gap-6 bg-[#1a1a1a] p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl">
         <div>
-          <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Dashboard</h1>
-          <p className="text-lg text-gray-700">Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Talent'}!</span></p>
+          <h1 className="text-3xl sm:text-4xl font-bold font-serif tracking-tight mb-2 text-white">Talent Dashboard</h1>
+          <p className="text-base sm:text-lg text-gray-300">Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Talent'}!</span></p>
         </div>
-        <Link href="/worker/jobs">
-          <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-[#CD7F32]/20 w-full md:w-auto justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-            Find Jobs
-          </motion.button>
-        </Link>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
+          <SwipeToToggleRunner
+            isRunnerAvailable={isRunnerAvailable}
+            onToggle={handleToggleRunner}
+            loading={togglingRunner}
+          />
+          <Link href="/worker/jobs" className="w-full sm:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center justify-center gap-2 bg-[#CD7F32] hover:bg-amber-600 text-white px-6 py-3.5 rounded-full font-bold shadow-lg shadow-[#CD7F32]/20 w-full whitespace-nowrap h-14"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+              Find Jobs
+            </motion.button>
+          </Link>
+        </div>
       </div>
 
       {/* ACTIVE TASKS & ERRANDS POP-UP AT TOP OF DASHBOARD */}

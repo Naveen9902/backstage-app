@@ -29,14 +29,19 @@ export async function GET() {
 
     const hiredEventIds = hiredApplications.map(app => app.staffingRequest.eventId);
 
+    const workerProfile = await prisma.workerProfile.findUnique({ where: { userId } });
+    const isRunnerAvailable = workerProfile?.isRunnerAvailable || false;
+
     const dispatches = await prisma.runnerDispatch.findMany({
       where: {
         OR: [
-          // Broadcast to hired staff
+          // Broadcast to hired staff for internal event tasks
           { status: 'Pending', runnerId: null, eventId: { in: hiredEventIds } },
-          // Open broadcast for external errands to any runner
-          { status: 'Pending', runnerId: null, task: { startsWith: '[EXTERNAL/ERRAND]' } },
-          { status: 'Pending', runnerId: null, price: { not: null } },
+          // Open broadcast for external errands to ANY ACTIVE RUNNER ONLY
+          ...(isRunnerAvailable ? [
+            { status: 'Pending', runnerId: null, task: { startsWith: '[EXTERNAL/ERRAND]' } },
+            { status: 'Pending', runnerId: null, price: { not: null } },
+          ] : []),
           // Directly assigned to this worker
           { runnerId: userId }
         ]
@@ -54,7 +59,8 @@ export async function GET() {
 
     return NextResponse.json({ 
       pending, 
-      myTasks
+      myTasks,
+      isRunnerAvailable
     }, { status: 200 });
   } catch (error) {
     console.error('GET WORKER RUNNERS ERROR:', error);
@@ -157,5 +163,34 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('ACTION RUNNER ERROR:', error);
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { isRunnerAvailable } = await req.json();
+
+    const updatedProfile = await prisma.workerProfile.upsert({
+      where: { userId },
+      update: { isRunnerAvailable: Boolean(isRunnerAvailable) },
+      create: {
+        userId,
+        name: 'Worker',
+        bio: 'Event staff & runner',
+        isRunnerAvailable: Boolean(isRunnerAvailable)
+      }
+    });
+
+    return NextResponse.json({ success: true, isRunnerAvailable: updatedProfile.isRunnerAvailable }, { status: 200 });
+  } catch (error) {
+    console.error('PATCH RUNNER STATUS ERROR:', error);
+    return NextResponse.json({ error: 'Failed to update runner status' }, { status: 500 });
   }
 }
