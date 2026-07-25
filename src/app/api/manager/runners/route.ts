@@ -88,26 +88,43 @@ export async function POST(req: Request) {
 
     const { eventId, task, urgency, runnerId, price } = await req.json();
 
-    if (!eventId || !task || !urgency) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!task || !urgency) {
+      return NextResponse.json({ error: 'Missing required fields (task and urgency are required)' }, { status: 400 });
     }
 
-    const event = await prisma.event.findFirst({
-      where: { id: eventId, managerId: userId }
-    });
-
-    if (!event) {
-      return NextResponse.json({ error: 'Event not found or unauthorized' }, { status: 404 });
-    }
-
-    if (event.status !== 'ONGOING') {
-      return NextResponse.json({ error: 'Runner tasks can only be dispatched for live (ONGOING) events.' }, { status: 400 });
+    let targetEventId = eventId;
+    if (!targetEventId) {
+      let defaultEvent = await prisma.event.findFirst({
+        where: { managerId: userId, title: 'General Venue & External Errands' }
+      });
+      if (!defaultEvent) {
+        defaultEvent = await prisma.event.create({
+          data: {
+            title: 'General Venue & External Errands',
+            category: 'Operations',
+            location: 'Venue / On-Ground',
+            date: new Date().toISOString().split('T')[0],
+            time: '00:00',
+            description: 'General venue operations, setup, and Rapido / Swiggy style external errands.',
+            status: 'ONGOING',
+            managerId: userId
+          }
+        });
+      }
+      targetEventId = defaultEvent.id;
+    } else {
+      const event = await prisma.event.findFirst({
+        where: { id: targetEventId, managerId: userId }
+      });
+      if (!event) {
+        return NextResponse.json({ error: 'Event not found or unauthorized' }, { status: 404 });
+      }
     }
 
     const dispatch = await prisma.runnerDispatch.create({
       data: {
         managerId: userId,
-        eventId,
+        eventId: targetEventId,
         task,
         urgency,
         price: price !== undefined && price !== null && price !== '' ? parseFloat(price) : null,

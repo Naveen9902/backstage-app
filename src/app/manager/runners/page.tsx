@@ -33,9 +33,11 @@ export default function RunnersPage() {
   useEffect(() => {
     fetch('/api/manager/events').then(res => res.json()).then(data => {
       if (Array.isArray(data)) {
-        const liveEvents = data.filter(ev => ev.status === 'ONGOING');
-        setEvents(liveEvents);
-        if (liveEvents.length > 0) setSelectedEvent(liveEvents[0].id);
+        const activeEvents = data.filter(ev => ev.status !== 'CANCELLED');
+        setEvents(activeEvents);
+        const ongoing = activeEvents.filter(ev => ev.status === 'ONGOING');
+        if (ongoing.length > 0) setSelectedEvent(ongoing[0].id);
+        else if (activeEvents.length > 0) setSelectedEvent(activeEvents[0].id);
       }
     });
     
@@ -116,18 +118,44 @@ export default function RunnersPage() {
           </div>
         </div>
 
-        {events.length === 0 ? (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="text-amber-600 w-5 h-5" />
-              <span className="font-bold text-amber-700">No Live Events</span>
+        {/* Top Bar: Quick Rapido Broadcast Errand */}
+        <div className="mb-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-6 text-white shadow-xl shadow-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-6 border border-blue-400/30">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20 text-2xl shadow-inner">
+              ⚡
             </div>
-            <p className="text-amber-600">Runner dispatch is only available for <strong>ongoing events</strong>. Go to <Link href="/manager/my-events" className="underline font-bold">My Events</Link> and toggle an event to <strong>Live</strong> first.</p>
+            <div>
+              <div className="flex items-center gap-2 font-extrabold text-base font-serif">
+                <span className="bg-white text-blue-600 text-xs px-2.5 py-0.5 rounded-lg uppercase font-mono font-extrabold shadow-sm">Rapido Mode</span>
+                <span className="text-xl">Open Broadcast Errand (Swiggy / Rapido Style)</span>
+              </div>
+              <p className="text-sm text-blue-100 mt-1 max-w-2xl leading-relaxed">
+                Need quick on-ground help or supplies? Broadcast an open errand with a fixed price to all nearby workers simultaneously. First worker to grab it claims the job automatically!
+              </p>
+            </div>
           </div>
-        ) : (
-          <>
-            {/* Top Two-Halves Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <button
+            onClick={() => {
+              setAssignModal({ userId: null, name: 'All Nearby Workers (Rapido Broadcast)', eventId: selectedEvent || (events[0]?.id) || null, isExternal: true, isBroadcast: true });
+              setTask('');
+              setPrice('');
+            }}
+            className="bg-white text-blue-700 hover:bg-blue-50 font-extrabold text-sm px-6 py-3.5 rounded-2xl shadow-lg shrink-0 transition-all hover:scale-105 active:scale-95 whitespace-nowrap flex items-center gap-2 border border-blue-100"
+          >
+            <span className="text-lg">⚡</span>
+            <span>Post Open Errand (₹)</span>
+          </button>
+        </div>
+
+        {events.length === 0 && (
+          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 text-sm text-amber-800">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <span><strong>Note:</strong> You have no events yet. Rapido Open Broadcast errands will automatically create a general operations event for you!</span>
+          </div>
+        )}
+
+        {/* Top Two-Halves Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             
               {/* Left Half: Hired Internal Staff */}
               <div className="bg-gradient-to-b from-white to-gray-50/50 p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-lg shadow-gray-200/50 flex flex-col justify-between relative overflow-hidden">
@@ -566,8 +594,6 @@ export default function RunnersPage() {
               </div>
 
             </div>
-          </>
-        )}
       </div>
 
       {/* Assign Modal */}
