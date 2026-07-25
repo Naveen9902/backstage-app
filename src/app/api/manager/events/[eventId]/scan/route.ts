@@ -99,8 +99,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       const diffMs = checkOutTime.getTime() - checkInTime.getTime();
       const diffHours = diffMs / (1000 * 60 * 60);
       
-      const hourlyRate = application.staffingRequest.payRate;
-      const totalAmount = hourlyRate * diffHours;
+      const payType = application.staffingRequest.payType || 'HOURLY';
+      const payRate = application.staffingRequest.payRate;
+      
+      const totalAmount = payType === 'FIXED' ? payRate : (payRate * diffHours);
 
       return NextResponse.json({
         success: true,
@@ -109,6 +111,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
         roleName: application.staffingRequest.roleName,
         totalHours: diffHours.toFixed(2),
         totalAmount: totalAmount.toFixed(2),
+        payType,
         applicationId: application.id
       });
     } else {
