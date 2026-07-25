@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { sendNotification } from '@/lib/notifications';
 
 export async function GET() {
   try {
@@ -136,6 +137,22 @@ export async function POST(req: Request) {
       }
     });
 
+    if (runnerId) {
+      await sendNotification(runnerId, `⚡ You have been assigned a new runner task: "${task}" (₹${price || 0}). Check your Runner board!`);
+    } else {
+      // Notify nearby workers about open errand broadcast
+      const nearbyWorkers = await prisma.workerProfile.findMany({
+        where: { isVerified: true },
+        select: { userId: true },
+        take: 10
+      });
+      for (const w of nearbyWorkers) {
+        if (w.userId !== userId) {
+          await sendNotification(w.userId, `⚡ Open Errand Broadcasted: "${task}" (₹${price || 0}). First worker to grab it claims guaranteed pay!`);
+        }
+      }
+    }
+
     return NextResponse.json(dispatch, { status: 201 });
   } catch (error) {
     console.error('CREATE RUNNER DISPATCH ERROR:', error);
@@ -177,12 +194,10 @@ export async function PATCH(req: Request) {
       });
       
       if (dispatch.runnerId) {
-        await prisma.notification.create({
-          data: {
-            userId: dispatch.runnerId,
-            message: `Manager has sent payment of ₹${dispatch.price || 0} for task: "${dispatch.task}". Please confirm receipt in your Runner board.`
-          }
-        });
+        await sendNotification(
+          dispatch.runnerId,
+          `💰 Manager has sent payment of ₹${dispatch.price || 0} for task: "${dispatch.task}". Please confirm receipt in your Runner board.`
+        );
       }
       return NextResponse.json(updated, { status: 200 });
     }
@@ -206,6 +221,8 @@ export async function PATCH(req: Request) {
         runner: { select: { name: true } }
       }
     });
+
+    await sendNotification(runnerId, `⚡ You have been assigned to runner task: "${dispatch.task}". Please accept it in your Runner board!`);
 
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {

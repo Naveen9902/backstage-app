@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { sendNotification } from '@/lib/notifications';
 
 export async function GET() {
   try {
@@ -87,8 +88,16 @@ export async function POST(req: Request) {
         data: {
           status: 'In Progress',
           runnerId: userId
+        },
+        include: {
+          event: { select: { managerId: true } },
+          runner: { select: { name: true } }
         }
       });
+      const mgrId = updated.managerId || updated.event?.managerId;
+      if (mgrId) {
+        await sendNotification(mgrId, `🏃 Runner ${updated.runner?.name || 'Worker'} has accepted and started task: "${updated.task}"`);
+      }
       return NextResponse.json(updated, { status: 200 });
     } 
     
@@ -111,22 +120,10 @@ export async function POST(req: Request) {
       });
       
       if (updated.event?.managerId) {
-        // 1. Create in-app notification for Manager
-        await prisma.notification.create({
-          data: {
-            userId: updated.event.managerId,
-            message: `Runner ${updated.runner?.name || ''} has completed the task: "${updated.task}"`
-          }
-        });
-        
-        // 2. Send Push Notification to Manager's phone
-        if (updated.event.manager?.pushSubscription) {
-          const { sendPushNotification } = await import('@/lib/push');
-          await sendPushNotification(updated.event.manager.pushSubscription, {
-            title: 'Task Completed! ✅',
-            body: `Runner ${updated.runner?.name || ''} has completed: "${updated.task}"`
-          });
-        }
+        await sendNotification(
+          updated.event.managerId,
+          `✅ Runner ${updated.runner?.name || 'Worker'} has completed the task: "${updated.task}"`
+        );
       }
 
       return NextResponse.json(updated, { status: 200 });
@@ -148,12 +145,10 @@ export async function POST(req: Request) {
         }
       });
       if (updated.event?.managerId) {
-        await prisma.notification.create({
-          data: {
-            userId: updated.event.managerId,
-            message: `Runner ${updated.runner?.name || 'Worker'} has confirmed receipt of ₹${updated.price || 0} for task: "${updated.task}"`
-          }
-        });
+        await sendNotification(
+          updated.event.managerId,
+          `💰 Runner ${updated.runner?.name || 'Worker'} has confirmed receipt of ₹${updated.price || 0} for task: "${updated.task}"`
+        );
       }
       return NextResponse.json(updated, { status: 200 });
     }

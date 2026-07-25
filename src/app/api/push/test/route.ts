@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendPushNotification } from '@/lib/push';
+import { sendNotification } from '@/lib/notifications';
 
 export async function POST() {
   try {
@@ -12,9 +13,11 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    await sendNotification(userId, "⚡ Test Notification: This is a live top-banner alert from BackStage!");
+
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.pushSubscription) {
-      return NextResponse.json({ error: 'No push subscription found' }, { status: 404 });
+      return NextResponse.json({ success: true, message: 'In-app notification triggered (no push subscription)' });
     }
 
     const result = await sendPushNotification(user.pushSubscription, {
@@ -22,13 +25,10 @@ export async function POST() {
       body: "This is a test notification from Back Stage!"
     });
 
-    if (result.success) {
-      return NextResponse.json({ success: true });
-    } else {
-      return NextResponse.json({ error: result.error || 'Failed to send push' }, { status: 500 });
-    }
+    return NextResponse.json({ success: true, pushResult: result });
   } catch (err) {
     console.error("Test Push Error:", err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

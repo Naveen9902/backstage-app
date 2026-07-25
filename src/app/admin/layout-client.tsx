@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function AdminLayoutClient({ children, user }: { children: React.ReactNode, user: any }) {
   const pathname = usePathname();
@@ -89,6 +90,7 @@ export default function AdminLayoutClient({ children, user }: { children: React.
           <Link href="/" className="md:hidden flex items-center gap-2"> <span className="font-serif font-bold tracking-wide text-white">Back<span className="text-[#CD7F32]">Stage</span></span>
           </Link>
           <div className="flex items-center gap-2 md:gap-4">
+            <NotificationBell />
             <ThemeToggle />
             <button
             onClick={async () => {
