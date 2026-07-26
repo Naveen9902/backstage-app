@@ -13,7 +13,14 @@ export async function GET(req: Request) {
     if (!userId) userId = cookieStore.get('userId')?.value;
 
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      const fallbackEvents = await prisma.event.findMany({
+        take: 30,
+        include: {
+          _count: { select: { fans: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json(fallbackEvents, { status: 200 });
     }
 
     // Fetch events where this user is in the 'fans' relation

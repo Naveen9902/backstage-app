@@ -1,13 +1,17 @@
-import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
+import prisma from '@/lib/prisma';
+import { cookies } from 'next/headers';
 
-export default async function UserCommunityChatPage({ params }: { params: Promise<{ eventId: string }> | { eventId: string } }) {
+export default async function UserCommunityChatPage({ params }: { params: any }) {
   let eventId = 'default';
   try {
-    const resolvedParams = await params;
-    eventId = resolvedParams?.eventId || 'default';
-  } catch (e) {}
+    const p = await params;
+    eventId = p?.eventId || 'default';
+  } catch (e) {
+    try {
+      eventId = params?.eventId || 'default';
+    } catch (err) {}
+  }
 
   let user: any = null;
   try {
@@ -27,16 +31,6 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
     }
   } catch (e) {}
 
-  if (!user) {
-    user = {
-      id: 'community_user',
-      name: 'Community Member',
-      avatarUrl: null,
-      role: 'USER'
-    };
-  }
-
-  // Fetch initial event data from database
   let event: any = null;
   try {
     event = await prisma.event.findUnique({
@@ -56,28 +50,25 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
     });
   } catch (e) {}
 
-  // Instant robust fallback if event not found or mock ID
-  if (!event) {
-    event = {
-      id: eventId,
-      title: "Community Chat",
-      description: "Official event community chat room. Connect with attendees and organizers.",
-      coverImageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop",
-      date: new Date().toISOString(),
-      location: "Main Event Area",
-      managerId: null,
-      manager: null
-    };
-  }
-
-  const currentUserObj = {
-    id: user.id,
-    name: user.name || 'Member',
-    avatarUrl: user.avatarUrl || null,
-    role: user.role || 'USER'
+  const safeEvent = event || {
+    id: eventId,
+    title: "Community Chat",
+    description: "Official event community chat room. Connect with attendees and organizers.",
+    coverImageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop",
+    date: new Date().toISOString(),
+    location: "Main Event Area",
+    managerId: null,
+    manager: null
   };
 
-  const eventData = JSON.parse(JSON.stringify(event));
+  const currentUserObj = {
+    id: user?.id || 'community_member',
+    name: user?.name || 'Member',
+    avatarUrl: user?.avatarUrl || null,
+    role: user?.role || 'USER'
+  };
+
+  const eventData = JSON.parse(JSON.stringify(safeEvent));
 
   return (
     <div className="w-full h-full bg-[#f3efe5] flex flex-col">
