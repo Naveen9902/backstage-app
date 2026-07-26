@@ -50,6 +50,13 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
   
   const [selectedFile, setSelectedFile] = useState<{
     dataUrl: string;
