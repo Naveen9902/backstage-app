@@ -180,10 +180,12 @@ export default function UserDashboardEvents() {
 
   // Top Section: Upcoming & Saved Events
   const upcomingEvents = useMemo(() => {
-    const savedOrJoined = events.filter(e => savedIds.includes(e.id) || joinedIds.includes(e.id));
-    if (savedOrJoined.length > 0) return { list: savedOrJoined, isFeatured: false };
-    // If user hasn't saved anything, show top 3 soonest events as recommendation
-    return { list: events.slice(0, 3), isFeatured: true };
+    // Only show saved or joined events that are NOT COMPLETED
+    const savedOrJoined = events.filter(e => 
+      (savedIds.includes(e.id) || joinedIds.includes(e.id)) && 
+      e.status !== 'COMPLETED'
+    );
+    return { list: savedOrJoined, isFeatured: false };
   }, [events, savedIds, joinedIds]);
 
   return (
@@ -198,17 +200,12 @@ export default function UserDashboardEvents() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] text-xs font-extrabold font-mono uppercase tracking-widest mb-2">
                 <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                {upcomingEvents.isFeatured ? "Recommended For You" : "Your Pinned Schedule"}
+                Your Pinned Schedule
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-serif tracking-tight text-white flex items-center gap-2.5">
                 <span>Upcoming Events &amp; Communities</span>
               </h2>
             </div>
-            {upcomingEvents.isFeatured && (
-              <p className="text-xs sm:text-sm text-gray-400 bg-white/5 px-4 py-2 rounded-xl border border-white/10 max-w-xs">
-                📌 <strong className="text-white">Tip:</strong> Click <span className="text-[#CD7F32]">♥ Save</span> on any event below to pin your upcoming schedule right here!
-              </p>
-            )}
           </div>
 
           {loading ? (
@@ -217,7 +214,7 @@ export default function UserDashboardEvents() {
             </div>
           ) : upcomingEvents.list.length === 0 ? (
             <div className="text-center py-10 bg-white/5 rounded-2xl border border-white/10">
-              <p className="text-gray-400 text-sm">No events available at the moment. Check back soon!</p>
+              <p className="text-gray-400 text-sm">No pinned events yet. Click ♥ Save on any event below to add it to your schedule!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
