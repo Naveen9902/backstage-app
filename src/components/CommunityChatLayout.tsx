@@ -652,6 +652,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                 (new Date(msg.createdAt).getTime() - new Date(prevMsg.createdAt).getTime() > 5 * 60000);
 
               // Native Mobile specific: align own messages to right on mobile
+              const isMe = (msg.senderId || msg.sender?.id) === safeUser.id;
               const isLiked = !!likedMessages[msg.id];
               const likesCount = messageLikesCount[msg.id] || 0;
 
