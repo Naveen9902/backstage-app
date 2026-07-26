@@ -8,7 +8,20 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
-  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS';
+  const [appFlavor, setAppFlavor] = useState('USER');
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const ua = navigator.userAgent;
+      if (ua.includes('BackstageFlavor/Ops')) {
+        setAppFlavor('OPS');
+      } else if (ua.includes('BackstageFlavor/User')) {
+        setAppFlavor('USER');
+      } else {
+        setAppFlavor(localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS');
+      }
+    }
+  }, []);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

@@ -10,7 +10,15 @@ export default function Register() {
   const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
   
   useEffect(() => {
-    const flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS';
+    let flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS';
+    if (typeof window !== 'undefined') {
+      const ua = navigator.userAgent;
+      if (ua.includes('BackstageFlavor/Ops')) {
+        flavor = 'OPS';
+      } else if (ua.includes('BackstageFlavor/User')) {
+        flavor = 'USER';
+      }
+    }
     setAppFlavor(flavor);
     if (flavor === 'USER') {
       setRole('USER');
