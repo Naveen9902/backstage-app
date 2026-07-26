@@ -587,7 +587,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               onClick={() => setMobileView(mobileView === 'chat' ? 'channels' : 'chat')}
               title="Toggle Channels"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-1.5 min-w-0">
               {!activeChannel.startsWith('dm_') && <Hash className="w-5 h-5 text-gray-400 shrink-0" />}
@@ -710,7 +710,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                       </div>
                     )}
 
-                    <div className={`flex items-center gap-1.5 group/msg max-w-full ${isMe ? 'flex-row-reverse md:flex-row' : 'flex-row'}`}>
+                    <div className={`flex flex-col group/msg max-w-full w-full ${isMe ? 'items-end md:items-start' : 'items-start'}`}>
                       <div className="flex-1 min-w-0 max-w-xl">
                         {/* Quoted Parent Message if Replying */}
                         {replyInfo && (
@@ -738,26 +738,24 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                           {displayText}
                           {renderMediaAttachment(msg.imageUrl)}
                         </div>
-                      </div>
 
-                      {/* Instagram Action Buttons: Positioned BESIDE message bubble */}
-                      <div className={`flex items-center gap-1 opacity-90 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity shrink-0 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <button 
-                          onClick={() => setReplyingTo(msg)}
-                          className="p-1.5 hover:bg-black/5 rounded-full text-gray-400 hover:text-[#CD7F32] transition-all"
-                          title="Reply to Message"
-                        >
-                          <Reply className="w-4 h-4" />
-                        </button>
-
-                        <button 
-                          onClick={() => handleToggleLike(msg.id)}
-                          className={`p-1.5 hover:bg-black/5 rounded-full text-xs flex items-center gap-1 transition-all ${isLiked ? 'text-red-500 font-bold' : 'text-gray-400 hover:text-red-500'}`}
-                          title="Like Message"
-                        >
-                          <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : ''}`} />
-                          {likesCount > 0 && <span className="text-[11px] font-bold">{likesCount}</span>}
-                        </button>
+                        {/* Action Buttons BELOW message */}
+                        <div className={`flex items-center gap-4 mt-1.5 px-2 ${isMe ? 'justify-end md:justify-start' : 'justify-start'}`}>
+                          <button 
+                            onClick={() => handleToggleLike(msg.id)}
+                            className={`flex items-center gap-1 text-[12px] font-semibold transition-all ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                          >
+                            <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500' : ''}`} />
+                            {likesCount > 0 && <span>{likesCount >= 1000 ? (likesCount/1000).toFixed(1)+'K' : likesCount}</span>}
+                          </button>
+                          
+                          <button 
+                            onClick={() => setReplyingTo(msg)}
+                            className="text-[12px] font-semibold text-gray-500 hover:text-gray-800 transition-all"
+                          >
+                            Reply
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -848,7 +846,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               type="text" 
               value={text}
               onChange={e => setText(e.target.value)}
-              placeholder={activeChannel === 'announcements' && safeUser.role !== 'MANAGER' ? "Only organizers can post in #announcements" : `Message ${getChatTitle()}`} 
+              placeholder={activeChannel === 'announcements' && safeUser.role !== 'MANAGER' ? "Only organizers can post in #announcements" : "Start the conversation..."} 
               disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'}
               className="flex-1 bg-transparent text-gray-800 md:text-white placeholder-gray-500 md:placeholder-gray-500 border-none outline-none px-2 focus:ring-0 disabled:opacity-50 text-[15px]"
             />
