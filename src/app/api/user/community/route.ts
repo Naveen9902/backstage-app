@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     }
 
     // Fetch events where this user is in the 'fans' relation
-    const events = await prisma.event.findMany({
+    let events = await prisma.event.findMany({
       where: {
         fans: {
           some: {
@@ -34,6 +34,21 @@ export async function GET(req: Request) {
         createdAt: 'desc'
       }
     });
+
+    // Fallback: If user hasn't joined any communities yet, return all available events
+    if (events.length === 0) {
+      events = await prisma.event.findMany({
+        take: 30,
+        include: {
+          _count: {
+            select: { fans: true }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    }
 
     return NextResponse.json(events, { status: 200 });
   } catch (error: any) {

@@ -19,6 +19,14 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) redirect('/login');
 
+  // Auto-connect user to event fans in database
+  try {
+    await prisma.event.update({
+      where: { id: eventId },
+      data: { fans: { connect: { id: user.id } } }
+    });
+  } catch (e) {}
+
   // Server-side optimized fetch for initial event data
   const event = await prisma.event.findUnique({
     where: { id: eventId },
@@ -56,7 +64,13 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
   });
 
   if (!event) {
-    return <div className="p-8 text-center text-red-500 font-bold">Event not found</div>;
+    return (
+      <div className="p-12 text-center max-w-md mx-auto my-12 bg-white rounded-3xl shadow-sm border border-gray-200">
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Community Chat Unavailable</h3>
+        <p className="text-sm text-gray-500 mb-6">This event community is currently unavailable or has been removed.</p>
+        <a href="/user/community" className="bg-[#242424] text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-md inline-block">Back to Communities</a>
+      </div>
+    );
   }
 
   // Fetch other events for the server sidebar
