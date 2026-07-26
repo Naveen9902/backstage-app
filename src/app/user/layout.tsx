@@ -42,6 +42,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     { name: 'Profile', shortName: 'Profile', path: '/user/profile', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
   ];
 
+  const isChatRoom = Boolean(pathname?.startsWith('/user/community/') && pathname !== '/user/community');
+
   return (
     <div className="min-h-screen bg-[#F5F5DC] flex">
       {/* Desktop Sidebar */}
@@ -120,27 +122,29 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
       {/* Main Content Area */}
       <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
-        <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
-          {/* Mobile Header Logo */}
-          <Link href="/" className="md:hidden flex items-center gap-2">
-            <Logo size="sm" />
-          </Link>
-          
-          <div className="flex items-center gap-2 md:gap-4">
-            <ThemeToggle />
-            <NotificationBell />
-            <button
-              onClick={async () => {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.href = '/';
-              }}
-              className="md:hidden text-gray-500 hover:text-red-500 p-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-            </button>
-          </div>
-        </header>
-        <div className="p-4 md:p-10 md:pt-0 flex-1">
+        {!isChatRoom && (
+          <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
+            {/* Mobile Header Logo */}
+            <Link href="/" className="md:hidden flex items-center gap-2">
+              <Logo size="sm" />
+            </Link>
+            
+            <div className="flex items-center gap-2 md:gap-4">
+              <ThemeToggle />
+              <NotificationBell />
+              <button
+                onClick={async () => {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                  window.location.href = '/';
+                }}
+                className="md:hidden text-gray-500 hover:text-red-500 p-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              </button>
+            </div>
+          </header>
+        )}
+        <div className={isChatRoom ? "flex-1 h-[calc(100dvh-64px)] md:h-screen p-0" : "p-4 md:p-10 md:pt-0 flex-1"}>
           {children}
         </div>
       </main>
