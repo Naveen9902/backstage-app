@@ -66,6 +66,12 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [activeChannel, setActiveChannel] = useState(initialChannel || (safeUser?.role === 'MANAGER' ? 'announcements' : 'general'));
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const handleChannelSelect = (channel: string) => {
+    setActiveChannel(channel);
+    setMobileView('chat');
+    setShowSwitcher(false);
+  };
+
   const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
   const safeEvent = event || {};
   const manager = safeEvent.manager || null;
@@ -539,24 +545,39 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       <div className={`flex-1 flex-col min-w-0 bg-[#f4efe5] ${mobileView === 'chat' ? 'flex' : 'hidden md:flex'}`}>
         
         {/* Chat Header */}
-        <div className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 bg-white md:bg-[#f4efe5] z-10">
-          <div className="flex items-center gap-3 text-gray-800 min-w-0">
+        <div className="h-16 flex items-center justify-between px-3 md:px-6 border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 bg-white md:bg-[#f4efe5] z-10 gap-2">
+          <div className="flex items-center gap-2 text-gray-800 min-w-0 shrink-0">
             <button 
-              className="md:hidden p-2 -ml-2 text-[#CD7F32] hover:bg-orange-50 rounded-full"
+              className="md:hidden p-1.5 -ml-1 text-[#CD7F32] hover:bg-orange-50 rounded-full"
               onClick={() => setMobileView(mobileView === 'chat' ? 'channels' : 'chat')}
               title="Toggle Channels"
             >
-              <div className="flex items-center gap-1">
-                <ChevronLeft className="w-7 h-7" />
-              </div>
+              <ChevronLeft className="w-6 h-6" />
             </button>
-            <div className="flex items-center gap-2 min-w-0">
-              {!activeChannel.startsWith('dm_') && <Hash className="w-6 h-6 text-gray-400 shrink-0" />}
-              <h2 className="font-bold text-[18px] md:text-lg font-serif truncate">{getChatTitle()}</h2>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {!activeChannel.startsWith('dm_') && <Hash className="w-5 h-5 text-gray-400 shrink-0" />}
+              <h2 className="font-bold text-[16px] md:text-lg font-serif truncate">{getChatTitle()}</h2>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-[#CD7F32] md:text-gray-500 shrink-0">
+          {/* Quick Channel Pills for Instant 1-Tap Switching */}
+          <div className="flex items-center gap-1 overflow-x-auto py-1 max-w-[200px] md:max-w-none no-scrollbar">
+            {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && safeUser.role === 'USER')).map(ch => (
+              <button
+                key={ch}
+                onClick={() => handleChannelSelect(ch)}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap border shrink-0 ${
+                  activeChannel === ch 
+                    ? 'bg-[#CD7F32] text-white border-[#CD7F32] shadow-sm' 
+                    : 'bg-black/5 hover:bg-black/10 text-gray-700 border-transparent'
+                }`}
+              >
+                #{ch}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-[#CD7F32] md:text-gray-500 shrink-0">
             {showSearchInput ? (
               <div className="flex items-center bg-white px-3 py-1 rounded-full border border-gray-300 shadow-sm">
                 <input 
