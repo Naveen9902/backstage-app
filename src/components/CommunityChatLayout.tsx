@@ -271,7 +271,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: finalPayloadText, imageUrl: messagePayload, channel: activeChannel })
+        body: JSON.stringify({ text: finalPayloadText, imageUrl: messagePayload, channel: activeChannel, parentId: replyingTo ? replyingTo.id : null })
       });
       if (res.ok) fetchMessages();
     } catch (err) {

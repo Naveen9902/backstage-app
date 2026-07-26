@@ -127,6 +127,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
       }
     });
 
+    // Create Notification if it's a reply to someone else
+    if (body.parentId) {
+      try {
+        const parentMsg = await prisma.eventChatMessage.findUnique({
+          where: { id: body.parentId }
+        });
+        if (parentMsg && parentMsg.senderId !== userId) {
+          const event = await prisma.event.findUnique({ where: { id: eventId } });
+          await prisma.notification.create({
+            data: {
+              userId: parentMsg.senderId,
+              message: `${user.name} replied to your message in ${event?.title || 'a community'}!`
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Failed to create reply notification", err);
+      }
+    }
+
     const enrichedMessage = {
       ...message,
       likesCount: message.likes.length,

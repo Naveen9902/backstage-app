@@ -7,6 +7,7 @@ import NotificationBell from '@/components/NotificationBell';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 import AppUpdateBanner from '@/components/AppUpdateBanner';
+import GlobalNotificationListener from '@/components/GlobalNotificationListener';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -48,6 +49,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen bg-[#F5F5DC] flex">
       <AppUpdateBanner />
+      {profile && <GlobalNotificationListener currentUser={profile} />}
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-[#242424] text-white flex-col fixed h-full border-r-4 border-[#CD7F32] z-40">
         
