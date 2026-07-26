@@ -1,56 +1,14 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
-import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
 
-export default async function UserCommunityChatPage({ params }: { params: any }) {
-  let eventId = 'default';
-  try {
-    const p = await params;
-    eventId = p?.eventId || 'default';
-  } catch (e) {
-    try {
-      eventId = params?.eventId || 'default';
-    } catch (err) {}
-  }
+export default function UserCommunityChatPage() {
+  const params = useParams();
+  const eventId = (params?.eventId as string) || 'default';
 
-  let user: any = null;
-  try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('fanUserId')?.value || 
-                   cookieStore.get('userId')?.value || 
-                   cookieStore.get('workerUserId')?.value || 
-                   cookieStore.get('managerUserId')?.value || 
-                   cookieStore.get('token')?.value ||
-                   cookieStore.get('auth_token')?.value;
-
-    if (userId) {
-      user = await prisma.user.findUnique({ 
-        where: { id: userId },
-        select: { id: true, name: true, avatarUrl: true, role: true }
-      });
-    }
-  } catch (e) {}
-
-  let event: any = null;
-  try {
-    event = await prisma.event.findUnique({
-      where: { id: eventId },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        coverImageUrl: true,
-        date: true,
-        location: true,
-        managerId: true,
-        manager: {
-          select: { id: true, name: true, avatarUrl: true, role: true }
-        }
-      }
-    });
-  } catch (e) {}
-
-  const safeEvent = event || {
+  const [eventData, setEventData] = useState<any>({
     id: eventId,
     title: "Community Chat",
     description: "Official event community chat room. Connect with attendees and organizers.",
@@ -59,23 +17,51 @@ export default async function UserCommunityChatPage({ params }: { params: any })
     location: "Main Event Area",
     managerId: null,
     manager: null
-  };
+  });
 
-  const currentUserObj = {
-    id: user?.id || 'community_member',
-    name: user?.name || 'Member',
-    avatarUrl: user?.avatarUrl || null,
-    role: user?.role || 'USER'
-  };
+  const [currentUser, setCurrentUser] = useState<any>({
+    id: 'community_member',
+    name: 'Member',
+    avatarUrl: null,
+    role: 'USER'
+  });
 
-  const eventData = JSON.parse(JSON.stringify(safeEvent));
+  useEffect(() => {
+    // 1. Fetch current logged-in user profile
+    fetch('/api/user/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error && data.id) {
+          setCurrentUser({
+            id: data.id,
+            name: data.name || 'Member',
+            avatarUrl: data.avatarUrl || null,
+            role: data.role || 'USER'
+          });
+        }
+      })
+      .catch(console.error);
+
+    // 2. Fetch event details for this eventId
+    fetch('/api/user/events')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const found = data.find((e: any) => String(e.id) === String(eventId));
+          if (found) {
+            setEventData(found);
+          }
+        }
+      })
+      .catch(console.error);
+  }, [eventId]);
 
   return (
     <div className="w-full h-full bg-[#f3efe5] flex flex-col">
       <CommunityChatLayout 
         eventId={eventId}
         event={eventData}
-        currentUser={currentUserObj}
+        currentUser={currentUser}
         otherEvents={[]}
         returnHref="/user/community"
       />
