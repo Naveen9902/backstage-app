@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { Capacitor } from '@capacitor/core';
 
 export default function GlobalNotificationListener({ currentUser }: { currentUser: any }) {
   const notificationCount = useRef(0);
@@ -11,7 +9,8 @@ export default function GlobalNotificationListener({ currentUser }: { currentUse
   // Helper to trigger a local push notification
   const triggerNotification = async (title: string, body: string, id: number) => {
     try {
-      if (Capacitor.isNativePlatform()) {
+      if (typeof window !== 'undefined' && (window as any).Capacitor && (window as any).Capacitor.isNativePlatform()) {
+        const { LocalNotifications } = await import('@capacitor/local-notifications');
         const perm = await LocalNotifications.checkPermissions();
         if (perm.display !== 'granted') {
           await LocalNotifications.requestPermissions();
