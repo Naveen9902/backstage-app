@@ -23,8 +23,10 @@ export default function AppGateway() {
   const [showPassword, setShowPassword] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-
   // Web App Home Page States (for Desktop View)
+  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'ALL';
+  const activeAppMode = appFlavor === 'OPS' ? 'OPS' : 'USER';
+
   const [topEvents, setTopEvents] = useState<any[]>([]);
   const [liveEvents, setLiveEvents] = useState<any[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -154,12 +156,13 @@ export default function AppGateway() {
         <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative z-10 flex flex-col items-center text-center max-w-sm"
+          initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+          transition={{ duration: 0.8, ease: "circOut" }}
+          className="relative z-10 flex flex-col items-center text-center max-w-sm group"
         >
-          <div className="relative mb-8">
+          <div className="relative mb-8 group-hover:scale-105 transition-transform duration-500">
             <motion.div
               animate={{ scale: [1, 1.06, 1], rotate: [0, 2, -2, 0] }}
               transition={{ duration: 3, repeat: Infinity }}
@@ -168,13 +171,14 @@ export default function AppGateway() {
             </motion.div>
             <div className="absolute -inset-3 rounded-3xl border border-[#CD7F32]/40 animate-[spin_4s_linear_infinite] pointer-events-none" />
             <div className="absolute -inset-6 rounded-3xl border border-[#CD7F32]/20 animate-[spin_7s_linear_infinite_reverse] pointer-events-none" />
+            <div className="absolute inset-0 bg-[#CD7F32]/20 blur-[30px] rounded-full scale-150 group-hover:scale-110 transition-all duration-700 pointer-events-none" />
           </div>
           
           <motion.h2 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-3xl font-bold font-serif text-white tracking-tight mb-2"
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-4xl font-bold font-serif text-white tracking-tight mb-2"
           >
             Back<span className="text-[#CD7F32]">Stage</span>
           </motion.h2>
@@ -182,11 +186,11 @@ export default function AppGateway() {
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
             className="text-xs font-mono text-[#CD7F32] uppercase tracking-[0.25em] flex items-center gap-2"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            Launching Experience...
+            {appFlavor === 'OPS' ? 'Launching Operations...' : 'Launching Experience...'}
           </motion.p>
         </motion.div>
       </div>
@@ -231,24 +235,11 @@ export default function AppGateway() {
             {/* App Subtitle Badge */}
             <div className="flex flex-col items-center text-center mb-5 pb-4 border-b border-white/10">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#CD7F32] bg-[#CD7F32]/10 px-3 py-1 rounded-full border border-[#CD7F32]/30 mb-2">
-                📱 Fan & Attendee Portal
+                {activeAppMode === 'OPS' ? '⚡ Manager & Staff Portal' : '📱 Fan & Attendee Portal'}
               </span>
               <p className="text-gray-400 text-xs font-medium">
-                Access event communities, chat rooms, and fan perks
+                {activeAppMode === 'OPS' ? 'Manage events, dispatch errands, and work' : 'Access event communities, chat rooms, and fan perks'}
               </p>
-            </div>
-
-            {/* 1-Tap Quick Demo Account Buttons */}
-            <div className="mb-5 bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2">
-              <p className="text-[10px] font-mono text-gray-400 uppercase font-bold text-center tracking-wider">Quick Demo Login (1-Tap)</p>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('USER')}
-                className="w-full bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-between transition-all"
-              >
-                <span className="flex items-center gap-2">🎟️ Demo Fan User</span>
-                <span className="text-[10px] font-mono text-[#CD7F32] uppercase">Launch App &rarr;</span>
-              </button>
             </div>
 
             {error && (

@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
+  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'ALL';
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -117,20 +118,9 @@ export default function Login() {
         >
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-[#F5F5DC] mb-2 font-serif">Welcome Back</h2>
-            <p className="text-[#F5F5DC]/60 text-xs">Sign in to your fan account</p>
-          </div>
-
-          {/* 1-Tap Quick Demo Account Buttons */}
-          <div className="mb-6 bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2">
-            <p className="text-[10px] font-mono text-gray-400 uppercase font-bold text-center tracking-wider">Quick Demo Login (1-Tap)</p>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('USER')}
-              className="w-full bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-between transition-all"
-            >
-              <span className="flex items-center gap-2">🎟️ Demo Fan User</span>
-              <span className="text-[10px] font-mono text-[#CD7F32] uppercase">Launch App &rarr;</span>
-            </button>
+            <p className="text-[#F5F5DC]/60 text-xs">
+              {appFlavor === 'OPS' ? 'Sign in to your manager/worker account' : 'Sign in to your fan account'}
+            </p>
           </div>
 
           {error && (

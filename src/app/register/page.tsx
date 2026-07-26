@@ -6,7 +6,10 @@ import Navbar from '@/components/Navbar';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
-  const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
+  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'ALL';
+  const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>(
+    appFlavor === 'USER' ? 'USER' : 'WORKER'
+  );
   const [workerSkills, setWorkerSkills] = useState<string[]>([]);
   const SKILL_OPTIONS = [
     'Bartender', 'Security', 'Audio Engineer', 'Lighting Tech',
@@ -76,29 +79,33 @@ export default function Register() {
 
           <div className="space-y-5">
             {/* Role Selection */}
-          <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mb-6">
-            <button
-              type="button"
-              onClick={() => setRole('WORKER')}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'WORKER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-            >
-              Worker
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('MANAGER')}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'MANAGER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-            >
-              Manager
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('USER')}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'USER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-            >
-              User
-            </button>
-          </div>
+          {appFlavor !== 'USER' && (
+            <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mb-6">
+              <button
+                type="button"
+                onClick={() => setRole('WORKER')}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'WORKER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
+              >
+                Worker
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('MANAGER')}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'MANAGER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
+              >
+                Manager
+              </button>
+              {appFlavor !== 'OPS' && (
+                <button
+                  type="button"
+                  onClick={() => setRole('USER')}
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'USER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
+                >
+                  User
+                </button>
+              )}
+            </div>
+          )}
 
             <div className="flex gap-4">
               <div className="flex-1">
