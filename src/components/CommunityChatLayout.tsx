@@ -710,52 +710,53 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                       </div>
                     )}
 
-                    <div className="relative group/msg">
-                      {/* Quoted Parent Message if Replying */}
-                      {replyInfo && (
-                        <div className="mb-1.5 p-2 rounded-xl bg-[#e8e2d5] border-l-4 border-[#CD7F32] text-xs flex flex-col text-gray-800 shadow-sm max-w-md">
-                          <span className="font-bold text-[11px] text-[#b57339] flex items-center gap-1">
-                            <CornerDownRight className="w-3.5 h-3.5" />
-                            Replying to @{replyInfo.senderName}
-                          </span>
-                          <span className="truncate opacity-90 mt-0.5 font-medium">{replyInfo.text}</span>
-                        </div>
-                      )}
-                      
-                      <div className={`
-                        text-[15px] whitespace-pre-wrap leading-relaxed px-4 py-2 relative
-                        ${activeChannel === 'announcements' 
-                          ? 'bg-[#fffcf5] border border-[#f3d7b4] text-[#8a5b28] p-3 rounded-2xl rounded-tl-sm font-medium overflow-hidden' 
-                          : isMe 
-                            ? 'bg-[#CD7F32] text-white rounded-2xl rounded-tr-sm md:bg-transparent md:text-gray-800 md:px-0 md:py-0 md:rounded-none' 
-                            : 'bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm shadow-sm md:bg-transparent md:border-none md:shadow-none md:px-0 md:py-0 md:rounded-none'
-                        }
-                      `}>
-                        {activeChannel === 'announcements' && (
-                          <Megaphone className="absolute top-2 right-2 w-12 h-12 text-[#CD7F32] opacity-5 -rotate-12" />
+                    <div className={`flex items-center gap-1.5 group/msg max-w-full ${isMe ? 'flex-row-reverse md:flex-row' : 'flex-row'}`}>
+                      <div className="flex-1 min-w-0 max-w-xl">
+                        {/* Quoted Parent Message if Replying */}
+                        {replyInfo && (
+                          <div className="mb-1.5 p-2 rounded-xl bg-[#e8e2d5] border-l-4 border-[#CD7F32] text-xs flex flex-col text-gray-800 shadow-sm">
+                            <span className="font-bold text-[11px] text-[#b57339] flex items-center gap-1">
+                              <CornerDownRight className="w-3.5 h-3.5" />
+                              Replying to @{replyInfo.senderName}
+                            </span>
+                            <span className="truncate opacity-90 mt-0.5 font-medium">{replyInfo.text}</span>
+                          </div>
                         )}
-                        {displayText}
-                        {renderMediaAttachment(msg.imageUrl)}
+                        
+                        <div className={`
+                          text-[15px] whitespace-pre-wrap leading-relaxed px-4 py-2 relative
+                          ${activeChannel === 'announcements' 
+                            ? 'bg-[#fffcf5] border border-[#f3d7b4] text-[#8a5b28] p-3 rounded-2xl rounded-tl-sm font-medium overflow-hidden' 
+                            : isMe 
+                              ? 'bg-[#CD7F32] text-white rounded-2xl rounded-tr-sm md:bg-transparent md:text-gray-800 md:px-0 md:py-0 md:rounded-none' 
+                              : 'bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm shadow-sm md:bg-transparent md:border-none md:shadow-none md:px-0 md:py-0 md:rounded-none'
+                          }
+                        `}>
+                          {activeChannel === 'announcements' && (
+                            <Megaphone className="absolute top-2 right-2 w-12 h-12 text-[#CD7F32] opacity-5 -rotate-12" />
+                          )}
+                          {displayText}
+                          {renderMediaAttachment(msg.imageUrl)}
+                        </div>
                       </div>
 
-                      {/* Instagram Action Buttons: Reply & Heart Like */}
-                      <div className={`flex items-center gap-1 mt-1 opacity-90 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity ${isMe ? 'justify-end md:justify-start' : 'justify-start'}`}>
+                      {/* Instagram Action Buttons: Positioned BESIDE message bubble */}
+                      <div className={`flex items-center gap-1 opacity-90 md:opacity-0 md:group-hover/msg:opacity-100 transition-opacity shrink-0 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <button 
+                          onClick={() => setReplyingTo(msg)}
+                          className="p-1.5 hover:bg-black/5 rounded-full text-gray-400 hover:text-[#CD7F32] transition-all"
+                          title="Reply to Message"
+                        >
+                          <Reply className="w-4 h-4" />
+                        </button>
+
                         <button 
                           onClick={() => handleToggleLike(msg.id)}
-                          className={`p-1 rounded-full text-xs flex items-center gap-1 transition-all ${isLiked ? 'text-red-500 font-bold' : 'text-gray-400 hover:text-red-500'}`}
+                          className={`p-1.5 hover:bg-black/5 rounded-full text-xs flex items-center gap-1 transition-all ${isLiked ? 'text-red-500 font-bold' : 'text-gray-400 hover:text-red-500'}`}
                           title="Like Message"
                         >
                           <Heart className={`w-4 h-4 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : ''}`} />
                           {likesCount > 0 && <span className="text-[11px] font-bold">{likesCount}</span>}
-                        </button>
-                        
-                        <button 
-                          onClick={() => setReplyingTo(msg)}
-                          className="p-1 rounded-full text-xs text-gray-400 hover:text-[#CD7F32] flex items-center gap-1 transition-all"
-                          title="Reply to Message"
-                        >
-                          <Reply className="w-4 h-4" />
-                          <span className="text-[11px] font-medium hidden sm:inline">Reply</span>
                         </button>
                       </div>
                     </div>
