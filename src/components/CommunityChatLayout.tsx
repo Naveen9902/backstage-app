@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Search, Bell, Info, Pin, Hash, MessageSquare, Lock, Settings, LogOut, ChevronLeft, Image as ImageIcon, Menu, X, Megaphone, Smile, MoreVertical, FileText, Video, Music, Download, AlertCircle, Paperclip } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import dynamic from 'next/dynamic';
@@ -62,6 +63,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [activeChannel, setActiveChannel] = useState(initialChannel || 'announcements');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
   const safeEvent = event || {};
   const manager = safeEvent.manager || null;
   const attendees = safeEvent.fans || [];
@@ -84,7 +86,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const getChatTitle = () => {
     if (activeChannel.startsWith('dm_')) {
       const parts = activeChannel.split('_');
-      const otherId = parts[1] === currentUser.id ? parts[2] : parts[1];
+      const otherId = parts[1] === safeUser.id ? parts[2] : parts[1];
       
       if (manager && otherId === manager.id) return `@ ${manager.name}`;
       const foundStaff = staff.find(s => s.id === otherId);
@@ -98,13 +100,13 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   };
 
   const getDmChannelId = (otherUserId: string) => {
-    const ids = [currentUser.id, otherUserId].sort();
+    const ids = [safeUser.id, otherUserId].sort();
     return `dm_${ids[0]}_${ids[1]}`;
   };
 
   const fetchMessages = async () => {
     try {
-      const endpoint = currentUser.role === 'MANAGER' ? `/api/chat/${eventId}` : `/api/user/community/${eventId}/messages`;
+      const endpoint = safeUser.role === 'MANAGER' ? `/api/chat/${eventId}` : `/api/user/community/${eventId}/messages`;
       const res = await fetch(`${endpoint}?channel=${encodeURIComponent(activeChannel)}`);
       if (res.ok) {
         const data = await res.json();
@@ -121,16 +123,27 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     setLoading(true);
     fetchMessages();
     
-    const channel = supabase.channel(`community_${eventId}_${activeChannel}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'EventChatMessage', filter: `eventId=eq.${eventId}` },
-        (payload) => {
-          if (payload.new.channel === activeChannel) fetchMessages();
-        }
-      ).subscribe();
+    let channel: any = null;
+    try {
+      if (supabase && typeof supabase.channel === 'function') {
+        channel = supabase.channel(`community_${eventId}_${activeChannel}`)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'EventChatMessage', filter: `eventId=eq.${eventId}` },
+            (payload) => {
+              if (payload?.new?.channel === activeChannel) fetchMessages();
+            }
+          ).subscribe();
+      }
+    } catch (e) {}
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { 
+      try {
+        if (channel && supabase && typeof supabase.removeChannel === 'function') {
+          supabase.removeChannel(channel);
+        }
+      } catch (e) {}
+    };
   }, [eventId, activeChannel]);
 
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
@@ -397,7 +410,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Production Channels</h3>
                 <div className="space-y-0.5">
-                  {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && currentUser.role === 'USER')).map(ch => (
+                  {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && safeUser.role === 'USER')).map(ch => (
                     <div 
                       key={ch}
                       onClick={() => handleChannelSelect(ch)}
@@ -457,16 +470,16 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
             <div className="h-16 bg-[#ebe7df] border-t border-[#e0dcd3] p-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3 cursor-pointer hover:bg-black/5 p-1 -ml-1 rounded">
                 <div className="w-9 h-9 rounded-full bg-gray-400 overflow-hidden relative shrink-0">
-                  {currentUser.avatarUrl ? (
-                    <img src={currentUser.avatarUrl} className="w-full h-full object-cover" alt="User" />
+                  {safeUser.avatarUrl ? (
+                    <img src={safeUser.avatarUrl} className="w-full h-full object-cover" alt="User" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#CD7F32] text-white font-bold">{currentUser.name.charAt(0)}</div>
+                    <div className="w-full h-full flex items-center justify-center bg-[#CD7F32] text-white font-bold">{(safeUser.name || 'Member').charAt(0)}</div>
                   )}
                   <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#ebe7df]"></div>
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-gray-800 leading-none truncate">{currentUser.name.split(' ')[0]}</span>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest">{currentUser.role === 'MANAGER' ? 'ORGANIZER' : 'STAFF'}</span>
+                  <span className="text-sm font-bold text-gray-800 leading-none truncate">{(safeUser.name || 'Member').split(' ')[0]}</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest">{safeUser.role === 'MANAGER' ? 'ORGANIZER' : 'STAFF'}</span>
                 </div>
               </div>
               <div className="flex gap-1 text-gray-500 shrink-0">
@@ -791,7 +804,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
             <button 
               type="button" 
               onClick={() => fileInputRef.current?.click()} 
-              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} 
+              disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'} 
               className="p-1.5 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30 cursor-pointer"
               title="Upload file (Images, Videos, Audio, GIFs, Docs max 10MB)"
             >
@@ -804,8 +817,8 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               type="text" 
               value={text}
               onChange={e => setText(e.target.value)}
-              placeholder={activeChannel === 'announcements' && currentUser.role !== 'MANAGER' ? "Only organizers can post in #announcements" : `Message ${getChatTitle()}`} 
-              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'}
+              placeholder={activeChannel === 'announcements' && safeUser.role !== 'MANAGER' ? "Only organizers can post in #announcements" : `Message ${getChatTitle()}`} 
+              disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'}
               className="flex-1 bg-transparent text-gray-800 md:text-white placeholder-gray-500 md:placeholder-gray-500 border-none outline-none px-2 focus:ring-0 disabled:opacity-50 text-[15px]"
             />
             
@@ -815,7 +828,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               className="hidden" 
               ref={fileInputRef} 
               onChange={handleFileSelect} 
-              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'}
+              disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'}
             />
             
             <button 
