@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
-import { redirect } from 'next/navigation';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
 
 export default async function UserCommunityChatPage({ params }: { params: Promise<{ eventId: string }> | { eventId: string } }) {
@@ -26,18 +25,33 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
                    cookieStore.get('token')?.value ||
                    cookieStore.get('auth_token')?.value;
 
-    if (!userId) redirect('/login');
-
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) redirect('/login');
-
-    // Auto-connect user to event fans in database
-    try {
-      await prisma.event.update({
-        where: { id: eventId },
-        data: { fans: { connect: { id: user.id } } }
+    let user: any = null;
+    if (userId) {
+      user = await prisma.user.findUnique({ 
+        where: { id: userId },
+        select: { id: true, name: true, avatarUrl: true, role: true }
       });
-    } catch (e) {}
+    }
+
+    // Fallback user if cookie is missing or guest mode
+    if (!user) {
+      user = {
+        id: userId || 'community_guest',
+        name: 'Community Member',
+        avatarUrl: null,
+        role: 'USER'
+      };
+    }
+
+    // Auto-connect user to event fans in database if valid user ID
+    if (user.id !== 'community_guest') {
+      try {
+        await prisma.event.update({
+          where: { id: eventId },
+          data: { fans: { connect: { id: user.id } } }
+        });
+      } catch (e) {}
+    }
 
     // Server-side optimized fetch for initial event data
     const event = await prisma.event.findUnique({
@@ -45,6 +59,7 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
       select: {
         id: true,
         title: true,
+        description: true,
         coverImageUrl: true,
         date: true,
         location: true,
@@ -87,38 +102,21 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
 
     // Fetch other events for the server sidebar
     let otherEvents: any[] = [];
-    if (user.role === 'USER') {
-      otherEvents = await prisma.event.findMany({
-        where: { fans: { some: { id: user.id } }, id: { not: eventId } },
-        select: { id: true, title: true, coverImageUrl: true },
-        take: 20
-      });
-    } else if (user.role === 'WORKER') {
-      const workerProfile = await prisma.workerProfile.findUnique({ 
-        where: { userId: user.id },
-        select: { id: true }
-      });
-      if (workerProfile) {
-        const apps = await prisma.application.findMany({
-          where: { workerProfileId: workerProfile.id, status: { in: ['ACCEPTED', 'HIRED'] } },
-          select: { staffingRequest: { select: { event: { select: { id: true, title: true, coverImageUrl: true } } } } },
+    try {
+      if (user.role === 'USER') {
+        otherEvents = await prisma.event.findMany({
+          where: { fans: { some: { id: user.id } }, id: { not: eventId } },
+          select: { id: true, title: true, coverImageUrl: true },
           take: 20
         });
-        const eventMap = new Map();
-        apps.forEach(app => {
-          if (app.staffingRequest?.event && app.staffingRequest.event.id !== eventId) {
-            eventMap.set(app.staffingRequest.event.id, app.staffingRequest.event);
-          }
-        });
-        otherEvents = Array.from(eventMap.values());
       }
-    }
+    } catch (e) {}
 
     const currentUserObj = {
       id: user.id,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      role: user.role
+      name: user.name || 'Member',
+      avatarUrl: user.avatarUrl || null,
+      role: user.role || 'USER'
     };
 
     const eventData = JSON.parse(JSON.stringify(event));
