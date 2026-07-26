@@ -95,13 +95,13 @@ export default function ProfilePage() {
   return (
     <div className="text-[#242424] w-full max-w-5xl mx-auto space-y-8 font-sans pb-12">
       {/* Page Header */}
-      <div className="mb-8 flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-gray-900 mb-2">Manager Profile</h1>
-          <p className="text-gray-500 font-medium">Customize your brand identity and view your active footprint.</p>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-900 mb-1 sm:mb-2">Manager Profile</h1>
+          <p className="text-sm sm:text-base text-gray-500 font-medium">Customize your brand identity and view your active footprint.</p>
         </div>
         {formData.rating > 0 && (
-          <div className="flex items-center gap-2 bg-[#CD7F32]/10 px-4 py-2 rounded-xl border border-[#CD7F32]/20 shadow-sm">
+          <div className="flex items-center gap-2 bg-[#CD7F32]/10 px-4 py-2.5 rounded-xl border border-[#CD7F32]/20 shadow-sm self-start sm:self-auto">
             <span className="font-black text-xl text-[#CD7F32]">{formData.rating.toFixed(1)}</span>
             <div className="flex text-[#CD7F32]">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -131,7 +131,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Avatar & Action Row */}
-            <div className="px-6 sm:px-8 flex flex-col sm:flex-row justify-between items-center sm:items-end relative -mt-16 sm:-mt-20 mb-8 z-10 gap-4 sm:gap-0">
+            <div className="px-6 sm:px-8 flex flex-col sm:flex-row justify-between items-center sm:items-end relative -mt-16 sm:-mt-20 mb-6 z-10 gap-4 sm:gap-0">
               <div className="relative mb-0 sm:mb-0">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 sm:border-[6px] border-white bg-gradient-to-br from-[#CD7F32] to-[#8a5522] shadow-2xl flex items-center justify-center overflow-hidden group/avatar cursor-pointer relative z-10 transition-transform duration-500 hover:scale-105" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                   {!formData.avatarUrl && (

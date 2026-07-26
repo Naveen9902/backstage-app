@@ -61,16 +61,16 @@ export default function ManagerDashboard() {
   return (
     <div className="text-[#242424]">
       {/* Header */}
-      <div className="flex justify-between items-start mb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Dashboard</h1>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <p className="text-lg text-gray-700">
+          <h1 className="text-3xl sm:text-4xl font-bold font-serif tracking-tight mb-2">Dashboard</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <p className="text-base sm:text-lg text-gray-700">
               Welcome back, <span className="text-[#CD7F32] font-semibold uppercase">{profile?.name || 'Manager'}!</span>
             </p>
             {profile?.managerProfile?.subscriptionTier && (
-              <div className="inline-flex">
-                <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+              <div className="inline-flex self-start sm:self-auto">
+                <span className={`text-[10px] sm:text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider ${
                   profile.managerProfile.subscriptionTier === 'ENTERPRISE'
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : profile.managerProfile.subscriptionTier === 'PRO'
@@ -83,11 +83,11 @@ export default function ManagerDashboard() {
             )}
           </div>
         </div>
-        <Link href="/manager/events/create">
+        <Link href="/manager/events/create" className="w-full sm:w-auto">
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-lg font-semibold shadow-lg shadow-[#CD7F32]/20"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-[#CD7F32]/20"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
             Create Event
@@ -100,19 +100,19 @@ export default function ManagerDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 bg-green-50 border border-green-300 rounded-xl p-4 flex items-center justify-between"
+          className="mb-8 bg-green-50 border border-green-300 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm"
         >
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse flex-shrink-0"></span>
+          <div className="flex items-start sm:items-center gap-3">
+            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse flex-shrink-0 mt-1 sm:mt-0"></span>
             <div>
-              <p className="font-bold text-green-800">
+              <p className="font-bold text-green-800 text-sm sm:text-base">
                 {liveEvents.length === 1 ? `"${liveEvents[0].title}" is LIVE now!` : `${liveEvents.length} events are LIVE right now!`}
               </p>
-              <p className="text-green-600 text-sm">Runners can be dispatched for these events.</p>
+              <p className="text-green-600 text-xs sm:text-sm mt-0.5">Runners can be dispatched for these events.</p>
             </div>
           </div>
-          <Link href="/manager/runners">
-            <button className="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+          <Link href="/manager/runners" className="w-full sm:w-auto">
+            <button className="w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               Dispatch Runners
             </button>
