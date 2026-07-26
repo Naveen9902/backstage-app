@@ -103,24 +103,68 @@ export default function UserEvents() {
     } catch (err) {}
   };
 
+  const [activeTab, setActiveTab] = useState<'liked' | 'all'>('liked');
+
+  const displayedEvents = events.filter(event => {
+    if (activeTab === 'liked') {
+      return savedIds.includes(event.id) || joinedIds.includes(event.id);
+    }
+    return true;
+  });
+
   return (
     <div className="space-y-8 text-[#242424] font-sans pb-12">
-      <div>
-        <h1 className="text-3xl font-bold font-serif mb-2">Upcoming Events</h1>
-        <p className="text-gray-600">Browse all available events and get your tickets.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold font-serif mb-2">Favorite &amp; Liked Events</h1>
+          <p className="text-gray-600">Your curated saved events and joined communities for instant access.</p>
+        </div>
+
+        {/* Tab Toggle */}
+        <div className="flex items-center bg-gray-100 p-1.5 rounded-full w-max border border-gray-200 shadow-inner">
+          <button
+            onClick={() => setActiveTab('liked')}
+            className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              activeTab === 'liked' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${activeTab === 'liked' ? 'fill-white' : ''}`} />
+            <span>Liked &amp; Favorites ({savedIds.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all ${
+              activeTab === 'all' ? 'bg-[#242424] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <span>Browse All ({events.length})</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center p-12">
           <div className="w-8 h-8 border-4 border-[#CD7F32]/30 border-t-[#CD7F32] rounded-full animate-spin" />
         </div>
-      ) : events.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-200">
-          <p className="text-gray-500 mb-4">No events found at the moment.</p>
+      ) : displayedEvents.length === 0 ? (
+        <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-200 max-w-lg mx-auto">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100">
+            <Heart className="w-8 h-8 fill-red-500" />
+          </div>
+          <h3 className="text-xl font-bold font-serif text-gray-900 mb-2">No Favorite Events Added Yet</h3>
+          <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+            Click the ❤️ heart icon on any event card to add it to your personal favorites list!
+          </p>
+          <button 
+            onClick={() => setActiveTab('all')}
+            className="bg-[#242424] hover:bg-black text-white text-xs font-bold px-6 py-3 rounded-full transition-all shadow-md"
+          >
+            Explore All Available Events
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event, i) => {
+          {displayedEvents.map((event, i) => {
             const isSaved = savedIds.includes(event.id);
             const isJoined = joinedIds.includes(event.id);
 
