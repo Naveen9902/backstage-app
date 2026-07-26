@@ -26,6 +26,8 @@ export default function UserCommunityChatPage() {
     role: 'USER'
   });
 
+  const [otherEvents, setOtherEvents] = useState<any[]>([]);
+
   useEffect(() => {
     // 1. Fetch current logged-in user profile
     const loadProfile = async () => {
@@ -47,7 +49,7 @@ export default function UserCommunityChatPage() {
       }
     };
 
-    // 2. Fetch event details for this eventId
+    // 2. Fetch event details for this eventId and all communities for switcher
     const loadEvent = async () => {
       try {
         const res = await fetch('/api/user/events');
@@ -63,6 +65,19 @@ export default function UserCommunityChatPage() {
       } catch (err) {
         console.warn('Events fetch warning:', err);
       }
+
+      try {
+        const resComm = await fetch('/api/user/community');
+        if (resComm.ok) {
+          const dataComm = await resComm.json();
+          if (Array.isArray(dataComm)) {
+            const filtered = dataComm.filter((e: any) => String(e.id) !== String(eventId));
+            setOtherEvents(filtered);
+          }
+        }
+      } catch (err) {
+        console.warn('Communities fetch warning:', err);
+      }
     };
 
     loadProfile();
@@ -75,7 +90,7 @@ export default function UserCommunityChatPage() {
         eventId={eventId}
         event={eventData}
         currentUser={currentUser}
-        otherEvents={[]}
+        otherEvents={otherEvents}
         returnHref="/user/community"
       />
     </div>

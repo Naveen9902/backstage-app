@@ -762,20 +762,16 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
             
             <button 
               type="button" 
-              onClick={() => fileInputRef.current?.click()} 
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
               disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'} 
-              className="p-2 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30 cursor-pointer"
-              title="Upload image, video, audio, or document (Max 10MB)"
+              className={`p-1.5 transition-colors disabled:opacity-30 cursor-pointer shrink-0 ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}
+              title="Add Emoji"
             >
-              <ImageIcon className="w-6 h-6" />
-            </button>
-            
-            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'} className={`p-2 transition-colors disabled:opacity-30 cursor-pointer ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}>
-              <Smile className="w-6 h-6" />
+              <Smile className="w-5 h-5 md:w-6 md:h-6" />
             </button>
             
             {showEmojiPicker && (
-              <div className="absolute bottom-16 right-0 z-50 shadow-2xl">
+              <div className="absolute bottom-14 right-2 sm:right-4 z-50 shadow-2xl max-w-[90vw] sm:max-w-xs">
                 <EmojiPicker 
                   onEmojiClick={(emojiData) => {
                     setText(prev => prev + emojiData.emoji);
