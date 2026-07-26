@@ -409,13 +409,22 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       {/* ============================================================== */}
       {/* 1. Servers Sidebar (Far Left - Visible on Mobile & Desktop) */}
       {/* ============================================================== */}
-      <div className="w-14 md:w-16 bg-[#2b2b2b] flex flex-col items-center py-4 gap-4 z-20 shrink-0 h-full">
+      <div className={`w-14 md:w-16 bg-[#2b2b2b] flex-col items-center py-4 gap-4 z-20 shrink-0 h-full ${mobileView === 'channels' ? 'flex' : 'hidden md:flex'}`}>
         <Link href={returnHref} className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] bg-[#3a3a3a] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#CD7F32] hover:rounded-xl transition-all mb-2 cursor-pointer shadow-sm">
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
         </Link>
         
-        <div className="relative group cursor-pointer" onClick={() => setMobileView(mobileView === 'channels' ? 'chat' : 'channels')}>
-          <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white rounded-r-md"></div>
+        <div 
+          className="relative group cursor-pointer" 
+          onClick={() => {
+            if (showSwitcher) {
+              setShowSwitcher(false);
+            } else {
+              setMobileView(mobileView === 'channels' ? 'chat' : 'channels');
+            }
+          }}
+        >
+          <div className={`absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white rounded-r-md transition-opacity ${!showSwitcher ? 'opacity-100' : 'opacity-0'}`}></div>
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] bg-[#CD7F32] flex items-center justify-center text-white font-bold shadow-lg overflow-hidden border border-white/20">
             {event.coverImageUrl ? (
               <img src={event.coverImageUrl} className="w-full h-full object-cover" alt="Event" />
