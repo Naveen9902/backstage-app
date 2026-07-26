@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
 
 export default function GlobalNotificationListener({ currentUser }: { currentUser: any }) {
-  const supabase = createClientComponentClient();
   const notificationCount = useRef(0);
 
   // Helper to trigger a local push notification
