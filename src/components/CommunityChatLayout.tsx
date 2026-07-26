@@ -35,6 +35,11 @@ type CommunityChatLayoutProps = {
 const ALL_CHANNELS = ['announcements', 'general', 'networking', 'q-and-a'];
 
 export default function CommunityChatLayout({ eventId, event, currentUser, otherEvents = [], returnHref = "/user/community", initialChannel }: CommunityChatLayoutProps) {
+  const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
+  const safeEvent = event || {};
+  const manager = safeEvent?.manager || null;
+  const attendees = safeEvent?.fans || [];
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -45,13 +50,6 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
   
   const [selectedFile, setSelectedFile] = useState<{
     dataUrl: string;
@@ -63,7 +61,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [activeChannel, setActiveChannel] = useState(initialChannel || (safeUser?.role === 'MANAGER' ? 'announcements' : 'general'));
+  const [activeChannel, setActiveChannel] = useState(initialChannel || (safeUser.role === 'MANAGER' ? 'announcements' : 'general'));
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleChannelSelect = (channel: string) => {
@@ -71,11 +69,6 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     setMobileView('chat');
     setShowSwitcher(false);
   };
-
-  const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
-  const safeEvent = event || {};
-  const manager = safeEvent.manager || null;
-  const attendees = safeEvent.fans || [];
   
   let staff: User[] = [];
   if (safeEvent.staffingRequests && Array.isArray(safeEvent.staffingRequests)) {
