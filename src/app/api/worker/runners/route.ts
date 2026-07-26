@@ -40,11 +40,9 @@ export async function GET() {
         OR: [
           // Broadcast to hired staff for internal event tasks
           { status: 'Pending', runnerId: null, eventId: { in: hiredEventIds } },
-          // Open broadcast for external errands to ANY ACTIVE RUNNER ONLY
-          ...(isRunnerAvailable ? [
-            { status: 'Pending', runnerId: null, task: { startsWith: '[EXTERNAL/ERRAND]' } },
-            { status: 'Pending', runnerId: null, price: { not: null } },
-          ] : []),
+          // Open broadcast for external errands available to ALL workers
+          { status: 'Pending', runnerId: null, task: { startsWith: '[EXTERNAL/ERRAND]' } },
+          { status: 'Pending', runnerId: null, price: { not: null } },
           // Directly assigned to this worker
           { runnerId: userId }
         ]
@@ -104,6 +102,16 @@ export async function POST(req: Request) {
         include: {
           event: { select: { managerId: true } },
           runner: { select: { name: true } }
+        }
+      });
+      await prisma.workerProfile.upsert({
+        where: { userId },
+        update: { isRunnerAvailable: true },
+        create: {
+          userId,
+          skills: 'General Event Staff, Runner',
+          experience: '1+ year event experience',
+          isRunnerAvailable: true
         }
       });
       const mgrId = updated.managerId || updated.event?.managerId;

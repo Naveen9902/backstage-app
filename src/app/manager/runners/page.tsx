@@ -234,8 +234,8 @@ export default function RunnersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
-        <div className="mb-10 relative overflow-hidden bg-[#242424] rounded-3xl p-8 md:p-12 text-white shadow-xl shadow-[#242424]/10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 pb-28 md:pb-12">
+        <div className="mb-6 md:mb-10 relative overflow-hidden bg-[#242424] rounded-3xl p-6 md:p-12 text-white shadow-xl shadow-[#242424]/10">
           {/* Radar Animation Background */}
           <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 opacity-30 pointer-events-none transform translate-x-1/4 -translate-y-1/4">
             <div className="absolute inset-0 rounded-full border-2 border-[#CD7F32] animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
@@ -251,27 +251,27 @@ export default function RunnersPage() {
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               Live Operations
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold font-serif tracking-tight mb-3">Runner Dispatch Center</h1>
-            <p className="text-lg text-gray-300 max-w-xl leading-relaxed">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif tracking-tight mb-3">Runner Dispatch Center</h1>
+            <p className="text-base sm:text-lg text-gray-300 max-w-xl leading-relaxed">
               Assign high-priority tasks directly to your hired staff during live events. Real-time coordination, amplified.
             </p>
           </div>
         </div>
 
         {/* Broadcast Errand to All Workers Banner Box */}
-        <div className="mb-12 bg-gradient-to-br from-[#242424] via-[#1a1a1a] to-[#121212] p-8 md:p-10 rounded-3xl border-2 border-[#CD7F32]/60 shadow-2xl relative overflow-hidden group hover:border-[#CD7F32] transition-all duration-300">
+        <div className="mb-8 md:mb-12 bg-gradient-to-br from-[#242424] via-[#1a1a1a] to-[#121212] p-6 sm:p-8 md:p-10 rounded-3xl border-2 border-[#CD7F32]/60 shadow-2xl relative overflow-hidden group hover:border-[#CD7F32] transition-all duration-300">
           <div className="absolute -right-12 -top-12 w-64 h-64 bg-[#CD7F32]/10 rounded-full blur-3xl pointer-events-none group-hover:bg-[#CD7F32]/20 transition-all duration-500"></div>
           <div className="absolute right-0 bottom-0 w-48 h-48 bg-[#CD7F32]/5 rounded-tl-full pointer-events-none"></div>
 
           <div className="relative z-10">
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] flex items-center justify-center text-2xl shadow-inner font-bold">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] flex items-center justify-center text-xl sm:text-2xl shadow-inner font-bold">
                 ⚡
               </div>
               <span className="bg-[#CD7F32] text-white text-xs font-mono font-extrabold px-3 py-1 rounded-md uppercase tracking-wider shadow-md">
                 Open Errand
               </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold font-serif text-white tracking-tight w-full sm:w-auto sm:ml-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-serif text-white tracking-tight w-full sm:w-auto sm:ml-2">
                 Broadcast Errand to All Workers
               </h2>
             </div>
@@ -280,11 +280,11 @@ export default function RunnersPage() {
               Need quick on-ground help or supplies? Broadcast an open errand with a fixed price to all nearby workers simultaneously. First worker to grab it claims the job automatically!
             </p>
 
-            <div className="mt-8">
+            <div className="mt-6 sm:mt-8">
               <button
                 type="button"
                 onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Workers', eventId: null, isExternal: true, isBroadcast: true })}
-                className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] hover:from-[#df8a3c] hover:to-[#CD7F32] text-white font-extrabold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm md:text-base border border-white/20 group/btn"
+                className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] hover:from-[#df8a3c] hover:to-[#CD7F32] text-white font-extrabold px-6 py-3.5 sm:px-8 sm:py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm md:text-base border border-white/20 group/btn"
               >
                 <span className="text-lg text-amber-200 group-hover/btn:scale-125 transition-transform">⚡</span>
                 <span className="tracking-wide">Post Open Errand (₹)</span>
@@ -294,7 +294,7 @@ export default function RunnersPage() {
         </div>
 
         {/* Top Two-Halves Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
             
               {/* Left Half: Hired Internal Staff */}
               <div className="bg-gradient-to-b from-white to-gray-50/50 p-6 md:p-8 rounded-3xl border border-gray-200/80 shadow-lg shadow-gray-200/50 flex flex-col justify-between relative overflow-hidden">
@@ -306,7 +306,7 @@ export default function RunnersPage() {
                         <Briefcase className="w-6 h-6" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold font-serif text-gray-900">Hired Event Runners</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold font-serif text-gray-900">Hired Event Runners</h2>
                         <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Internal Venue Crew &bull; Live Tasks</p>
                       </div>
                     </div>
@@ -316,7 +316,7 @@ export default function RunnersPage() {
                   </div>
 
                   {hiredStaff.length === 0 ? (
-                    <div className="bg-white/80 backdrop-blur p-12 rounded-2xl border border-dashed border-gray-200 text-center my-6">
+                    <div className="bg-white/80 backdrop-blur p-8 sm:p-12 rounded-2xl border border-dashed border-gray-200 text-center my-6">
                       <Briefcase className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                       <p className="text-gray-500 font-medium">No internal runners assigned to ongoing events.</p>
                       <p className="text-xs text-gray-400 mt-1">Hire staff in the Staffing tab first.</p>
@@ -374,7 +374,7 @@ export default function RunnersPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold font-serif text-gray-900">Nearby Quick Runners</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold font-serif text-gray-900">Nearby Quick Runners</h2>
                         <p className="text-xs text-[#CD7F32] uppercase tracking-wider font-semibold">External Errands &bull; Instant Dispatch</p>
                       </div>
                     </div>
@@ -382,32 +382,6 @@ export default function RunnersPage() {
                       <span className="w-2 h-2 rounded-full bg-[#CD7F32] animate-pulse"></span>
                       {nearbyRunners.length} Nearby
                     </span>
-                  </div>
-
-                  {/* Broadcast Open Errand Action Bar */}
-                  <div className="mb-5">
-                    <button
-                      type="button"
-                      onClick={() => setAssignModal({ userId: 'BROADCAST', name: 'All Nearby Runners', eventId: null, isExternal: true, isBroadcast: true })}
-                      className="w-full bg-gradient-to-r from-[#242424] via-[#1c1c1c] to-[#242424] hover:from-[#181818] hover:to-[#181818] text-white p-4 rounded-2xl border border-[#CD7F32]/60 shadow-lg hover:shadow-xl flex items-center justify-between group transition-all duration-300"
-                    >
-                      <div className="flex items-center gap-3.5 text-left">
-                        <div className="w-11 h-11 rounded-xl bg-[#CD7F32] text-white flex items-center justify-center text-lg font-bold shadow-md group-hover:scale-110 transition-transform shrink-0">
-                          ⚡
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm text-white group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
-                            <span>Broadcast Open Errand</span>
-                            <span className="text-[10px] bg-[#CD7F32]/20 text-[#CD7F32] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider border border-[#CD7F32]/30">First to Claim</span>
-                          </div>
-                          <p className="text-xs text-gray-400 mt-0.5">Post an external task & fee for any available nearby worker</p>
-                        </div>
-                      </div>
-                      <div className="bg-[#CD7F32]/20 group-hover:bg-[#CD7F32] text-[#CD7F32] group-hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 border border-[#CD7F32]/30 group-hover:border-transparent">
-                        <span>Broadcast</span>
-                        <Send className="w-3.5 h-3.5" />
-                      </div>
-                    </button>
                   </div>
 
                   {nearbyRunners.length === 0 ? (

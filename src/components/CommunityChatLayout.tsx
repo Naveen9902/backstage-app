@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Bell, Info, Pin, Hash, MessageSquare, Lock, Settings, LogOut, ChevronLeft, Image as ImageIcon, Menu, X, Megaphone, Smile, MoreVertical } from 'lucide-react';
+import { Search, Bell, Info, Pin, Hash, MessageSquare, Lock, Settings, LogOut, ChevronLeft, Image as ImageIcon, Menu, X, Megaphone, Smile, MoreVertical, FileText, Video, Music, Download, AlertCircle, Paperclip } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import EmojiPicker from 'emoji-picker-react';
 
@@ -39,7 +39,15 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [mobileView, setMobileView] = useState<'channels' | 'chat'>('channels');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null);
+  
+  const [selectedFile, setSelectedFile] = useState<{
+    dataUrl: string;
+    fileName: string;
+    fileType: 'image' | 'video' | 'audio' | 'file';
+    fileSizeMb: string;
+  } | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [activeChannel, setActiveChannel] = useState(initialChannel || 'announcements');
@@ -53,7 +61,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     event.staffingRequests.forEach((req: any) => {
       if (req.applications) {
         req.applications.forEach((app: any) => {
-          if (app.status === 'HIRED' && app.workerProfile?.user) {
+          if ((app.status === 'HIRED' || app.status === 'ACCEPTED') && app.workerProfile?.user) {
             if (!staff.find(s => s.id === app.workerProfile.user.id)) {
               staff.push(app.workerProfile.user);
             }
@@ -119,9 +127,9 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
   useEffect(() => {
     if (shouldAutoScroll) {
-      messagesEndRef.current?.scrollIntoView();
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, shouldAutoScroll]);
 
   useEffect(() => {
     setShouldAutoScroll(true);
@@ -133,29 +141,53 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     setShouldAutoScroll(isNearBottom);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError(null);
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const maxBytes = 10 * 1024 * 1024; // 10MB limit
+    if (file.size > maxBytes) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setFileError(`File size exceeds 10MB limit (${sizeMb}MB selected). Please choose a smaller file.`);
+      e.target.value = '';
+      return;
+    }
+
+    const mime = file.type.toLowerCase();
+    let fileType: 'image' | 'video' | 'audio' | 'file' = 'file';
+    if (mime.startsWith('image/')) fileType = 'image';
+    else if (mime.startsWith('video/')) fileType = 'video';
+    else if (mime.startsWith('audio/')) fileType = 'audio';
+
     const reader = new FileReader();
-    reader.onload = (event) => { setSelectedImageBase64(event.target?.result as string); };
+    reader.onload = (event) => {
+      setSelectedFile({
+        dataUrl: event.target?.result as string,
+        fileName: file.name,
+        fileType,
+        fileSizeMb: (file.size / (1024 * 1024)).toFixed(2)
+      });
+    };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() && !selectedImageBase64) return;
+    if (!text.trim() && !selectedFile) return;
 
     const messageText = text;
-    const messageImage = selectedImageBase64;
+    const messagePayload = selectedFile ? JSON.stringify(selectedFile) : null;
     setText(''); 
-    setSelectedImageBase64(null);
+    setSelectedFile(null);
+    setFileError(null);
     setShowEmojiPicker(false);
 
     const optimisticMsg: Message = {
       id: Date.now().toString(),
       text: messageText,
-      imageUrl: messageImage,
+      imageUrl: messagePayload,
       createdAt: new Date().toISOString(),
       senderId: currentUser.id,
       sender: {
@@ -172,7 +204,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: messageText, imageUrl: messageImage, channel: activeChannel })
+        body: JSON.stringify({ text: messageText, imageUrl: messagePayload, channel: activeChannel })
       });
       if (res.ok) fetchMessages();
     } catch (err) {
@@ -181,9 +213,59 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     }
   };
 
-  const handleChannelSelect = (ch: string) => {
-    setActiveChannel(ch);
-    setMobileView('chat');
+  const renderMediaAttachment = (mediaData?: string | null) => {
+    if (!mediaData) return null;
+    try {
+      if (mediaData.startsWith('{')) {
+        const parsed = JSON.parse(mediaData);
+        if (parsed.fileType === 'image') {
+          return (
+            <div className="mt-2 max-w-[240px] md:max-w-md rounded-xl overflow-hidden border border-black/10 shadow-sm">
+              <img src={parsed.dataUrl} alt={parsed.fileName} className="w-full h-auto max-h-80 object-contain" />
+            </div>
+          );
+        }
+        if (parsed.fileType === 'video') {
+          return (
+            <div className="mt-2 max-w-[260px] md:max-w-md rounded-xl overflow-hidden border border-black/10 shadow-sm bg-black">
+              <video src={parsed.dataUrl} controls className="w-full h-auto max-h-80" />
+            </div>
+          );
+        }
+        if (parsed.fileType === 'audio') {
+          return (
+            <div className="mt-2 p-2 bg-gray-50 rounded-xl border border-gray-200 max-w-xs">
+              <audio src={parsed.dataUrl} controls className="w-full h-10" />
+              <p className="text-[10px] text-gray-500 mt-1 font-mono px-1 truncate">{parsed.fileName}</p>
+            </div>
+          );
+        }
+        return (
+          <a 
+            href={parsed.dataUrl} 
+            download={parsed.fileName} 
+            className="mt-2 flex items-center gap-3 p-3 bg-white/80 hover:bg-white rounded-xl border border-gray-200 shadow-sm max-w-xs transition-all group/file"
+          >
+            <div className="w-10 h-10 rounded-lg bg-[#CD7F32]/20 text-[#CD7F32] flex items-center justify-center font-bold text-lg shrink-0">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-xs text-gray-800 truncate group-hover/file:text-[#CD7F32]">{parsed.fileName}</p>
+              <p className="text-[10px] text-gray-400 font-mono">{parsed.fileSizeMb} MB</p>
+            </div>
+            <Download className="w-4 h-4 text-gray-400 group-hover/file:text-[#CD7F32] shrink-0" />
+          </a>
+        );
+      }
+    } catch (e) {
+      // Fallback for plain URL images
+    }
+
+    return (
+      <div className="mt-2 max-w-[240px] md:max-w-sm rounded-xl overflow-hidden border border-black/10">
+        <img src={mediaData} alt="attachment" className="w-full h-auto" />
+      </div>
+    );
   };
 
   return (
@@ -569,11 +651,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                         <Megaphone className="absolute top-2 right-2 w-12 h-12 text-[#CD7F32] opacity-5 -rotate-12" />
                       )}
                       {msg.text}
-                      {msg.imageUrl && (
-                        <div className="mt-2 max-w-[200px] md:max-w-sm rounded-xl overflow-hidden border border-black/10">
-                          <img src={msg.imageUrl} alt="attachment" className="w-full h-auto" />
-                        </div>
-                      )}
+                      {renderMediaAttachment(msg.imageUrl)}
                     </div>
                   </div>
                 </div>
@@ -585,28 +663,65 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
         {/* Chat Input Bar */}
         <div className="p-3 md:p-6 bg-white md:bg-[#f4efe5] relative border-t border-gray-100 md:border-none">
-          {showEmojiPicker && (
-            <div className="absolute bottom-[100%] left-0 md:right-6 md:left-auto z-50 w-full md:w-auto shadow-2xl rounded-t-xl md:rounded-lg overflow-hidden border border-gray-200">
-              <EmojiPicker onEmojiClick={(e) => setText(prev => prev + e.emoji)} theme="light" width="100%" />
-            </div>
-          )}
-          {selectedImageBase64 && (
-            <div className="mb-2 bg-white p-2 rounded-xl border border-gray-200 w-max relative shadow-sm">
-              <button 
-                onClick={() => setSelectedImageBase64(null)}
-                className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 shadow-md"
-              >
-                <X className="w-3 h-3" />
+          {fileError && (
+            <div className="mb-2 bg-red-50 text-red-600 p-2.5 rounded-xl border border-red-200 text-xs font-semibold flex items-center justify-between shadow-sm animate-shake">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{fileError}</span>
+              </div>
+              <button onClick={() => setFileError(null)} className="p-0.5 hover:bg-red-100 rounded-full">
+                <X className="w-3.5 h-3.5" />
               </button>
-              <img src={selectedImageBase64} alt="preview" className="h-20 w-auto rounded-lg object-contain" />
             </div>
           )}
+
+          {selectedFile && (
+            <div className="mb-3 bg-white p-3 rounded-2xl border border-gray-200 w-max max-w-sm relative shadow-md flex items-center gap-3">
+              <button 
+                type="button"
+                onClick={() => setSelectedFile(null)}
+                className="absolute -top-2 -right-2 bg-gray-800 text-white rounded-full p-1 shadow-md hover:bg-black transition-all"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              {selectedFile.fileType === 'image' && (
+                <img src={selectedFile.dataUrl} alt="preview" className="h-16 w-16 rounded-xl object-cover border border-gray-100" />
+              )}
+              {selectedFile.fileType === 'video' && (
+                <div className="h-16 w-20 bg-black rounded-xl overflow-hidden flex items-center justify-center">
+                  <Video className="w-6 h-6 text-white" />
+                </div>
+              )}
+              {selectedFile.fileType === 'audio' && (
+                <div className="h-16 w-16 bg-[#CD7F32]/10 text-[#CD7F32] rounded-xl flex items-center justify-center font-bold">
+                  <Music className="w-6 h-6" />
+                </div>
+              )}
+              {selectedFile.fileType === 'file' && (
+                <div className="h-16 w-16 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center font-bold">
+                  <FileText className="w-6 h-6" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-xs text-gray-900 truncate max-w-[180px]">{selectedFile.fileName}</p>
+                <p className="text-[10px] text-gray-400 font-mono">{selectedFile.fileSizeMb} MB (Max 10MB)</p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={sendMessage} className="bg-gray-100 md:bg-[#242424] rounded-full flex items-center p-1 md:p-2 shadow-inner md:shadow-lg border border-transparent md:border-none relative">
-            <button type="button" disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} className="p-2 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30">
-              <div className="w-7 h-7 rounded-full bg-white md:bg-gray-600 flex items-center justify-center shadow-sm md:shadow-none">
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()} 
+              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} 
+              className="p-1.5 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30 cursor-pointer"
+              title="Upload file (Images, Videos, Audio, GIFs, Docs max 10MB)"
+            >
+              <div className="w-7 h-7 rounded-full bg-white md:bg-gray-600 flex items-center justify-center shadow-sm md:shadow-none hover:scale-105 transition-transform">
                 <span className="text-lg font-bold leading-none mb-0.5 text-[#CD7F32] md:text-white">+</span>
               </div>
             </button>
+
             <input 
               type="text" 
               value={text}
@@ -616,13 +731,26 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               className="flex-1 bg-transparent text-gray-800 md:text-white placeholder-gray-500 md:placeholder-gray-500 border-none outline-none px-2 focus:ring-0 disabled:opacity-50 text-[15px]"
             />
             
-            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'}/>
+            <input 
+              type="file" 
+              accept="image/*,video/*,audio/*,.gif,.pdf,.doc,.docx,.txt,.csv,.xlsx,.zip" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleFileSelect} 
+              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'}
+            />
             
-            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} className="p-2 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30">
+            <button 
+              type="button" 
+              onClick={() => fileInputRef.current?.click()} 
+              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} 
+              className="p-2 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30 cursor-pointer"
+              title="Upload image or media"
+            >
               <ImageIcon className="w-6 h-6" />
             </button>
             
-            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} className={`p-2 transition-colors disabled:opacity-30 ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}>
+            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} className={`p-2 transition-colors disabled:opacity-30 cursor-pointer ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}>
               <Smile className="w-6 h-6" />
             </button>
             

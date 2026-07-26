@@ -2,15 +2,50 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Calendar, MapPin } from 'lucide-react';
+import UserEventDetailView from '@/components/UserEventDetailView';
 
 export default function UserEvents() {
+  const router = useRouter();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [joinedIds, setJoinedIds] = useState<string[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    // We can fetch from an open endpoint or create a user-specific one.
-    // Fetch all public events for users
+    // 1. Fetch user profile to scope saved events to the current logged-in account
+    fetch('/api/user/profile')
+      .then(res => res.json())
+      .then(profile => {
+        if (profile && profile.id) {
+          setCurrentUser(profile);
+          const savedKey = `backstage_saved_events_${profile.id}`;
+          const joinedKey = `backstage_joined_communities_${profile.id}`;
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem(savedKey) || '[]');
+              const joined = JSON.parse(localStorage.getItem(joinedKey) || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {}
+          }
+        } else {
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem('backstage_saved_events_guest') || '[]');
+              const joined = JSON.parse(localStorage.getItem('backstage_joined_communities_guest') || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {}
+          }
+        }
+      })
+      .catch(console.error);
+
     fetch('/api/user/events')
       .then(res => res.json())
       .then(data => {
@@ -22,8 +57,54 @@ export default function UserEvents() {
       .finally(() => setLoading(false));
   }, []);
 
+  const toggleSaveEvent = (eventId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSavedIds(prev => {
+      const isSaved = prev.includes(eventId);
+      const nextArr = isSaved ? prev.filter(id => id !== eventId) : [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        try {
+          const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+          localStorage.setItem(savedKey, JSON.stringify(nextArr));
+        } catch (err) {}
+      }
+      return nextArr;
+    });
+  };
+
+  const handleJoinCommunity = async (eventId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setJoinedIds(prev => {
+      if (prev.includes(eventId)) return prev;
+      const next = [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        try {
+          const joinedKey = currentUser ? `backstage_joined_communities_${currentUser.id}` : 'backstage_joined_communities_guest';
+          localStorage.setItem(joinedKey, JSON.stringify(next));
+        } catch (err) {}
+      }
+      return next;
+    });
+
+    setSavedIds(prev => {
+      if (prev.includes(eventId)) return prev;
+      const next = [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        try {
+          const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+          localStorage.setItem(savedKey, JSON.stringify(next));
+        } catch (err) {}
+      }
+      return next;
+    });
+
+    try {
+      await fetch(`/api/user/events/${eventId}/join`, { method: 'POST' });
+    } catch (err) {}
+  };
+
   return (
-    <div className="space-y-8 text-[#242424]">
+    <div className="space-y-8 text-[#242424] font-sans pb-12">
       <div>
         <h1 className="text-3xl font-bold font-serif mb-2">Upcoming Events</h1>
         <p className="text-gray-600">Browse all available events and get your tickets.</p>
@@ -34,47 +115,111 @@ export default function UserEvents() {
           <div className="w-8 h-8 border-4 border-[#CD7F32]/30 border-t-[#CD7F32] rounded-full animate-spin" />
         </div>
       ) : events.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-[#CD7F32]/20">
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-200">
           <p className="text-gray-500 mb-4">No events found at the moment.</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event, i) => (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              key={event.id}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-[#CD7F32]/20 hover:shadow-md transition-shadow flex flex-col"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-xl leading-tight">{event.title}</h3>
-                <span className="px-2 py-1 bg-[#CD7F32]/10 text-[#CD7F32] text-xs font-bold rounded-md uppercase">
-                  {event.status}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500 mb-6 line-clamp-2 flex-1">{event.description}</p>
-              
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center text-sm text-gray-600 gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                  <span>{new Date(event.date).toLocaleDateString()} {event.startTime && `at ${event.startTime}`}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600 gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span className="truncate">{event.location}</span>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event, i) => {
+            const isSaved = savedIds.includes(event.id);
+            const isJoined = joinedIds.includes(event.id);
 
-              <Link href={`/user/events/${event.id}`} className="block w-full">
-                <button className="w-full py-2.5 bg-[#242424] text-white rounded-xl font-semibold hover:bg-black transition-colors">
-                  View Details
-                </button>
-              </Link>
-            </motion.div>
-          ))}
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                key={event.id}
+                onClick={() => setSelectedEvent(event)}
+                className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-[#CD7F32]/40 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between h-full hover:-translate-y-1"
+              >
+                <div>
+                  {/* Event Poster Area */}
+                  <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
+                    <img 
+                      src={event.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-90" />
+                    
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap z-10">
+                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider shadow-sm ${
+                        event.status === 'ONGOING' ? 'bg-emerald-500 text-black font-black animate-pulse' : 'bg-white text-gray-900'
+                      }`}>
+                        {event.status || 'UPCOMING'}
+                      </span>
+                      {isJoined && (
+                        <span className="bg-blue-600 text-white text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm">
+                          👥 Joined
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Save Heart Button */}
+                    <button
+                      onClick={(e) => toggleSaveEvent(event.id, e)}
+                      className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-90 shadow-md z-10 ${
+                        isSaved ? 'bg-red-500 text-white' : 'bg-black/50 text-white/80 hover:text-white hover:bg-black/70'
+                      }`}
+                      title={isSaved ? "Remove from Saved" : "Save Event"}
+                    >
+                      <Heart className={`w-4 h-4 ${isSaved ? 'fill-white' : ''}`} />
+                    </button>
+
+                    {/* Date overlay on image bottom */}
+                    <div className="absolute bottom-3 left-3 right-3 text-white z-10">
+                      <span className="text-xs font-bold font-mono bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 inline-flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-[#CD7F32]" />
+                        {new Date(event.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {event.startTime && ` • ${event.startTime}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Details Area */}
+                  <div className="p-5">
+                    <h3 className="font-extrabold text-gray-900 text-base mb-1.5 leading-snug line-clamp-2 group-hover:text-[#CD7F32] transition-colors">
+                      {event.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 font-semibold mb-2 flex items-center gap-1 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#CD7F32] shrink-0" />
+                      {event.location}
+                    </p>
+                    <p className="text-xs text-gray-400 font-medium line-clamp-2 leading-relaxed">
+                      {event.description || "Join this exciting experience. Click to view full lineup, timings, and community access."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card Footer */}
+                <div className="px-5 py-3.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs font-bold">
+                  <span className="text-gray-600 truncate max-w-[140px]">
+                    {event.attendeeCategory || event.tags || "General Event"}
+                  </span>
+                  <span className="text-[#CD7F32] group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    View Details &amp; Join →
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       )}
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <UserEventDetailView
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            isSaved={savedIds.includes(selectedEvent.id)}
+            hasJoined={joinedIds.includes(selectedEvent.id)}
+            onToggleSave={() => toggleSaveEvent(selectedEvent.id)}
+            onJoinCommunity={() => handleJoinCommunity(selectedEvent.id)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

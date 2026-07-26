@@ -60,7 +60,7 @@ export async function POST(req: Request) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 30 // 30 days
+        maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
       });
       
       response.cookies.set('managerSessionToken', sessionToken, {
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 30 // 30 days
+        maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
       });
 
       return response;
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 30 // 30 days
+      maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
     });
 
     return response;

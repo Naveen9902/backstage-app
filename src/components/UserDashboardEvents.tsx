@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, ChevronDown, ChevronUp, Filter, Calendar, Clock, Globe, Ticket, Heart, Users, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import UserEventDetailView from './UserEventDetailView';
 
 export default function UserDashboardEvents() {
   const router = useRouter();
@@ -12,7 +13,8 @@ export default function UserDashboardEvents() {
   const [loading, setLoading] = useState(true);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [joinedIds, setJoinedIds] = useState<string[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Filter States (Matching Home Web exactly)
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,17 +44,36 @@ export default function UserDashboardEvents() {
   const venues = ['Jio World Garden', 'Phoenix Marketcity', 'Pragati Maidan', 'Hard Rock Cafe', 'Palace Grounds'];
 
   useEffect(() => {
-    // Load saved & joined from localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = JSON.parse(localStorage.getItem('backstage_saved_events') || '[]');
-        const joined = JSON.parse(localStorage.getItem('backstage_joined_communities') || '[]');
-        if (Array.isArray(saved)) setSavedIds(saved);
-        if (Array.isArray(joined)) setJoinedIds(joined);
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    // 1. Fetch current logged in user profile first to restrict saved & joined events to this account only!
+    fetch('/api/user/profile')
+      .then(res => res.json())
+      .then(profile => {
+        if (profile && profile.id) {
+          setCurrentUser(profile);
+          const savedKey = `backstage_saved_events_${profile.id}`;
+          const joinedKey = `backstage_joined_communities_${profile.id}`;
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem(savedKey) || '[]');
+              const joined = JSON.parse(localStorage.getItem(joinedKey) || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        } else {
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem('backstage_saved_events_guest') || '[]');
+              const joined = JSON.parse(localStorage.getItem('backstage_joined_communities_guest') || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {}
+          }
+        }
+      })
+      .catch(console.error);
 
     // Fetch all events
     fetch('/api/user/events')
@@ -85,7 +106,8 @@ export default function UserDashboardEvents() {
       const exists = prev.includes(eventId);
       const next = exists ? prev.filter(id => id !== eventId) : [...prev, eventId];
       if (typeof window !== 'undefined') {
-        localStorage.setItem('backstage_saved_events', JSON.stringify(next));
+        const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+        localStorage.setItem(savedKey, JSON.stringify(next));
       }
       return next;
     });
@@ -97,7 +119,8 @@ export default function UserDashboardEvents() {
       if (prev.includes(eventId)) return prev;
       const next = [...prev, eventId];
       if (typeof window !== 'undefined') {
-        localStorage.setItem('backstage_joined_communities', JSON.stringify(next));
+        const joinedKey = currentUser ? `backstage_joined_communities_${currentUser.id}` : 'backstage_joined_communities_guest';
+        localStorage.setItem(joinedKey, JSON.stringify(next));
       }
       return next;
     });
@@ -107,7 +130,8 @@ export default function UserDashboardEvents() {
       if (prev.includes(eventId)) return prev;
       const next = [...prev, eventId];
       if (typeof window !== 'undefined') {
-        localStorage.setItem('backstage_saved_events', JSON.stringify(next));
+        const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+        localStorage.setItem(savedKey, JSON.stringify(next));
       }
       return next;
     });
@@ -555,136 +579,18 @@ export default function UserDashboardEvents() {
         </div>
       </section>
 
-      {/* 3. EVENT DETAILS MODAL ("if he click the event should appear and remove book now, add join community & save event") */}
       <AnimatePresence>
         {selectedEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-md" onClick={() => setSelectedEvent(null)}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#1a1a20] text-white rounded-3xl overflow-hidden border border-white/10 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col relative"
-            >
-              {/* Close Button */}
-              <button 
-                onClick={() => setSelectedEvent(null)}
-                className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black text-white/80 hover:text-white flex items-center justify-center border border-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              {/* Scrollable Modal Content */}
-              <div className="overflow-y-auto flex-1 p-0">
-                {/* Modal Header Poster */}
-                <div className="relative aspect-[16/7] sm:aspect-[21/9] w-full bg-gray-900">
-                  <img 
-                    src={selectedEvent.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 
-                    alt={selectedEvent.title} 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a20] via-black/30 to-transparent" />
-                  <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between">
-                    <div>
-                      <span className="inline-block px-3 py-1 rounded-md bg-[#CD7F32] text-white text-[10px] font-black uppercase tracking-wider mb-2 shadow-md">
-                        {selectedEvent.status || "UPCOMING"}
-                      </span>
-                      <h2 className="text-2xl sm:text-4xl font-extrabold font-serif text-white leading-tight shadow-sm">
-                        {selectedEvent.title}
-                      </h2>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Modal Body */}
-                <div className="p-6 sm:p-8 space-y-6">
-                  {/* Key Info Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 text-center">
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</div>
-                      <div className="text-sm font-bold text-white mt-0.5">
-                        {new Date(selectedEvent.date || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Time</div>
-                      <div className="text-sm font-bold text-white mt-0.5">{selectedEvent.startTime || "6:00 PM"}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Location</div>
-                      <div className="text-sm font-bold text-white mt-0.5 truncate px-2">{selectedEvent.location}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Category</div>
-                      <div className="text-sm font-bold text-[#CD7F32] mt-0.5 truncate px-2">{selectedEvent.attendeeCategory || "General"}</div>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2 font-serif flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#CD7F32]" /> About This Event
-                    </h3>
-                    <p className="text-gray-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                      {selectedEvent.description || "Experience live entertainment, connect with fellow attendees, and participate in exclusive community discussions. Save this event to keep it pinned at the top of your dashboard, or join the community to connect with fans."}
-                    </p>
-                  </div>
-
-                  {/* Community & Tags info */}
-                  {selectedEvent.tags && (
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Event Tags</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedEvent.tags.split(',').map((tag: string, i: number) => (
-                          <span key={i} className="text-xs bg-white/10 text-gray-200 px-3 py-1 rounded-lg border border-white/10 font-medium">
-                            #{tag.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Modal Action Bar ("remove book now, add join community and save event") */}
-              <div className="p-6 bg-black/60 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-gray-400 text-center sm:text-left">
-                  <span className="font-bold text-white">No tickets required here.</span> Join the community or save to your upcoming list.
-                </div>
-                
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  {/* Save Event Button */}
-                  <button
-                    onClick={() => toggleSaveEvent(selectedEvent.id)}
-                    className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 border ${
-                      savedIds.includes(selectedEvent.id)
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30'
-                        : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
-                    }`}
-                  >
-                    <Heart className={`w-4 h-4 ${savedIds.includes(selectedEvent.id) ? 'fill-red-400 text-red-400' : ''}`} />
-                    {savedIds.includes(selectedEvent.id) ? "♥ Saved in Upcoming" : "♥ Save Event"}
-                  </button>
-
-                  {/* Join Community Button */}
-                  <button
-                    onClick={() => {
-                      handleJoinCommunity(selectedEvent.id);
-                      router.push(`/user/community/${selectedEvent.id}`);
-                    }}
-                    className="flex-1 sm:flex-none bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b56e29] hover:to-amber-700 text-white px-7 py-3 rounded-xl font-extrabold text-sm shadow-lg shadow-[#CD7F32]/30 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Users className="w-4 h-4" />
-                    {joinedIds.includes(selectedEvent.id) ? "Enter Community Hub" : "👥 Join Community"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <UserEventDetailView
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            isSaved={savedIds.includes(selectedEvent.id)}
+            hasJoined={joinedIds.includes(selectedEvent.id)}
+            onToggleSave={() => toggleSaveEvent(selectedEvent.id)}
+            onJoinCommunity={() => handleJoinCommunity(selectedEvent.id)}
+          />
         )}
       </AnimatePresence>
-
     </div>
   );
 }

@@ -7,26 +7,38 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
   const { eventId } = await params;
   
   const cookieStore = await cookies();
-  const userId = cookieStore.get('fanUserId')?.value || cookieStore.get('workerUserId')?.value;
+  const userId = cookieStore.get('fanUserId')?.value || 
+                 cookieStore.get('userId')?.value || 
+                 cookieStore.get('workerUserId')?.value || 
+                 cookieStore.get('managerUserId')?.value || 
+                 cookieStore.get('token')?.value ||
+                 cookieStore.get('auth_token')?.value;
 
   if (!userId) redirect('/login');
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) redirect('/login');
 
-  // Server-side fetch for initial event data to pass to layout
+  // Server-side optimized fetch for initial event data
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      coverImageUrl: true,
+      date: true,
+      location: true,
+      managerId: true,
       manager: {
         select: { id: true, name: true, avatarUrl: true, role: true }
       },
       staffingRequests: {
-        include: {
+        select: {
           applications: {
-            include: {
+            where: { status: { in: ['ACCEPTED', 'HIRED'] } },
+            select: {
               workerProfile: {
-                include: {
+                select: {
                   user: {
                     select: { id: true, name: true, avatarUrl: true, role: true }
                   }
@@ -37,13 +49,14 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
         }
       },
       fans: {
-        select: { id: true, name: true, avatarUrl: true, role: true }
+        select: { id: true, name: true, avatarUrl: true, role: true },
+        take: 50
       }
     }
   });
 
   if (!event) {
-    return <div className="p-8 text-center text-red-500">Event not found</div>;
+    return <div className="p-8 text-center text-red-500 font-bold">Event not found</div>;
   }
 
   // Fetch other events for the server sidebar
@@ -51,19 +64,23 @@ export default async function UserCommunityChatPage({ params }: { params: Promis
   if (user.role === 'USER') {
     otherEvents = await prisma.event.findMany({
       where: { fans: { some: { id: user.id } }, id: { not: eventId } },
-      select: { id: true, title: true, coverImageUrl: true }
+      select: { id: true, title: true, coverImageUrl: true },
+      take: 20
     });
   } else if (user.role === 'WORKER') {
-    const workerProfile = await prisma.workerProfile.findUnique({ where: { userId: user.id } });
+    const workerProfile = await prisma.workerProfile.findUnique({ 
+      where: { userId: user.id },
+      select: { id: true }
+    });
     if (workerProfile) {
       const apps = await prisma.application.findMany({
         where: { workerProfileId: workerProfile.id, status: { in: ['ACCEPTED', 'HIRED'] } },
-        include: { staffingRequest: { include: { event: { select: { id: true, title: true, coverImageUrl: true } } } } }
+        select: { staffingRequest: { select: { event: { select: { id: true, title: true, coverImageUrl: true } } } } },
+        take: 20
       });
-      // Filter unique events
       const eventMap = new Map();
       apps.forEach(app => {
-        if (app.staffingRequest.event && app.staffingRequest.event.id !== eventId) {
+        if (app.staffingRequest?.event && app.staffingRequest.event.id !== eventId) {
           eventMap.set(app.staffingRequest.event.id, app.staffingRequest.event);
         }
       });
