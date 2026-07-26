@@ -64,7 +64,7 @@ export default function GlobalNotificationListener({ currentUser }: { currentUse
     const channels: any[] = [];
 
     // 2. Listen to Notification table for explicit user notifications (Replies, etc.)
-    const notificationChannel = supabase.channel(`notifications_${currentUser.id}`)
+    const notificationChannel = supabase.channel(`global_push_notifications_${currentUser.id}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'Notification', filter: `userId=eq.${currentUser.id}` },
