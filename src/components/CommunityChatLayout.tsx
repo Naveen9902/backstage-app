@@ -37,8 +37,16 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
   const [showSwitcher, setShowSwitcher] = useState(false);
-  const [mobileView, setMobileView] = useState<'channels' | 'chat'>('channels');
+  const [mobileView, setMobileView] = useState<'channels' | 'chat'>('chat');
+  const [showSplash, setShowSplash] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
   
   const [selectedFile, setSelectedFile] = useState<{
     dataUrl: string;
@@ -272,6 +280,74 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   return (
     <div className="flex h-full w-full bg-white overflow-hidden text-[#242424] relative md:rounded-xl shadow-sm md:border border-gray-200">
       
+      {/* ============================================================== */}
+      {/* ANIMATED SPLASH SCREEN OVERLAY */}
+      {/* ============================================================== */}
+      {showSplash && (
+        <motion.div 
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="fixed inset-0 z-50 bg-[#121215] flex flex-col items-center justify-center p-6 text-white text-center select-none"
+        >
+          {/* Ambient Glow Orbs */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#CD7F32]/25 rounded-full blur-[90px] pointer-events-none animate-pulse" />
+          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-56 h-56 bg-amber-500/15 rounded-full blur-[80px] pointer-events-none" />
+
+          {/* Center Card Content */}
+          <div className="relative z-10 flex flex-col items-center max-w-sm w-full space-y-6">
+            {/* Animated Event Avatar */}
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, type: 'spring', stiffness: 120 }}
+              className="relative"
+            >
+              <div className="w-24 h-24 rounded-3xl p-1 bg-gradient-to-tr from-[#CD7F32] via-amber-500 to-amber-200 shadow-2xl shadow-[#CD7F32]/40 relative">
+                <div className="w-full h-full bg-[#1a1a20] rounded-[22px] overflow-hidden flex items-center justify-center border border-white/20">
+                  {safeEvent.coverImageUrl ? (
+                    <img src={safeEvent.coverImageUrl} className="w-full h-full object-cover" alt={safeEvent.title} />
+                  ) : (
+                    <span className="text-3xl font-black font-serif text-[#CD7F32]">
+                      {safeEvent.title?.charAt(0) || "B"}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="absolute -inset-2 rounded-[32px] border border-[#CD7F32]/40 animate-ping pointer-events-none" />
+            </motion.div>
+
+            {/* Event Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="space-y-2 px-4"
+            >
+              <span className="inline-block px-3 py-1 rounded-full bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] text-[11px] font-black tracking-widest uppercase shadow-sm">
+                COMMUNITY HUB
+              </span>
+              <h2 className="text-2xl font-extrabold text-white font-serif drop-shadow-md leading-tight line-clamp-2">
+                {safeEvent.title || "Community Chat"}
+              </h2>
+              <p className="text-xs text-gray-400 font-medium">
+                Entering community chat &amp; connecting to live members...
+              </p>
+            </motion.div>
+
+            {/* Animated Loading Bar */}
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: "100%" }}
+              className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden relative border border-white/10"
+            >
+              <div className="h-full bg-gradient-to-r from-[#CD7F32] to-amber-400 rounded-full animate-pulse w-full origin-left duration-1000" />
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+
       {/* ============================================================== */}
       {/* DESKTOP SIDEBARS (Hidden on mobile) */}
       {/* ============================================================== */}
