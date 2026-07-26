@@ -53,13 +53,14 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [activeChannel, setActiveChannel] = useState(initialChannel || 'announcements');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const manager = event.manager;
-  const attendees = event.fans || [];
+  const safeEvent = event || {};
+  const manager = safeEvent.manager || null;
+  const attendees = safeEvent.fans || [];
   
   let staff: User[] = [];
-  if (event.staffingRequests) {
-    event.staffingRequests.forEach((req: any) => {
-      if (req.applications) {
+  if (safeEvent.staffingRequests && Array.isArray(safeEvent.staffingRequests)) {
+    safeEvent.staffingRequests.forEach((req: any) => {
+      if (req && req.applications && Array.isArray(req.applications)) {
         req.applications.forEach((app: any) => {
           if ((app.status === 'HIRED' || app.status === 'ACCEPTED') && app.workerProfile?.user) {
             if (!staff.find(s => s.id === app.workerProfile.user.id)) {
@@ -586,7 +587,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5" onScroll={handleScroll}>
           <div className="text-center py-4">
-             <span className="bg-white/40 text-gray-400 text-xs font-bold px-3 py-1 rounded-full">{new Date(event.date || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+             <span className="bg-white/40 text-gray-400 text-xs font-bold px-3 py-1 rounded-full">{new Date(safeEvent.date || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
 
           {loading ? (
@@ -774,26 +775,26 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       <div className="hidden lg:flex w-72 bg-[#fdfdfc] border-l border-[#e0dcd3] flex-col z-10 shrink-0 overflow-y-auto">
         {/* Event Hero Area */}
         <div className="relative h-40 bg-[#e8e4db] shrink-0 border-b border-[#e0dcd3]">
-          {event.coverImageUrl ? (
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${event.coverImageUrl})` }}>
+          {safeEvent.coverImageUrl ? (
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${safeEvent.coverImageUrl})` }}>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </div>
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/80 to-[#CD7F32] flex items-center justify-center">
-              <span className="text-white font-serif text-4xl font-bold opacity-30">{event.title?.charAt(0)}</span>
+              <span className="text-white font-serif text-4xl font-bold opacity-30">{safeEvent.title?.charAt(0)}</span>
             </div>
           )}
           
           <div className="absolute -bottom-8 left-4 w-16 h-16 bg-white rounded-2xl p-1 shadow-md border border-gray-100">
             <div className="w-full h-full bg-[#CD7F32] rounded-xl flex items-center justify-center text-white font-bold text-xl overflow-hidden">
-               {event.coverImageUrl ? <img src={event.coverImageUrl} className="w-full h-full object-cover"/> : event.title?.charAt(0)}
+               {safeEvent.coverImageUrl ? <img src={safeEvent.coverImageUrl} className="w-full h-full object-cover"/> : safeEvent.title?.charAt(0)}
             </div>
           </div>
         </div>
 
         <div className="pt-10 px-4 pb-6 border-b border-[#e0dcd3]">
-          <h2 className="font-serif font-bold text-xl text-gray-900 mb-2 leading-tight">{event.title}</h2>
-          <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-4">{event.description || "The official community hub for the event."}</p>
+          <h2 className="font-serif font-bold text-xl text-gray-900 mb-2 leading-tight">{safeEvent.title}</h2>
+          <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-4">{safeEvent.description || "The official community hub for the event."}</p>
           
           <div className="bg-[#f3ede4] rounded-lg p-3 border border-[#e8dccb]">
             <div className="flex gap-2 items-start text-[#9b581e]">
