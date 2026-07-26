@@ -13,7 +13,8 @@ export default function GlobalNotificationListener({ currentUser }: { currentUse
           (window as any).Capacitor && 
           typeof (window as any).Capacitor.isNativePlatform === 'function' && 
           (window as any).Capacitor.isNativePlatform()) {
-        const { LocalNotifications } = await import('@capacitor/local-notifications');
+        const packageName = '@capacitor/local-notifications';
+        const { LocalNotifications } = await import(/* webpackIgnore: true */ packageName);
         const perm = await LocalNotifications.checkPermissions();
         if (perm.display !== 'granted') {
           await LocalNotifications.requestPermissions();
