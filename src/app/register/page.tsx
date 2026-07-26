@@ -10,7 +10,7 @@ export default function Register() {
   const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
   
   useEffect(() => {
-    const flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER';
+    const flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS';
     setAppFlavor(flavor);
     if (flavor === 'USER') {
       setRole('USER');
