@@ -63,7 +63,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [activeChannel, setActiveChannel] = useState(initialChannel || 'announcements');
+  const [activeChannel, setActiveChannel] = useState(initialChannel || (safeUser?.role === 'MANAGER' ? 'announcements' : 'general'));
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
@@ -215,18 +215,18 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       text: messageText,
       imageUrl: messagePayload,
       createdAt: new Date().toISOString(),
-      senderId: currentUser.id,
+      senderId: safeUser.id,
       sender: {
-        id: currentUser.id,
-        name: currentUser.name || 'You',
-        avatarUrl: currentUser.avatarUrl || null,
-        role: currentUser.role,
+        id: safeUser.id,
+        name: safeUser.name || 'You',
+        avatarUrl: safeUser.avatarUrl || null,
+        role: safeUser.role,
       }
     };
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
-      const endpoint = currentUser.role === 'MANAGER' ? `/api/chat/${eventId}` : `/api/user/community/${eventId}/messages`;
+      const endpoint = safeUser.role === 'MANAGER' ? `/api/chat/${eventId}` : `/api/user/community/${eventId}/messages`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -742,14 +742,14 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
             <button 
               type="button" 
               onClick={() => fileInputRef.current?.click()} 
-              disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} 
+              disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'} 
               className="p-2 text-[#CD7F32] md:text-gray-400 md:hover:text-white transition-colors disabled:opacity-30 cursor-pointer"
-              title="Upload image or media"
+              title="Upload image, video, audio, or document (Max 10MB)"
             >
               <ImageIcon className="w-6 h-6" />
             </button>
             
-            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} disabled={activeChannel === 'announcements' && currentUser.role !== 'MANAGER'} className={`p-2 transition-colors disabled:opacity-30 cursor-pointer ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}>
+            <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} disabled={activeChannel === 'announcements' && safeUser.role !== 'MANAGER'} className={`p-2 transition-colors disabled:opacity-30 cursor-pointer ${showEmojiPicker ? 'text-[#b57339]' : 'text-[#CD7F32] md:text-gray-400 md:hover:text-white'}`}>
               <Smile className="w-6 h-6" />
             </button>
             
