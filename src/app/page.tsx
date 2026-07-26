@@ -33,6 +33,14 @@ export default function AppGateway() {
   const [locationFilter, setLocationFilter] = useState('');
 
   useEffect(() => {
+    // Load saved app mode preference if any
+    try {
+      const savedMode = localStorage.getItem('backstage_app_mode');
+      if (savedMode === 'OPS' || savedMode === 'USER') {
+        setActiveAppMode(savedMode);
+      }
+    } catch(e){}
+
     // Hide Splash Intro after 1.6s
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
@@ -105,6 +113,13 @@ export default function AppGateway() {
       setError('An error occurred during login. Please try again.');
     }
     setLoginLoading(false);
+  };
+
+  const switchAppMode = (mode: 'USER' | 'OPS') => {
+    setActiveAppMode(mode);
+    try {
+      localStorage.setItem('backstage_app_mode', mode);
+    } catch(e){}
   };
 
   const handleLogin = async () => {
@@ -219,7 +234,7 @@ export default function AppGateway() {
           {/* DUAL APP SELECTOR TABS */}
           <div className="bg-black/60 p-1 rounded-2xl border border-white/10 flex items-center gap-1 relative">
             <button
-              onClick={() => setActiveAppMode('USER')}
+              onClick={() => switchAppMode('USER')}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
                 activeAppMode === 'USER' ? 'text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
               }`}
@@ -231,7 +246,7 @@ export default function AppGateway() {
             </button>
 
             <button
-              onClick={() => setActiveAppMode('OPS')}
+              onClick={() => switchAppMode('OPS')}
               className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
                 activeAppMode === 'OPS' ? 'text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
               }`}
