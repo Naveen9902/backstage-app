@@ -228,11 +228,21 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     e.preventDefault();
     if (!text.trim() && !selectedFile) return;
 
-    const currentReply = replyingTo ? {
-      id: replyingTo.id,
-      senderName: replyingTo.sender?.name || 'Member',
-      text: replyingTo.text
-    } : null;
+    const messageText = text;
+    const messagePayload = selectedFile ? JSON.stringify(selectedFile) : null;
+    let finalPayloadText = messageText;
+    let currentReply = null;
+
+    if (replyingTo) {
+      const senderName = replyingTo.sender?.name || 'Member';
+      const replySnippet = replyingTo.text ? replyingTo.text.replace(/[\r\n]+/g, ' ').slice(0, 80) : 'Media Attachment';
+      currentReply = {
+        id: replyingTo.id,
+        senderName: senderName,
+        text: replySnippet
+      };
+      finalPayloadText = `[reply:@${senderName}:${replySnippet}]\n${messageText}`;
+    }
 
     setText(''); 
     setSelectedFile(null);
@@ -242,7 +252,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
     const optimisticMsg: Message = {
       id: Date.now().toString(),
-      text: messageText,
+      text: finalPayloadText,
       imageUrl: messagePayload,
       createdAt: new Date().toISOString(),
       senderId: safeUser.id,
@@ -261,7 +271,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: messageText, imageUrl: messagePayload, channel: activeChannel })
+        body: JSON.stringify({ text: finalPayloadText, imageUrl: messagePayload, channel: activeChannel })
       });
       if (res.ok) fetchMessages();
     } catch (err) {
@@ -656,6 +666,21 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
               const isLiked = !!likedMessages[msg.id];
               const likesCount = messageLikesCount[msg.id] || 0;
 
+              let replyInfo = msg.replyTo;
+              let displayText = msg.text || '';
+
+              if (displayText.startsWith('[reply:')) {
+                const match = displayText.match(/^\[reply:@([^:]+):([^\]]+)\]\n?([\s\S]*)$/);
+                if (match) {
+                  replyInfo = {
+                    id: 'reply',
+                    senderName: match[1],
+                    text: match[2]
+                  };
+                  displayText = match[3];
+                }
+              }
+
               return (
                 <div key={msg.id} className={`group flex gap-3 md:gap-4 ${showHeader ? 'mt-6' : 'mt-1'} ${isMe ? 'flex-row-reverse md:flex-row' : ''} relative`}>
                   {showHeader ? (
@@ -687,13 +712,13 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
 
                     <div className="relative group/msg">
                       {/* Quoted Parent Message if Replying */}
-                      {msg.replyTo && (
-                        <div className="mb-1.5 p-2 rounded-xl bg-black/5 md:bg-white/40 border-l-4 border-[#CD7F32] text-xs flex flex-col text-gray-700 shadow-sm max-w-md">
-                          <span className="font-bold text-[11px] text-[#CD7F32] flex items-center gap-1">
-                            <CornerDownRight className="w-3 h-3" />
-                            Replying to @{msg.replyTo.senderName}
+                      {replyInfo && (
+                        <div className="mb-1.5 p-2 rounded-xl bg-[#e8e2d5] border-l-4 border-[#CD7F32] text-xs flex flex-col text-gray-800 shadow-sm max-w-md">
+                          <span className="font-bold text-[11px] text-[#b57339] flex items-center gap-1">
+                            <CornerDownRight className="w-3.5 h-3.5" />
+                            Replying to @{replyInfo.senderName}
                           </span>
-                          <span className="truncate opacity-80 mt-0.5">{msg.replyTo.text}</span>
+                          <span className="truncate opacity-90 mt-0.5 font-medium">{replyInfo.text}</span>
                         </div>
                       )}
                       
@@ -709,7 +734,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                         {activeChannel === 'announcements' && (
                           <Megaphone className="absolute top-2 right-2 w-12 h-12 text-[#CD7F32] opacity-5 -rotate-12" />
                         )}
-                        {msg.text}
+                        {displayText}
                         {renderMediaAttachment(msg.imageUrl)}
                       </div>
 
