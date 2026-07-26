@@ -131,8 +131,8 @@ export default function ProfilePage() {
             </div>
 
             {/* Avatar & Action Row */}
-            <div className="px-8 flex flex-col sm:flex-row justify-between items-start sm:items-end relative -mt-16 sm:-mt-20 mb-8 z-10">
-              <div className="relative mb-4 sm:mb-0">
+            <div className="px-6 sm:px-8 flex flex-col sm:flex-row justify-between items-center sm:items-end relative -mt-16 sm:-mt-20 mb-8 z-10 gap-4 sm:gap-0">
+              <div className="relative mb-0 sm:mb-0">
                 <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 sm:border-[6px] border-white bg-gradient-to-br from-[#CD7F32] to-[#8a5522] shadow-2xl flex items-center justify-center overflow-hidden group/avatar cursor-pointer relative z-10 transition-transform duration-500 hover:scale-105" style={{ backgroundImage: formData.avatarUrl ? `url(${formData.avatarUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                   {!formData.avatarUrl && (
                     <span className="text-5xl sm:text-6xl font-black text-white mix-blend-overlay shadow-sm">
@@ -164,7 +164,7 @@ export default function ProfilePage() {
               <button 
                 onClick={handleSubmit} 
                 disabled={saving || loading} 
-                className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(205,127,50,0.3)] hover:-translate-y-1 disabled:opacity-50 disabled:hover:transform-none flex items-center gap-2"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(205,127,50,0.3)] hover:-translate-y-1 disabled:opacity-50 disabled:hover:transform-none flex items-center justify-center gap-2"
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
@@ -368,15 +368,15 @@ export default function ProfilePage() {
           )}
         </div>
         
-        <div className="lg:col-span-3 mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full max-w-4xl mx-auto shadow-2xl relative overflow-hidden group">
+        <div className="lg:col-span-3 mt-6 mb-8 p-6 sm:p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full max-w-3xl mx-auto shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
             <h3 className="font-black text-[#CD7F32] text-xl mb-2 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
               DANGER ZONE
             </h3>
-            <p className="text-[#EAE6DF] text-sm mb-6 font-medium max-w-2xl">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone and all data will be permanently wiped.</p>
-            <button onClick={handleDeleteAccount} disabled={saving} className="px-8 py-3 bg-gradient-to-r from-[#CD7F32] to-[#a86524] text-black font-black rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-[0_0_15px_rgba(205,127,50,0.5)] disabled:opacity-50 flex items-center gap-2">
+            <p className="text-[#EAE6DF] text-xs sm:text-sm mb-5 sm:mb-6 font-medium max-w-2xl leading-relaxed">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone and all data will be permanently wiped.</p>
+            <button onClick={handleDeleteAccount} disabled={saving} className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-[#CD7F32] to-[#a86524] text-black font-black rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-[0_0_15px_rgba(205,127,50,0.5)] disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
               Delete My Account Permanently
             </button>

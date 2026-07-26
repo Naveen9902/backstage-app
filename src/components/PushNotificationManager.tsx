@@ -17,6 +17,7 @@ export default function PushNotificationManager() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [message, setMessage] = useState('');
   const [isNative, setIsNative] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean>(false);
 
   useEffect(() => {
     // Detect Native Capacitor APK vs Web safely
@@ -27,6 +28,21 @@ export default function PushNotificationManager() {
         (window as any).Capacitor.isNativePlatform()
       );
       setIsNative(isCapacitorNative);
+
+      const checkPerms = async () => {
+        if (isCapacitorNative) {
+          try {
+            const { LocalNotifications } = await import('@capacitor/local-notifications');
+            const perm = await LocalNotifications.checkPermissions();
+            if (perm.display === 'granted') setHasPermission(true);
+          } catch(e) {}
+        } else {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            setHasPermission(true);
+          }
+        }
+      };
+      checkPerms();
 
       if (!isCapacitorNative && 'serviceWorker' in navigator && 'PushManager' in window) {
         registerServiceWorker();
@@ -66,6 +82,7 @@ export default function PushNotificationManager() {
         body: JSON.stringify(sub)
       });
       setMessage('Web push subscription activated!');
+      setHasPermission(true);
     } catch (err) {
       console.error(err);
       setMessage('Please allow notification permissions in your browser settings.');
@@ -80,6 +97,7 @@ export default function PushNotificationManager() {
         const perm = await LocalNotifications.requestPermissions();
         if (perm.display === 'granted') {
           setMessage('📱 Mobile Device Notifications Enabled!');
+          setHasPermission(true);
           await LocalNotifications.schedule({
             notifications: [
               {
@@ -98,6 +116,7 @@ export default function PushNotificationManager() {
           const perm = await Notification.requestPermission();
           if (perm === 'granted') {
             setMessage('📱 Mobile & Browser Notifications Enabled!');
+            setHasPermission(true);
             subscribeToPush();
           } else {
             setMessage('Permission denied in browser settings.');
@@ -150,6 +169,7 @@ export default function PushNotificationManager() {
         } else if (Notification.permission !== 'denied') {
           const perm = await Notification.requestPermission();
           if (perm === 'granted') {
+            setHasPermission(true);
             new Notification('🎉 BackStage Notifications Active!', {
               body: 'You are all set to receive instant shift and runner dispatch alerts.',
               icon: '/logo.jpg'
@@ -175,6 +195,30 @@ export default function PushNotificationManager() {
     }
   };
 
+  if (hasPermission) {
+    return (
+      <div className="p-3 sm:p-4 border border-emerald-500/30 bg-emerald-500/5 text-emerald-600 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between shadow-sm w-full gap-3">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest font-mono block">System Alerts Active</span>
+            <span className="text-[10px] text-gray-500 font-medium">You will receive push notifications</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={testSystemNotification} className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm flex-1 sm:flex-none">
+            Test Alert
+          </button>
+          {!isNative && subscription && (
+             <button onClick={unsubscribeFromPush} className="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-bold transition-colors shadow-sm border border-red-100 flex-1 sm:flex-none">
+               Disable
+             </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-5 border border-[#CD7F32]/30 bg-gradient-to-r from-[#1a1a1a] via-[#242424] to-[#1a1a1a] text-white rounded-2xl flex flex-col items-start gap-4 shadow-xl w-full">
       <div className="flex items-center justify-between w-full flex-wrap gap-2 pb-3 border-b border-white/10">
@@ -185,12 +229,12 @@ export default function PushNotificationManager() {
           </h3>
         </div>
         <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-extrabold px-3 py-1 rounded-full font-mono uppercase tracking-wider">
-          Active & Ready
+          Ready to Setup
         </span>
       </div>
       
       <p className="text-xs md:text-sm text-gray-300 leading-relaxed">
-        You are configured to receive real-time alerts for accepted shifts, new runner dispatches, and payout confirmations directly on your device.
+        Enable real-time alerts for accepted shifts, new runner dispatches, and payout confirmations directly on your device.
       </p>
 
       <div className="flex flex-wrap items-center gap-2.5 pt-1 w-full sm:w-auto">
@@ -199,15 +243,7 @@ export default function PushNotificationManager() {
           type="button"
           className="w-full sm:w-auto px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs md:text-sm transition-all shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/40"
         >
-          <span>📱 Enable Device Notifications</span>
-        </button>
-
-        <button
-          onClick={testSystemNotification}
-          type="button"
-          className="w-full sm:w-auto px-4.5 py-2.5 bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b86d26] hover:to-amber-700 text-white font-extrabold rounded-xl text-xs md:text-sm transition-all shadow-lg hover:shadow-orange-500/20 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span>⚡ Send Test Alert</span>
+          <span>📱 Enable Notifications</span>
         </button>
 
         {!isNative && !subscription && 'serviceWorker' in (typeof navigator !== 'undefined' ? navigator : {}) && (
@@ -217,16 +253,6 @@ export default function PushNotificationManager() {
             className="w-full sm:w-auto px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs md:text-sm transition-all border border-white/20"
           >
             Enable Web Push
-          </button>
-        )}
-
-        {!isNative && subscription && (
-          <button
-            onClick={unsubscribeFromPush}
-            type="button"
-            className="w-full sm:w-auto px-3.5 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold rounded-xl text-xs transition-all border border-red-500/30"
-          >
-            Unsubscribe Web Push
           </button>
         )}
       </div>
