@@ -3,7 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Search, Bell, Info, Pin, Hash, MessageSquare, Lock, Settings, LogOut, ChevronLeft, Image as ImageIcon, Menu, X, Megaphone, Smile, MoreVertical, FileText, Video, Music, Download, AlertCircle, Paperclip } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import EmojiPicker from 'emoji-picker-react';
+import dynamic from 'next/dynamic';
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
 type User = {
   id: string;

@@ -10,7 +10,9 @@ Use these pre-seeded accounts to quickly test the application's different roles.
 ## 📋 Manager
 - **Email**: `manager@backstage.com`
 - **Password**: `manager123`
-- **Role**: Can create events, request staffing, view analytics, dispatch runners, and accept/reject talent applications.
+- **Role**: Can create events, request staffing, view analytics, dispatch runner
+- 
+- s, and accept/reject talent applications.
 
 ## 🎤 Talent / Worker
 - **Email**: `worker@backstage.com`
