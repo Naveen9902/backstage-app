@@ -366,132 +366,128 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       )}
 
       {/* ============================================================== */}
-      {/* DESKTOP SIDEBARS (Hidden on mobile) */}
+      {/* 1. Servers Sidebar (Far Left - Visible on Mobile & Desktop) */}
       {/* ============================================================== */}
-      <div className="hidden md:flex h-full shrink-0">
+      <div className="w-14 md:w-16 bg-[#2b2b2b] flex flex-col items-center py-4 gap-4 z-20 shrink-0 h-full">
+        <Link href={returnHref} className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] bg-[#3a3a3a] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#CD7F32] hover:rounded-xl transition-all mb-2 cursor-pointer shadow-sm">
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+        </Link>
         
-        {/* 1. Servers Sidebar (Far Left) */}
-        <div className="w-16 bg-[#2b2b2b] flex flex-col items-center py-4 gap-4 z-20 shrink-0">
-          <Link href={returnHref} className="w-12 h-12 rounded-[16px] bg-[#3a3a3a] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#CD7F32] hover:rounded-xl transition-all mb-2 cursor-pointer shadow-sm">
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          
-          <div className="relative group cursor-pointer">
-            <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white rounded-r-md"></div>
-            <div className="w-12 h-12 rounded-[16px] bg-[#CD7F32] flex items-center justify-center text-white font-bold shadow-lg overflow-hidden border border-white/20">
-              {event.coverImageUrl ? (
-                <img src={event.coverImageUrl} className="w-full h-full object-cover" alt="Event" />
-              ) : (
-                <span className="text-xl">{event.title?.charAt(0)}</span>
+        <div className="relative group cursor-pointer" onClick={() => setMobileView(mobileView === 'channels' ? 'chat' : 'channels')}>
+          <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white rounded-r-md"></div>
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] bg-[#CD7F32] flex items-center justify-center text-white font-bold shadow-lg overflow-hidden border border-white/20">
+            {event.coverImageUrl ? (
+              <img src={event.coverImageUrl} className="w-full h-full object-cover" alt="Event" />
+            ) : (
+              <span className="text-lg md:text-xl">{event.title?.charAt(0)}</span>
+            )}
+          </div>
+        </div>
+
+        <div className="w-8 h-px bg-white/10 my-2"></div>
+        
+        <div 
+          onClick={() => setShowSwitcher(!showSwitcher)}
+          className={`w-10 h-10 md:w-12 md:h-12 rounded-[24px] flex items-center justify-center transition-all cursor-pointer mt-2 shadow-sm ${showSwitcher ? 'bg-green-500 text-white rounded-[16px]' : 'bg-[#3a3a3a] text-green-500 hover:bg-green-500 hover:text-white hover:rounded-[16px]'}`}
+        >
+          <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* 2. Channels Sidebar (Inner Left - Responsive on Mobile & Desktop) */}
+      {/* ============================================================== */}
+      <div className={`w-56 md:w-64 bg-[#f8f6f0] border-r border-[#e0dcd3] z-10 shrink-0 relative overflow-hidden flex-col h-full ${mobileView === 'channels' ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`absolute inset-0 flex flex-col transition-transform duration-300 ease-in-out ${showSwitcher ? '-translate-x-full' : 'translate-x-0'}`}>
+          <div className="h-16 flex items-center px-4 font-bold text-lg border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0">
+            <div className="flex flex-col">
+              <span className="font-serif leading-tight truncate w-48 md:w-56">{event.title}</span>
+              {event.status === 'ONGOING' && (
+                 <span className="text-[10px] bg-[#CD7F32] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider inline-block w-fit mt-1">Live Now</span>
               )}
             </div>
           </div>
 
-          <div className="w-8 h-px bg-white/10 my-2"></div>
-          
-          <div 
-            onClick={() => setShowSwitcher(!showSwitcher)}
-            className={`w-12 h-12 rounded-[24px] flex items-center justify-center transition-all cursor-pointer mt-2 shadow-sm ${showSwitcher ? 'bg-green-500 text-white rounded-[16px]' : 'bg-[#3a3a3a] text-green-500 hover:bg-green-500 hover:text-white hover:rounded-[16px]'}`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          <div className="flex-1 overflow-y-auto p-3 space-y-6">
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Production Channels</h3>
+              <div className="space-y-0.5">
+                {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && safeUser.role === 'USER')).map(ch => (
+                  <div 
+                    key={ch}
+                    onClick={() => { handleChannelSelect(ch); setMobileView('chat'); }}
+                    className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer group transition-colors ${
+                      activeChannel === ch ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-600 hover:bg-[#e8e4db]/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Hash className="w-4 h-4 opacity-70" />
+                      <span>{ch}</span>
+                    </div>
+                    {activeChannel === ch && <Pin className="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Direct Messages</h3>
+              <div className="space-y-0.5">
+                {manager && manager.id !== safeUser.id && (
+                  <div 
+                    onClick={() => { handleChannelSelect(getDmChannelId(manager.id)); setMobileView('chat'); }}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer group transition-colors ${
+                      activeChannel === getDmChannelId(manager.id) ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-600 hover:bg-[#e8e4db]/50'
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
+                      {manager.avatarUrl && <img src={manager.avatarUrl} className="w-full h-full object-cover"/>}
+                      <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    </div>
+                    <span className="truncate">{manager.name}</span>
+                  </div>
+                )}
+                {staff.filter(s => s.id !== safeUser.id).map((s) => (
+                  <div 
+                    key={s.id}
+                    onClick={() => { handleChannelSelect(getDmChannelId(s.id)); setMobileView('chat'); }}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer group transition-colors ${
+                      activeChannel === getDmChannelId(s.id) ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-600 hover:bg-[#e8e4db]/50'
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
+                      {s.avatarUrl && <img src={s.avatarUrl} className="w-full h-full object-cover"/>}
+                      <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    </div>
+                    <span className="truncate">{s.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="h-16 bg-[#ebe7df] border-t border-[#e0dcd3] p-3 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3 cursor-pointer hover:bg-black/5 p-1 -ml-1 rounded">
+              <div className="w-9 h-9 rounded-full bg-gray-400 overflow-hidden relative shrink-0">
+                {safeUser.avatarUrl ? (
+                  <img src={safeUser.avatarUrl} className="w-full h-full object-cover" alt="User" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#CD7F32] text-white font-bold">{(safeUser.name || 'Member').charAt(0)}</div>
+                )}
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#ebe7df]"></div>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold text-gray-800 leading-none truncate">{(safeUser.name || 'Member').split(' ')[0]}</span>
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest">{safeUser.role === 'MANAGER' ? 'ORGANIZER' : 'STAFF'}</span>
+              </div>
+            </div>
+            <div className="flex gap-1 text-gray-500 shrink-0">
+              <Settings className="w-4 h-4 cursor-pointer hover:text-gray-800" />
+            </div>
           </div>
         </div>
 
-        {/* 2. Channels Sidebar (Inner Left) */}
-        <div className="w-64 bg-[#f8f6f0] border-r border-[#e0dcd3] z-10 shrink-0 relative overflow-hidden flex flex-col">
-          <div className={`absolute inset-0 flex flex-col transition-transform duration-300 ease-in-out ${showSwitcher ? '-translate-x-full' : 'translate-x-0'}`}>
-            <div className="h-16 flex items-center px-4 font-bold text-lg border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0">
-              <div className="flex flex-col">
-                <span className="font-serif leading-tight truncate w-56">{event.title}</span>
-                {event.status === 'ONGOING' && (
-                   <span className="text-[10px] bg-[#CD7F32] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider inline-block w-fit mt-1">Live Now</span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 space-y-6">
-              <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Production Channels</h3>
-                <div className="space-y-0.5">
-                  {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && safeUser.role === 'USER')).map(ch => (
-                    <div 
-                      key={ch}
-                      onClick={() => handleChannelSelect(ch)}
-                      className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer group transition-colors ${
-                        activeChannel === ch ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-600 hover:bg-[#e8e4db]/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Hash className="w-4 h-4 opacity-70" />
-                        <span>{ch}</span>
-                      </div>
-                      {activeChannel === ch && <Pin className="w-3.5 h-3.5 text-gray-400 opacity-0 group-hover:opacity-100" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Direct Messages</h3>
-                <div className="space-y-1">
-                  {manager && manager.id !== currentUser.id && (
-                    <div 
-                      onClick={() => handleChannelSelect(getDmChannelId(manager.id))}
-                      className={`flex items-center gap-3 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-                        activeChannel === getDmChannelId(manager.id) ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-700 hover:bg-[#e8e4db]/50'
-                      }`}
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
-                        {manager.avatarUrl && <img src={manager.avatarUrl} className="w-full h-full object-cover"/>}
-                        <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-[#f8f6f0]"></div>
-                      </div>
-                      <span className="text-sm truncate">{manager.name}</span>
-                    </div>
-                  )}
-                  {staff.filter(s => s.id !== currentUser.id).map((s) => {
-                    const dmId = getDmChannelId(s.id);
-                    return (
-                      <div 
-                        key={s.id}
-                        onClick={() => handleChannelSelect(dmId)}
-                        className={`flex items-center gap-3 px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-                          activeChannel === dmId ? 'bg-[#e8e4db] text-[#9b581e] font-semibold' : 'text-gray-700 hover:bg-[#e8e4db]/50'
-                        }`}
-                      >
-                        <div className="w-6 h-6 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
-                          {s.avatarUrl && <img src={s.avatarUrl} className="w-full h-full object-cover"/>}
-                          <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-[#f8f6f0]"></div>
-                        </div>
-                        <span className="text-sm truncate">{s.name.split(' ')[0]} {s.name.split(' ')[1]?.[0] || ''}.</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="h-16 bg-[#ebe7df] border-t border-[#e0dcd3] p-3 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3 cursor-pointer hover:bg-black/5 p-1 -ml-1 rounded">
-                <div className="w-9 h-9 rounded-full bg-gray-400 overflow-hidden relative shrink-0">
-                  {safeUser.avatarUrl ? (
-                    <img src={safeUser.avatarUrl} className="w-full h-full object-cover" alt="User" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#CD7F32] text-white font-bold">{(safeUser.name || 'Member').charAt(0)}</div>
-                  )}
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-[#ebe7df]"></div>
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold text-gray-800 leading-none truncate">{(safeUser.name || 'Member').split(' ')[0]}</span>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest">{safeUser.role === 'MANAGER' ? 'ORGANIZER' : 'STAFF'}</span>
-                </div>
-              </div>
-              <div className="flex gap-1 text-gray-500 shrink-0">
-                <Settings className="w-4 h-4 cursor-pointer hover:text-gray-800" />
-              </div>
-            </div>
-          </div>
-
-          <div className={`absolute inset-0 flex flex-col bg-[#1e1e1e] border-r border-[#2b2b2b] text-white transition-transform duration-300 ease-in-out ${showSwitcher ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute inset-0 flex flex-col bg-[#1e1e1e] border-r border-[#2b2b2b] text-white transition-transform duration-300 ease-in-out ${showSwitcher ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="h-16 flex items-center px-4 border-b border-[#2b2b2b] shrink-0 bg-[#181818] shadow-sm">
               <button onClick={() => setShowSwitcher(false)} className="mr-3 text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-[#2b2b2b] transition-all">
                 <ChevronLeft className="w-5 h-5" />
@@ -534,121 +530,8 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ============================================================== */}
-      {/* MOBILE CHANNELS LIST (Visible on mobile when mobileView === 'channels') */}
-      {/* ============================================================== */}
-      <div className={`md:hidden flex-col w-full h-full bg-white ${mobileView === 'channels' ? 'flex' : 'hidden'}`}>
-        {/* Mobile Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100 bg-white shrink-0">
-          <Link href={returnHref} className="p-2 -ml-2 text-gray-400 hover:text-gray-800 rounded-full">
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-lg text-gray-900 truncate">Chat</h1>
-          </div>
-          <button onClick={() => setShowSwitcher(!showSwitcher)} className="p-2 -mr-2 text-gray-400 hover:text-gray-800 rounded-full">
-            <MoreVertical className="w-6 h-6" />
-          </button>
-        </div>
 
-        {/* Mobile Community Switcher Overlay */}
-        {showSwitcher && (
-          <div className="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end" onClick={() => setShowSwitcher(false)}>
-            <div className="bg-white rounded-t-3xl p-4 flex flex-col max-h-[70vh] shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold font-serif text-xl">Your Communities</h2>
-                <button onClick={() => setShowSwitcher(false)} className="p-2 bg-gray-100 rounded-full"><X className="w-5 h-5 text-gray-500"/></button>
-              </div>
-              <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-                {otherEvents.length === 0 ? (
-                  <p className="text-gray-400 text-center py-4">No other communities joined yet.</p>
-                ) : (
-                  otherEvents.map(ev => {
-                    const href = currentUser.role === 'MANAGER' ? `/manager/events/${ev.id}/chat` : `/user/community/${ev.id}`;
-                    return (
-                      <Link key={ev.id} href={href} className="flex items-center gap-4 p-3 rounded-2xl border border-gray-100 hover:bg-gray-50 active:bg-gray-100 transition-colors">
-                        <div className="w-12 h-12 rounded-xl bg-[#CD7F32] overflow-hidden shrink-0">
-                          {ev.coverImageUrl ? <img src={ev.coverImageUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-white font-bold">{ev.title?.charAt(0)}</div>}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-900 text-[15px]">{ev.title}</span>
-                          <span className="text-xs text-[#CD7F32] font-semibold">Switch to Chat</span>
-                        </div>
-                      </Link>
-                    )
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto pb-6">
-          <div className="px-4 py-6">
-            <h1 className="font-serif font-bold text-3xl text-gray-900 leading-tight mb-2">{event.title}</h1>
-            <p className="text-sm text-gray-500">The official community hub for the event.</p>
-          </div>
-
-          <div className="px-2">
-            <div className="px-2 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Channels</div>
-            <div className="space-y-1">
-              {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && currentUser.role === 'USER')).map(ch => (
-                <button 
-                  key={ch}
-                  onClick={() => handleChannelSelect(ch)}
-                  className="w-full flex items-center gap-4 p-3 rounded-2xl active:bg-gray-100 transition-colors text-left"
-                >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${activeChannel === ch ? 'bg-[#CD7F32]/10 text-[#CD7F32]' : 'bg-gray-100 text-gray-500'}`}>
-                    <Hash className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0 border-b border-gray-100 pb-3 -mb-3">
-                    <h3 className={`font-semibold text-lg truncate ${activeChannel === ch ? 'text-[#CD7F32]' : 'text-gray-900'}`}>{ch}</h3>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="px-2 mt-8">
-            <div className="px-2 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Direct Messages</div>
-            <div className="space-y-1">
-              {manager && manager.id !== currentUser.id && (
-                <button 
-                  onClick={() => handleChannelSelect(getDmChannelId(manager.id))}
-                  className="w-full flex items-center gap-4 p-3 rounded-2xl active:bg-gray-100 transition-colors text-left"
-                >
-                  <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden relative shrink-0">
-                    {manager.avatarUrl && <img src={manager.avatarUrl} className="w-full h-full object-cover"/>}
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                  </div>
-                  <div className="flex-1 min-w-0 border-b border-gray-100 pb-3 -mb-3">
-                    <h3 className="font-semibold text-lg text-gray-900 truncate">{manager.name}</h3>
-                    <p className="text-sm text-gray-500 truncate">Organizer</p>
-                  </div>
-                </button>
-              )}
-              {staff.filter(s => s.id !== currentUser.id).map((s) => (
-                <button 
-                  key={s.id}
-                  onClick={() => handleChannelSelect(getDmChannelId(s.id))}
-                  className="w-full flex items-center gap-4 p-3 rounded-2xl active:bg-gray-100 transition-colors text-left"
-                >
-                  <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden relative shrink-0">
-                    {s.avatarUrl && <img src={s.avatarUrl} className="w-full h-full object-cover"/>}
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                  </div>
-                  <div className="flex-1 min-w-0 border-b border-gray-100 pb-3 -mb-3">
-                    <h3 className="font-semibold text-lg text-gray-900 truncate">{s.name}</h3>
-                    <p className="text-sm text-gray-500 truncate">Staff</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ============================================================== */}
       {/* MAIN CHAT AREA (Desktop: Always, Mobile: Only when mobileView === 'chat') */}
