@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
+  const [activeAppMode, setActiveAppMode] = useState<'USER' | 'OPS'>('USER');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,15 +32,14 @@ export default function Login() {
       .catch(() => {});
   }, []);
 
-  const handleLogin = async () => {
-    if (!formData.email || !formData.password) return;
+  const executeLoginWithEmail = async (emailToUse: string, passToUse: string) => {
     setLoading(true);
     setError('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ email: emailToUse, password: passToUse })
       });
       const data = await res.json();
       if (res.ok) {
@@ -64,6 +64,21 @@ export default function Login() {
       setError('An error occurred during login');
     }
     setLoading(false);
+  };
+
+  const handleLogin = async () => {
+    if (!formData.email || !formData.password) return;
+    executeLoginWithEmail(formData.email, formData.password);
+  };
+
+  const handleDemoLogin = (role: 'USER' | 'MANAGER' | 'WORKER') => {
+    if (role === 'USER') {
+      executeLoginWithEmail('user@test.com', 'UserPass123!');
+    } else if (role === 'MANAGER') {
+      executeLoginWithEmail('manager@test.com', 'ManagerPass123!');
+    } else {
+      executeLoginWithEmail('worker@test.com', 'WorkerPass123!');
+    }
   };
 
   const handleVerify2FA = async () => {
@@ -94,16 +109,71 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#242424] relative overflow-x-hidden font-sans">
       <Navbar />
-      <div className="flex items-center justify-center p-6 min-h-[calc(100vh-80px)]">
+      <div className="flex items-center justify-center p-4 sm:p-6 min-h-[calc(100vh-80px)]">
         {/* Background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#CD7F32]/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div 
-          className="w-full max-w-md bg-[#1a1a1a] rounded-2xl shadow-2xl shadow-black/50 border border-white/5 p-8 relative z-10 mt-8 mb-8"
+          className="w-full max-w-md bg-[#1a1a1a] rounded-3xl shadow-2xl shadow-black/50 border border-white/10 p-6 sm:p-8 relative z-10 mt-6 mb-6"
         >
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-[#F5F5DC] mb-2 font-serif">Welcome Back</h2>
-            <p className="text-[#F5F5DC]/60 text-sm">Sign in to your account</p>
+            <p className="text-[#F5F5DC]/60 text-xs">Select your app experience to launch</p>
+          </div>
+
+          {/* DUAL APP SELECTOR TABS */}
+          <div className="bg-black/60 p-1 rounded-2xl border border-white/10 flex items-center gap-1 mb-6 relative">
+            <button
+              onClick={() => setActiveAppMode('USER')}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
+                activeAppMode === 'USER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <span>📱 Fan App</span>
+            </button>
+
+            <button
+              onClick={() => setActiveAppMode('OPS')}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
+                activeAppMode === 'OPS' ? 'bg-[#b06a29] text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <span>⚡ Manager & Staff</span>
+            </button>
+          </div>
+
+          {/* 1-Tap Quick Demo Account Buttons */}
+          <div className="mb-6 bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2">
+            <p className="text-[10px] font-mono text-gray-400 uppercase font-bold text-center tracking-wider">Quick Demo Login (1-Tap)</p>
+            {activeAppMode === 'USER' ? (
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('USER')}
+                className="w-full bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-between transition-all"
+              >
+                <span className="flex items-center gap-2">🎟️ Demo Fan User</span>
+                <span className="text-[10px] font-mono text-[#CD7F32] uppercase">Launch App &rarr;</span>
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin('MANAGER')}
+                  className="bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-2 text-[11px] font-bold flex items-center justify-between transition-all"
+                >
+                  <span>🏢 Organizer</span>
+                  <span className="text-[9px] text-[#CD7F32]">&rarr;</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin('WORKER')}
+                  className="bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-2 text-[11px] font-bold flex items-center justify-between transition-all"
+                >
+                  <span>🏃 Event Crew</span>
+                  <span className="text-[9px] text-[#CD7F32]">&rarr;</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {error && (
