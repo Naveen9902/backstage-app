@@ -40,13 +40,17 @@ export async function POST(req: Request) {
     response.cookies.delete('userId');
     response.cookies.delete('temp2faUserId'); // Clear the temp token
 
-    response.cookies.set(cookieName, user.id, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
-      maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
-    });
+      maxAge: 60 * 60 * 24 * 365 * 100,
+      expires: new Date(2100, 0, 1)
+    };
+
+    response.cookies.set(cookieName, user.id, cookieOptions);
+    response.cookies.set('userId', user.id, cookieOptions);
 
     return response;
   } catch (error) {

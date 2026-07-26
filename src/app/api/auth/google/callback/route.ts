@@ -97,6 +97,7 @@ export async function GET(req: Request) {
     cookieStore.delete('managerUserId');
     cookieStore.delete('fanUserId');
     cookieStore.delete('adminUserId');
+    cookieStore.delete('userId');
 
     const roleMap: Record<string, string> = {
       'WORKER': 'workerUserId',
@@ -105,16 +106,27 @@ export async function GET(req: Request) {
       'ADMIN': 'adminUserId'
     };
 
-    const cookieName = roleMap[user.role] || 'userId';
+    const cookieName = roleMap[user.role] || 'fanUserId';
     
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365 * 100,
+      expires: new Date(2100, 0, 1)
+    };
+
     cookieStore.set({
       name: cookieName,
       value: user.id,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      ...cookieOptions
+    });
+
+    cookieStore.set({
+      name: 'userId',
+      value: user.id,
+      ...cookieOptions
     });
 
     // 5. Redirect to appropriate dashboard

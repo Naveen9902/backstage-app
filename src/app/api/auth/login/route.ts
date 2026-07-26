@@ -55,21 +55,18 @@ export async function POST(req: Request) {
       response.cookies.delete('fanUserId');
       response.cookies.delete('userId');
 
-      response.cookies.set('managerUserId', user.id, {
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
-        maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
-      });
-      
-      response.cookies.set('managerSessionToken', sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
-      });
+        maxAge: 60 * 60 * 24 * 365 * 100,
+        expires: new Date(2100, 0, 1)
+      };
+
+      response.cookies.set('managerUserId', user.id, cookieOptions);
+      response.cookies.set('userId', user.id, cookieOptions);
+      response.cookies.set('managerSessionToken', sessionToken, cookieOptions);
 
       return response;
     }
@@ -85,13 +82,17 @@ export async function POST(req: Request) {
     response.cookies.delete('userId');
     response.cookies.delete('managerSessionToken');
 
-    response.cookies.set(cookieName, user.id, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
-      maxAge: 60 * 60 * 24 * 365 * 100 // 100 years (lifetime session)
-    });
+      maxAge: 60 * 60 * 24 * 365 * 100,
+      expires: new Date(2100, 0, 1)
+    };
+
+    response.cookies.set(cookieName, user.id, cookieOptions);
+    response.cookies.set('userId', user.id, cookieOptions);
 
     return response;
   } catch (error) {

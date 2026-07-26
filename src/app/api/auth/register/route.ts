@@ -34,7 +34,26 @@ export async function POST(req: Request) {
       });
     }
 
-    return NextResponse.json(user, { status: 201 });
+    const response = NextResponse.json(user, { status: 201 });
+    const roleMap: Record<string, string> = {
+      'WORKER': 'workerUserId',
+      'MANAGER': 'managerUserId',
+      'USER': 'fanUserId',
+      'ADMIN': 'adminUserId'
+    };
+    const cookieName = roleMap[role] || 'fanUserId';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365 * 100,
+      expires: new Date(2100, 0, 1)
+    };
+    response.cookies.set(cookieName, user.id, cookieOptions);
+    response.cookies.set('userId', user.id, cookieOptions);
+
+    return response;
   } catch (error: any) {
     console.error("REGISTER ERROR:", error);
     return NextResponse.json({ error: 'Failed to create user', details: error.message }, { status: 500 });

@@ -43,6 +43,9 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
+        if (typeof window !== 'undefined') {
+          try { localStorage.setItem('backstage_user_session', JSON.stringify(data)); } catch(e){}
+        }
         if (data.requires2FA) {
           setRequires2FA(true);
         } else if (data.role === 'ADMIN') {

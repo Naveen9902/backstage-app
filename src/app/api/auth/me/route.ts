@@ -6,10 +6,13 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    let userId = cookieStore.get('adminUserId')?.value;
-    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    let userId = cookieStore.get('fanUserId')?.value;
+    if (!userId) userId = cookieStore.get('userId')?.value;
     if (!userId) userId = cookieStore.get('workerUserId')?.value;
-    if (!userId) userId = cookieStore.get('userId')?.value; // fallback
+    if (!userId) userId = cookieStore.get('managerUserId')?.value;
+    if (!userId) userId = cookieStore.get('adminUserId')?.value;
+    if (!userId) userId = cookieStore.get('token')?.value;
+    if (!userId) userId = cookieStore.get('auth_token')?.value;
 
     if (!userId) {
       return NextResponse.json({ loggedIn: false }, { status: 200 });
