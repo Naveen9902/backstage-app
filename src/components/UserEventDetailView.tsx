@@ -222,21 +222,28 @@ export default function UserEventDetailView({
 
             {/* Join Community Button */}
             <button
-              onClick={onJoinCommunity}
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!hasJoined) {
+                  await onJoinCommunity();
+                }
+                onClose();
+                router.push(`/user/community/${event.id}`);
+              }}
               disabled={isJoining}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b56e29] hover:to-amber-700 text-white px-7 py-3 rounded-xl font-extrabold text-sm shadow-lg shadow-[#CD7F32]/30 transition-all flex items-center justify-center gap-2 shrink-0"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b56e29] hover:to-amber-700 text-white px-7 py-3 rounded-xl font-extrabold text-sm shadow-lg shadow-[#CD7F32]/30 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
             >
               {isJoining ? (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : hasJoined ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Enter Community Hub
+                  Enter Community Hub →
                 </>
               ) : (
                 <>
                   <Users className="w-4 h-4" />
-                  👥 Join Community
+                  👥 Join &amp; Enter Chat →
                 </>
               )}
             </button>
