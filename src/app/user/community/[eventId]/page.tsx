@@ -28,32 +28,45 @@ export default function UserCommunityChatPage() {
 
   useEffect(() => {
     // 1. Fetch current logged-in user profile
-    fetch('/api/user/profile')
-      .then(res => res.json())
-      .then(data => {
-        if (data && !data.error && data.id) {
-          setCurrentUser({
-            id: data.id,
-            name: data.name || 'Member',
-            avatarUrl: data.avatarUrl || null,
-            role: data.role || 'USER'
-          });
-        }
-      })
-      .catch(console.error);
-
-    // 2. Fetch event details for this eventId
-    fetch('/api/user/events')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const found = data.find((e: any) => String(e.id) === String(eventId));
-          if (found) {
-            setEventData(found);
+    const loadProfile = async () => {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && !data.error && data.id) {
+            setCurrentUser({
+              id: data.id,
+              name: data.name || 'Member',
+              avatarUrl: data.avatarUrl || null,
+              role: data.role || 'USER'
+            });
           }
         }
-      })
-      .catch(console.error);
+      } catch (err) {
+        console.warn('Profile fetch warning:', err);
+      }
+    };
+
+    // 2. Fetch event details for this eventId
+    const loadEvent = async () => {
+      try {
+        const res = await fetch('/api/user/events');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            const found = data.find((e: any) => String(e.id) === String(eventId));
+            if (found) {
+              setEventData(found);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Events fetch warning:', err);
+      }
+    };
+
+    loadProfile();
+    loadEvent();
   }, [eventId]);
 
   return (
