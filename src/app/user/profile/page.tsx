@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera } from 'lucide-react';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -11,6 +12,11 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({ name: '', mobile: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  
+  // OTP States
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   useEffect(() => {
     fetch('/api/user/profile')
@@ -48,6 +54,63 @@ export default function ProfilePage() {
       setMessage('An error occurred.');
     }
     setSaving(false);
+  };
+
+  const handleSendOtp = async () => {
+    if (!formData.mobile) {
+      alert("Enter a mobile number above first!");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch('/api/auth/phone/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOtpSent(true);
+        if (data.mockOtp) {
+          alert("SIMULATION MODE: Your OTP is " + data.mockOtp);
+          setOtpCode(data.mockOtp);
+        } else {
+          alert("OTP sent! Check your phone.");
+        }
+      } else {
+        alert(data.error || "Failed to send OTP");
+      }
+    } catch (e) {
+      alert("An error occurred sending OTP.");
+    }
+    setVerifyingOtp(false);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode) {
+      alert("Enter the OTP code!");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch('/api/auth/phone/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.mobile, code: otpCode })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProfile({ ...profile, isPhoneVerified: true });
+        setOtpSent(false);
+        setOtpCode('');
+        alert("Phone Verified!");
+      } else {
+        alert(data.error || "Invalid OTP");
+      }
+    } catch (e) {
+      alert("An error occurred verifying OTP.");
+    }
+    setVerifyingOtp(false);
   };
 
   if (loading) {
@@ -169,13 +232,34 @@ export default function ProfilePage() {
                   </div>
                   <div className="space-y-1.5 group/input">
                     <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Phone Number</label>
-                    <input 
-                      type="text" 
-                      value={formData.mobile} 
-                      onChange={e => setFormData({...formData, mobile: e.target.value})}
-                      placeholder="+1 (555) 000-0000"
-                      className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner"
-                    />
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={formData.mobile} 
+                        onChange={e => setFormData({...formData, mobile: e.target.value})}
+                        placeholder="+1 (555) 000-0000"
+                        className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner"
+                      />
+                      {!profile?.isPhoneVerified && !otpSent && (
+                        <button type="button" onClick={handleSendOtp} disabled={verifyingOtp} className="whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white px-4 rounded-xl font-bold text-sm transition-all shadow-md">
+                          {verifyingOtp ? '...' : 'Verify'}
+                        </button>
+                      )}
+                    </div>
+                    {otpSent && (
+                      <div className="flex gap-2 mt-2">
+                        <input 
+                          type="text" 
+                          value={otpCode}
+                          onChange={e => setOtpCode(e.target.value)}
+                          placeholder="Enter OTP"
+                          className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-blue-500/30 focus:bg-white rounded-xl px-4 py-2 text-gray-900 font-semibold outline-none transition-all shadow-inner"
+                        />
+                        <button type="button" onClick={handleVerifyOtp} disabled={verifyingOtp} className="whitespace-nowrap bg-green-500 hover:bg-green-600 text-white px-4 rounded-xl font-bold text-sm transition-all shadow-md">
+                          {verifyingOtp ? '...' : 'Confirm'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -199,9 +283,21 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Phone Number</p>
-                  <p className="text-sm font-bold text-gray-900">{profile?.mobile || 'Not provided'}</p>
+                  <p className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    {profile?.mobile || 'Not provided'}
+                    {profile?.isPhoneVerified && <span className="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-widest">Verified</span>}
+                  </p>
                 </div>
               </div>
+            </div>
+
+            {/* Notification Manager */}
+            <div>
+              <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <svg className="w-4 h-4 text-[#CD7F32]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                Notifications
+              </h3>
+              <PushNotificationManager />
             </div>
 
             <div>
