@@ -32,10 +32,10 @@ export default function AppGateway() {
   const [locationFilter, setLocationFilter] = useState('');
 
   useEffect(() => {
-    // Hide Splash Intro after 1.6s
+    // Hide Splash Intro after 3.0s
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
-    }, 1600);
+    }, 3000);
 
     // Check if running inside native Capacitor APK
     import('@capacitor/core').then(({ Capacitor }) => {
