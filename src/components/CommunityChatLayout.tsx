@@ -42,6 +42,9 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [mobileView, setMobileView] = useState<'channels' | 'chat'>('chat');
   const [showSplash, setShowSplash] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -654,23 +657,45 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
         
         {/* Chat Header */}
         <div className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 bg-white md:bg-[#f4efe5] z-10">
-          <div className="flex items-center gap-3 text-gray-800">
+          <div className="flex items-center gap-3 text-gray-800 min-w-0">
             <button 
               className="md:hidden p-2 -ml-2 text-[#CD7F32] hover:bg-orange-50 rounded-full"
-              onClick={() => setMobileView('channels')}
+              onClick={() => setMobileView(mobileView === 'chat' ? 'channels' : 'chat')}
+              title="Toggle Channels"
             >
               <div className="flex items-center gap-1">
                 <ChevronLeft className="w-7 h-7" />
               </div>
             </button>
-            <div className="flex items-center gap-2">
-              {!activeChannel.startsWith('dm_') && <Hash className="w-6 h-6 text-gray-300 hidden md:block" />}
-              <h2 className="font-bold text-[19px] md:text-lg font-serif">{getChatTitle()}</h2>
+            <div className="flex items-center gap-2 min-w-0">
+              {!activeChannel.startsWith('dm_') && <Hash className="w-6 h-6 text-gray-400 shrink-0" />}
+              <h2 className="font-bold text-[18px] md:text-lg font-serif truncate">{getChatTitle()}</h2>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-[#CD7F32] md:text-gray-500">
-            <Search className="w-5 h-5 cursor-pointer hover:text-gray-800" />
-            <Info className="w-5 h-5 cursor-pointer hover:text-gray-800 hidden md:block" />
+
+          <div className="flex items-center gap-3 text-[#CD7F32] md:text-gray-500 shrink-0">
+            {showSearchInput ? (
+              <div className="flex items-center bg-white px-3 py-1 rounded-full border border-gray-300 shadow-sm">
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search messages..."
+                  className="bg-transparent text-xs text-gray-800 outline-none w-28 md:w-40"
+                  autoFocus
+                />
+                <button onClick={() => { setSearchQuery(''); setShowSearchInput(false); }} className="text-gray-400 hover:text-gray-600 ml-1">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setShowSearchInput(true)} className="p-1.5 hover:bg-black/5 rounded-full transition-colors">
+                <Search className="w-5 h-5 cursor-pointer hover:text-gray-800" />
+              </button>
+            )}
+            <button onClick={() => setShowInfoModal(true)} className="p-1.5 hover:bg-black/5 rounded-full transition-colors" title="Event Info">
+              <Info className="w-5 h-5 cursor-pointer hover:text-gray-800" />
+            </button>
           </div>
         </div>
 
@@ -957,6 +982,86 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
           </div>
         </div>
       </div>
+
+      {/* Event Info Modal for Mobile & Desktop */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-end animate-fadeIn" onClick={() => setShowInfoModal(false)}>
+          <div className="w-full max-w-md bg-[#242424] text-white h-full p-6 overflow-y-auto shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+              <h3 className="font-serif font-bold text-xl flex items-center gap-2">
+                <Info className="w-5 h-5 text-[#CD7F32]" />
+                Event Details
+              </h3>
+              <button onClick={() => setShowInfoModal(false)} className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="relative h-48 rounded-2xl overflow-hidden mb-6 border border-white/10 shadow-lg shrink-0">
+              {safeEvent.coverImageUrl ? (
+                <img src={safeEvent.coverImageUrl} className="w-full h-full object-cover" alt={safeEvent.title} />
+              ) : (
+                <div className="w-full h-full bg-[#CD7F32] flex items-center justify-center font-bold text-3xl">
+                  {safeEvent.title?.charAt(0)}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                <h2 className="font-serif font-bold text-xl text-white leading-snug">{safeEvent.title}</h2>
+              </div>
+            </div>
+
+            <div className="space-y-6 flex-1">
+              <div>
+                <h4 className="text-xs font-bold text-[#CD7F32] uppercase tracking-wider mb-2">Description</h4>
+                <p className="text-sm text-gray-300 leading-relaxed font-light">{safeEvent.description || "Official community chat for event attendees and organizers."}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-[#333333] p-4 rounded-xl border border-white/5">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Date</span>
+                  <span className="text-xs font-bold text-white">{new Date(safeEvent.date || Date.now()).toLocaleDateString()}</span>
+                </div>
+                <div className="bg-[#333333] p-4 rounded-xl border border-white/5">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-widest block mb-1">Location</span>
+                  <span className="text-xs font-bold text-white truncate block">{safeEvent.location || "Main Event Area"}</span>
+                </div>
+              </div>
+
+              {manager && (
+                <div className="bg-[#333333] p-4 rounded-xl border border-white/5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#CD7F32] flex items-center justify-center font-bold text-white shrink-0">
+                    {manager.avatarUrl ? <img src={manager.avatarUrl} className="w-full h-full rounded-full object-cover" /> : manager.name?.charAt(0)}
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-white block">{manager.name}</span>
+                    <span className="text-[10px] text-[#CD7F32] uppercase font-bold tracking-wider">Event Organizer</span>
+                  </div>
+                </div>
+              )}
+
+              {attendees.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-[#CD7F32] uppercase tracking-wider mb-3">Community Members ({attendees.length})</h4>
+                  <div className="flex -space-x-2 overflow-hidden py-1">
+                    {attendees.slice(0, 10).map((a: any, i: number) => (
+                      <div key={a.id || i} className="inline-block h-8 w-8 rounded-full ring-2 ring-[#242424] bg-gray-600 text-white flex items-center justify-center font-bold text-xs">
+                        {a.avatarUrl ? <img src={a.avatarUrl} className="w-full h-full rounded-full object-cover" /> : (a.name?.charAt(0) || 'M')}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button 
+              onClick={() => setShowInfoModal(false)}
+              className="mt-6 w-full py-3 bg-[#CD7F32] text-white font-bold rounded-xl text-sm shadow-lg hover:bg-[#b56e29] transition-colors"
+            >
+              Close Details
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
