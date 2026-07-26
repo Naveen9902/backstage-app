@@ -19,9 +19,13 @@ export default function PushNotificationManager() {
   const [isNative, setIsNative] = useState(false);
 
   useEffect(() => {
-    // Detect Native Capacitor APK vs Web
+    // Detect Native Capacitor APK vs Web safely
     if (typeof window !== 'undefined') {
-      const isCapacitorNative = Boolean((window as any).Capacitor && (window as any).Capacitor.isNativePlatform());
+      const isCapacitorNative = Boolean(
+        (window as any).Capacitor && 
+        typeof (window as any).Capacitor.isNativePlatform === 'function' && 
+        (window as any).Capacitor.isNativePlatform()
+      );
       setIsNative(isCapacitorNative);
 
       if (!isCapacitorNative && 'serviceWorker' in navigator && 'PushManager' in window) {

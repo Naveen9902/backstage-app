@@ -9,7 +9,10 @@ export default function GlobalNotificationListener({ currentUser }: { currentUse
   // Helper to trigger a local push notification
   const triggerNotification = async (title: string, body: string, id: number) => {
     try {
-      if (typeof window !== 'undefined' && (window as any).Capacitor && (window as any).Capacitor.isNativePlatform()) {
+      if (typeof window !== 'undefined' && 
+          (window as any).Capacitor && 
+          typeof (window as any).Capacitor.isNativePlatform === 'function' && 
+          (window as any).Capacitor.isNativePlatform()) {
         const { LocalNotifications } = await import('@capacitor/local-notifications');
         const perm = await LocalNotifications.checkPermissions();
         if (perm.display !== 'granted') {
