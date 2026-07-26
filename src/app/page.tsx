@@ -14,7 +14,6 @@ export default function AppGateway() {
   const [isNativeApp, setIsNativeApp] = useState(false);
 
   // App Selection & Splash State
-  const [activeAppMode, setActiveAppMode] = useState<'USER' | 'OPS'>('USER');
   const [showSplash, setShowSplash] = useState(true);
 
   // Login Form States (for Mobile Boxed Portal)
@@ -33,14 +32,6 @@ export default function AppGateway() {
   const [locationFilter, setLocationFilter] = useState('');
 
   useEffect(() => {
-    // Load saved app mode preference if any
-    try {
-      const savedMode = localStorage.getItem('backstage_app_mode');
-      if (savedMode === 'OPS' || savedMode === 'USER') {
-        setActiveAppMode(savedMode);
-      }
-    } catch(e){}
-
     // Hide Splash Intro after 1.6s
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
@@ -113,13 +104,6 @@ export default function AppGateway() {
       setError('An error occurred during login. Please try again.');
     }
     setLoginLoading(false);
-  };
-
-  const switchAppMode = (mode: 'USER' | 'OPS') => {
-    setActiveAppMode(mode);
-    try {
-      localStorage.setItem('backstage_app_mode', mode);
-    } catch(e){}
   };
 
   const handleLogin = async () => {
@@ -231,38 +215,11 @@ export default function AppGateway() {
             </Link>
           </div>
 
-          {/* DUAL APP SELECTOR TABS */}
-          <div className="bg-black/60 p-1 rounded-2xl border border-white/10 flex items-center gap-1 relative">
-            <button
-              onClick={() => switchAppMode('USER')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
-                activeAppMode === 'USER' ? 'text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              {activeAppMode === 'USER' && (
-                <motion.div layoutId="activeAppTab" className="absolute inset-0 bg-[#CD7F32] rounded-xl -z-10" />
-              )}
-              <span>📱 Fan Community App</span>
-            </button>
-
-            <button
-              onClick={() => switchAppMode('OPS')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${
-                activeAppMode === 'OPS' ? 'text-white shadow-md' : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              {activeAppMode === 'OPS' && (
-                <motion.div layoutId="activeAppTab" className="absolute inset-0 bg-[#b06a29] rounded-xl -z-10" />
-              )}
-              <span>⚡ Manager & Staff App</span>
-            </button>
-          </div>
         </header>
 
         {/* Boxed Dual Login Form */}
         <main className="relative z-10 my-auto py-4 flex items-center justify-center w-full">
           <motion.div 
-            key={activeAppMode}
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -274,45 +231,24 @@ export default function AppGateway() {
             {/* App Subtitle Badge */}
             <div className="flex flex-col items-center text-center mb-5 pb-4 border-b border-white/10">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#CD7F32] bg-[#CD7F32]/10 px-3 py-1 rounded-full border border-[#CD7F32]/30 mb-2">
-                {activeAppMode === 'USER' ? '📱 Fan & Attendee Portal' : '🏢 Event Manager & Crew Portal'}
+                📱 Fan & Attendee Portal
               </span>
               <p className="text-gray-400 text-xs font-medium">
-                {activeAppMode === 'USER' ? 'Access event communities, chat rooms, and fan perks' : 'Manage live events, dispatch runners, and staff shifts'}
+                Access event communities, chat rooms, and fan perks
               </p>
             </div>
 
             {/* 1-Tap Quick Demo Account Buttons */}
             <div className="mb-5 bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2">
               <p className="text-[10px] font-mono text-gray-400 uppercase font-bold text-center tracking-wider">Quick Demo Login (1-Tap)</p>
-              {activeAppMode === 'USER' ? (
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('USER')}
-                  className="w-full bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-between transition-all"
-                >
-                  <span className="flex items-center gap-2">🎟️ Demo Fan User</span>
-                  <span className="text-[10px] font-mono text-[#CD7F32] uppercase">Launch App &rarr;</span>
-                </button>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('MANAGER')}
-                    className="bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-between transition-all"
-                  >
-                    <span>🏢 Organizer</span>
-                    <span className="text-[9px] text-[#CD7F32]">&rarr;</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('WORKER')}
-                    className="bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-between transition-all"
-                  >
-                    <span>🏃 Event Crew</span>
-                    <span className="text-[9px] text-[#CD7F32]">&rarr;</span>
-                  </button>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('USER')}
+                className="w-full bg-[#CD7F32]/20 hover:bg-[#CD7F32]/30 border border-[#CD7F32]/40 text-white rounded-xl py-2 px-3 text-xs font-bold flex items-center justify-between transition-all"
+              >
+                <span className="flex items-center gap-2">🎟️ Demo Fan User</span>
+                <span className="text-[10px] font-mono text-[#CD7F32] uppercase">Launch App &rarr;</span>
+              </button>
             </div>
 
             {error && (
