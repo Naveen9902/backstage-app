@@ -200,24 +200,24 @@ export default function UserEventDetailView({
           </div>
         </div>
 
-        {/* Bottom Action Bar - Exactly matching Screenshot 3 */}
-        <div className="p-5 sm:p-6 bg-[#121216] border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
-          <div className="text-xs text-gray-400 text-center sm:text-left">
-            <span className="font-bold text-white">No tickets required here.</span> Join the community or save to your upcoming list.
+        {/* Bottom Action Bar */}
+        <div className="p-4 sm:p-6 bg-[#121216] border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="text-[11px] sm:text-xs text-gray-400 text-center sm:text-left leading-tight">
+            <span className="font-bold text-white">No tickets required here.</span><br className="sm:hidden" /> Join the community or save to your upcoming list.
           </div>
           
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-stretch gap-2.5 w-full sm:w-auto">
             {/* Save Event Button */}
             <button
               onClick={onToggleSave}
-              className={`flex-1 sm:flex-none px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 border ${
+              className={`flex-1 sm:flex-none px-3 sm:px-5 py-2.5 rounded-xl font-bold text-[13px] transition-all flex items-center justify-center gap-1.5 border whitespace-nowrap ${
                 isSaved
-                  ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30'
-                  : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                  ? 'bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20'
+                  : 'bg-white/5 hover:bg-white/10 text-white border-white/10'
               }`}
             >
               <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-400 text-red-400' : ''}`} />
-              {isSaved ? "♥ Saved Event" : "♥ Save Event"}
+              {isSaved ? "Saved" : "Save"}
             </button>
 
             {/* Join Community Button */}
@@ -231,19 +231,19 @@ export default function UserEventDetailView({
                 router.push(`/user/community/${event.id}`);
               }}
               disabled={isJoining}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b56e29] hover:to-amber-700 text-white px-7 py-3 rounded-xl font-extrabold text-sm shadow-lg shadow-[#CD7F32]/30 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+              className="flex-[2] sm:flex-none bg-gradient-to-r from-[#CD7F32] to-amber-600 hover:from-[#b56e29] hover:to-amber-700 text-white px-4 py-2.5 rounded-xl font-extrabold text-[13px] shadow-md shadow-[#CD7F32]/20 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap"
             >
               {isJoining ? (
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : hasJoined ? (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  Enter Community Hub →
+                  Enter Hub →
                 </>
               ) : (
                 <>
                   <Users className="w-4 h-4" />
-                  👥 Join &amp; Enter Chat →
+                  Join Chat →
                 </>
               )}
             </button>
