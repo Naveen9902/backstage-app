@@ -97,7 +97,7 @@ export default function ProfilePage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-900 mb-1 sm:mb-2">Manager Profile</h1>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-900 mb-1 sm:mb-2">Executive Identity</h1>
           <p className="text-sm sm:text-base text-gray-500 font-medium">Customize your brand identity and view your active footprint.</p>
         </div>
         {formData.rating > 0 && (

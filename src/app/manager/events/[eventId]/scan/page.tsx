@@ -30,8 +30,8 @@ export default function QRScannerPage() {
       html5QrCode.start(
         { facingMode: "environment" },
         { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 }, 
+          fps: 15, 
+          qrbox: { width: 200, height: 200 }, 
           aspectRatio: 1.0
         },
         onScanSuccess,
