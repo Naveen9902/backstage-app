@@ -409,7 +409,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       {/* ============================================================== */}
       {/* 1. Servers Sidebar (Far Left - Visible on Mobile & Desktop) */}
       {/* ============================================================== */}
-      <div className={`w-14 md:w-16 bg-[#2b2b2b] flex-col items-center py-4 gap-4 z-20 shrink-0 h-full ${mobileView === 'channels' ? 'flex' : 'hidden md:flex'}`}>
+      <div className="w-14 md:w-16 bg-[#2b2b2b] flex flex-col items-center py-4 gap-4 z-20 shrink-0 h-full">
         <Link href={returnHref} className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] bg-[#3a3a3a] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#CD7F32] hover:rounded-xl transition-all mb-2 cursor-pointer shadow-sm">
           <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
         </Link>
@@ -437,7 +437,12 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
         <div className="w-8 h-px bg-white/10 my-2"></div>
         
         <div 
-          onClick={() => setShowSwitcher(!showSwitcher)}
+          onClick={() => {
+            setShowSwitcher(!showSwitcher);
+            if (!showSwitcher && window.innerWidth < 768) {
+              setMobileView('channels');
+            }
+          }}
           className={`w-10 h-10 md:w-12 md:h-12 rounded-[24px] flex items-center justify-center transition-all cursor-pointer mt-2 shadow-sm ${showSwitcher ? 'bg-green-500 text-white rounded-[16px]' : 'bg-[#3a3a3a] text-green-500 hover:bg-green-500 hover:text-white hover:rounded-[16px]'}`}
         >
           <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -690,10 +695,12 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                 }
               }
 
+              const isReply = !!replyInfo;
+
               return (
-                <div key={msg.id} className={`group flex gap-3 md:gap-4 ${showHeader ? 'mt-6' : 'mt-1'} ${isMe ? 'flex-row-reverse md:flex-row' : ''} relative`}>
+                <div key={msg.id} className={`group flex gap-3 md:gap-4 ${showHeader ? 'mt-6' : 'mt-1'} ${isReply ? 'ml-10 md:ml-12' : ''} relative`}>
                   {showHeader ? (
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-300 shrink-0 overflow-hidden">
+                    <div className={`${isReply ? 'w-6 h-6 md:w-8 md:h-8 mt-1' : 'w-8 h-8 md:w-10 md:h-10'} rounded-full bg-gray-300 shrink-0 overflow-hidden`}>
                       {msg.sender.avatarUrl ? (
                         <img src={msg.sender.avatarUrl} className="w-full h-full object-cover" alt={msg.sender.name} />
                       ) : (
@@ -708,9 +715,9 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                     </div>
                   )}
 
-                  <div className={`flex-1 min-w-0 flex flex-col ${isMe ? 'items-end md:items-start' : 'items-start'}`}>
+                  <div className="flex-1 min-w-0 flex flex-col items-start">
                     {showHeader && (
-                      <div className={`flex items-baseline gap-2 mb-1 ${isMe ? 'flex-row-reverse md:flex-row' : ''}`}>
+                      <div className="flex items-baseline gap-2 mb-1">
                         <span className="font-bold text-gray-900">{msg.sender.name}</span>
                         {msg.sender.role === 'MANAGER' && (
                           <span className="bg-[#b57339] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Organizer</span>
@@ -719,7 +726,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                       </div>
                     )}
 
-                    <div className={`flex flex-col group/msg max-w-full w-full ${isMe ? 'items-end md:items-start' : 'items-start'}`}>
+                    <div className="flex flex-col group/msg max-w-full w-full items-start">
                       <div className="flex-1 min-w-0 max-w-xl">
                         {/* Quoted Parent Message if Replying */}
                         {replyInfo && (
@@ -733,12 +740,10 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                         )}
                         
                         <div className={`
-                          text-[15px] whitespace-pre-wrap leading-relaxed px-4 py-2 relative
+                          text-[15px] whitespace-pre-wrap leading-relaxed relative
                           ${activeChannel === 'announcements' 
-                            ? 'bg-[#fffcf5] border border-[#f3d7b4] text-[#8a5b28] p-3 rounded-2xl rounded-tl-sm font-medium overflow-hidden' 
-                            : isMe 
-                              ? 'bg-[#CD7F32] text-white rounded-2xl rounded-tr-sm md:bg-transparent md:text-gray-800 md:px-0 md:py-0 md:rounded-none' 
-                              : 'bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm shadow-sm md:bg-transparent md:border-none md:shadow-none md:px-0 md:py-0 md:rounded-none'
+                            ? 'bg-[#fffcf5] border border-[#f3d7b4] text-[#8a5b28] p-3 rounded-2xl font-medium overflow-hidden px-4 py-2' 
+                            : 'text-gray-800'
                           }
                         `}>
                           {activeChannel === 'announcements' && (
@@ -749,7 +754,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                         </div>
 
                         {/* Action Buttons BELOW message */}
-                        <div className={`flex items-center gap-4 mt-1.5 px-2 ${isMe ? 'justify-end md:justify-start' : 'justify-start'}`}>
+                        <div className="flex items-center gap-4 mt-1.5 opacity-80 group-hover/msg:opacity-100 transition-opacity">
                           <button 
                             onClick={() => handleToggleLike(msg.id)}
                             className={`flex items-center gap-1 text-[12px] font-semibold transition-all ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
