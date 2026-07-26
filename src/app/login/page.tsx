@@ -8,7 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
-  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'ALL';
+  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER';
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

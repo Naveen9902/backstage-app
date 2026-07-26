@@ -1,15 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
-  const appFlavor = process.env.NEXT_PUBLIC_APP_FLAVOR || 'ALL';
-  const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>(
-    appFlavor === 'USER' ? 'USER' : 'WORKER'
-  );
+  const [appFlavor, setAppFlavor] = useState<string>('USER');
+  const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
+  
+  useEffect(() => {
+    const flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER';
+    setAppFlavor(flavor);
+    if (flavor === 'USER') {
+      setRole('USER');
+    }
+  }, []);
+
   const [workerSkills, setWorkerSkills] = useState<string[]>([]);
   const SKILL_OPTIONS = [
     'Bartender', 'Security', 'Audio Engineer', 'Lighting Tech',
@@ -57,18 +64,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#242424] relative overflow-x-hidden font-sans flex flex-col">
-      {/* Custom Header for Register Page */}
-      <header className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1a1a1a]/80 backdrop-blur-md sticky top-0 z-50">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold font-serif text-white tracking-tight">
-            Back<span className="text-[#CD7F32]">Stage</span>
-          </span>
-        </Link>
-        <Link href="/login" className="text-xs font-bold bg-[#CD7F32]/10 text-[#CD7F32] px-4 py-2 rounded-full border border-[#CD7F32]/30 hover:bg-[#CD7F32]/20 transition-all">
-          Sign In
-        </Link>
-      </header>
-
+      <Navbar />
       <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
         {/* Background glow */}
         <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#CD7F32]/10 rounded-full blur-[100px] pointer-events-none" />
