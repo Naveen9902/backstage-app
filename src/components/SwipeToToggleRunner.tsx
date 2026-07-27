@@ -46,11 +46,11 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
           ) : isRunnerAvailable ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
-              <span className="whitespace-nowrap">ACTIVE • SWIPE TO STOP</span>
+              <span className="whitespace-nowrap">SWIPE TO TURN OFF</span>
             </>
           ) : (
             <>
-              <span className="whitespace-nowrap">⚡ SWIPE FOR RUNNER DUTY</span>
+              <span className="whitespace-nowrap">SWIPE TO RUNNER</span>
             </>
           )}
         </span>

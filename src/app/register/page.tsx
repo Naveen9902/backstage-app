@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { Eye, EyeOff } from 'lucide-react';
+import F1Background from '@/components/F1Background';
+import { motion } from 'framer-motion';
 
 export default function Register() {
   const [appFlavor, setAppFlavor] = useState<string>('USER');
@@ -71,16 +73,22 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#242424] relative overflow-x-hidden font-sans flex flex-col">
+    <div className="min-h-screen bg-[#121212] relative overflow-x-hidden font-sans flex flex-col selection:bg-[#CD7F32]/30 text-white">
+      <F1Background />
       <Navbar />
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        {/* Background glow */}
-        <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#CD7F32]/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-[#CD7F32]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10">
+        {/* Dynamic Heavy Graphics Ambient Glows */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#CD7F32]/20 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
 
-        <div 
-          className="w-full max-w-md bg-[#1a1a1a] rounded-2xl shadow-2xl shadow-black/50 border border-white/5 p-8 relative z-10 mt-8 mb-8"
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, rotateX: 10 }}
+          animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full max-w-md bg-gradient-to-br from-[#1a1a1a]/90 to-[#0a0a0a]/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/10 p-8 sm:p-10 relative mt-8 mb-8 overflow-hidden group perspective-[1000px]"
         >
+          {/* Glass Glare */}
+          <div className="absolute -inset-full bg-gradient-to-b from-transparent via-white/5 to-transparent rotate-45 group-hover:animate-[glare_2s_ease-in-out_infinite] pointer-events-none" />
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-[#F5F5DC] mb-2 font-serif">
               {appFlavor === 'USER' ? 'Welcome to BackStage App' : 'Create Account'}
@@ -97,34 +105,32 @@ export default function Register() {
           )}
 
           <div className="space-y-5">
-            {/* Role Selection */}
-          {appFlavor !== 'USER' && (
-            <div className="flex p-1 bg-black/40 rounded-xl border border-white/5 mb-6">
-              <button
-                type="button"
-                onClick={() => setRole('WORKER')}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'WORKER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-              >
-                Worker
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('MANAGER')}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'MANAGER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-              >
-                Manager
-              </button>
-              {appFlavor !== 'OPS' && (
-                <button
-                  type="button"
-                  onClick={() => setRole('USER')}
-                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${role === 'USER' ? 'bg-[#CD7F32] text-white shadow-md' : 'text-[#F5F5DC]/60 hover:text-[#F5F5DC]'}`}
-                >
-                  User
-                </button>
-              )}
-            </div>
-          )}
+          <div className="flex p-1 bg-black/60 rounded-xl border border-white/10 mb-6 backdrop-blur-md relative overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setRole('WORKER')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'WORKER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+            >
+              {role === 'WORKER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+              Worker
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('MANAGER')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'MANAGER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+            >
+              {role === 'MANAGER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+              Manager
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('USER')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'USER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+            >
+              {role === 'USER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+              User
+            </button>
+          </div>
 
             <div className="flex gap-4">
               <div className="flex-1">
@@ -256,7 +262,7 @@ export default function Register() {
               </Link>
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

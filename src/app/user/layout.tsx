@@ -125,7 +125,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
+      <main className={`flex-1 md:ml-64 flex flex-col overflow-x-hidden ${isChatRoom ? 'h-[100dvh]' : 'mb-16 md:mb-0 min-h-screen'}`}>
         {!isChatRoom && (
           <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
             {/* Mobile Header Logo */}

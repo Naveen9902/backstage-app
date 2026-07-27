@@ -45,6 +45,25 @@ input, textarea {
   -webkit-user-select: auto;
 }
 
+/* Fix autofill background in dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #1a1a1a inset !important;
+    -webkit-text-fill-color: #F5F5DC !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover, 
+html.dark input:-webkit-autofill:focus, 
+html.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #1a1a1a inset !important;
+    -webkit-text-fill-color: #F5F5DC !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 /* Hide webkit scrollbars globally */
 ::-webkit-scrollbar {
   display: none;
@@ -91,6 +110,7 @@ input, textarea {
     box-shadow: none;
   }
 }
+
 
 /* ==========================================================================
    GLOBAL DARK MODE OVERRIDES FOR DASHBOARDS AND APP

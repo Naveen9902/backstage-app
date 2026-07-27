@@ -7,6 +7,9 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import Navbar from '@/components/Navbar';
+import AnimatedSplash from '@/components/AnimatedSplash';
+import F1Background from '@/components/F1Background';
+import UnifiedLoginForm from '@/components/UnifiedLoginForm';
 
 export default function AppGateway() {
   const router = useRouter();
@@ -31,10 +34,6 @@ export default function AppGateway() {
   const [locationFilter, setLocationFilter] = useState('');
 
   useEffect(() => {
-    // Hide Splash Intro after 3.0s
-    const splashTimer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3000);
 
     // Check if running inside native Capacitor APK
     import('@capacitor/core').then(({ Capacitor }) => {
@@ -70,78 +69,12 @@ export default function AppGateway() {
       if (Array.isArray(liveData)) setLiveEvents(liveData);
     }).catch(() => {})
       .finally(() => setEventsLoading(false));
-
-    return () => clearTimeout(splashTimer);
   }, []);
 
   // Removed boxed login functions since mobile now redirects to /login
 
   if (checkingAuth || showSplash) {
-    return (
-      <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center text-white font-sans p-4 relative overflow-hidden">
-        {/* Oscar Stage Background */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?auto=format&fit=crop&q=80" 
-            alt="Stage Background"
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/80 to-transparent" />
-        </div>
-
-        {/* Animated Background Orbs */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#CD7F32]/25 rounded-full blur-[140px] pointer-events-none animate-pulse z-0" />
-        <div className="absolute bottom-10 right-10 w-72 h-72 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none z-0" />
-
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)", y: 50 }}
-          animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-          exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)", y: -50 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="relative z-10 flex flex-col items-center text-center max-w-sm group"
-        >
-          <div className="relative mb-8 group-hover:scale-105 transition-transform duration-500">
-            <motion.div
-              animate={{ scale: [1, 1.06, 1], rotate: [0, 2, -2, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              <Logo size="xl" showText={false} />
-            </motion.div>
-            <div className="absolute -inset-3 rounded-3xl border border-[#CD7F32]/60 animate-[spin_4s_linear_infinite] pointer-events-none" />
-            <div className="absolute -inset-6 rounded-3xl border border-[#CD7F32]/30 animate-[spin_7s_linear_infinite_reverse] pointer-events-none" />
-            <div className="absolute inset-0 bg-[#CD7F32]/40 blur-[30px] rounded-full scale-150 group-hover:scale-110 transition-all duration-700 pointer-events-none" />
-          </div>
-          
-          <motion.h2 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-5xl font-bold font-serif text-white tracking-tight mb-2 drop-shadow-2xl"
-          >
-            Back<span className="text-[#CD7F32]">Stage</span>
-          </motion.h2>
-
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.8 }}
-            className="text-sm font-bold text-[#F5F5DC] uppercase tracking-[0.2em] mb-4 drop-shadow-md"
-          >
-            {appFlavor === 'USER' ? 'Welcome to our App' : 'Event Operations'}
-          </motion.p>
-
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.0, duration: 0.8 }}
-            className="text-[10px] font-mono text-[#CD7F32] uppercase tracking-[0.3em] flex items-center gap-2"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            {appFlavor === 'OPS' ? 'Launching Operations...' : 'Launching Experience...'}
-          </motion.p>
-        </motion.div>
-      </div>
-    );
+    return <AnimatedSplash onComplete={() => setShowSplash(false)} appFlavor={appFlavor} />;
   }
 
   return (
@@ -152,7 +85,8 @@ export default function AppGateway() {
           Visible on mobile/tablet (< 768px) OR when running inside Capacitor APK.
           Shows: Attractive Welcome Screen -> Login -> Launch.
          ========================================================================= */}
-      <div className={isNativeApp ? "block w-full min-h-screen flex flex-col justify-between p-4 sm:p-6" : "md:hidden w-full min-h-screen flex flex-col justify-between p-4 sm:p-6"}>
+      <div className={isNativeApp ? "block w-full min-h-screen flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden" : "md:hidden w-full min-h-screen flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden"}>
+        <F1Background />
         {/* Ambient Glows */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#CD7F32]/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -217,10 +151,12 @@ export default function AppGateway() {
           Visible only on large desktop screens (>= 768px) and non-native web.
           Shows: Full Marketing Home Page with Hero, Events, Features, Pricing.
          ========================================================================= */}
-      <div className={isNativeApp ? "hidden" : "hidden md:block w-full min-h-screen bg-[#242424] text-white selection:bg-[#CD7F32]/30"}>
-        <Navbar />
+      <div className={isNativeApp ? "hidden" : "hidden md:block w-full bg-[#242424] text-white selection:bg-[#CD7F32]/30"}>
+        <div className="relative min-h-screen overflow-hidden">
+          <F1Background />
+          <Navbar />
 
-        {/* Hero Section */}
+          {/* Hero Section */}
         <main className="max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 relative z-10">
           
           <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#CD7F32]/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen animate-pulse" />
@@ -343,6 +279,7 @@ export default function AppGateway() {
             </motion.div>
           </motion.div>
         </main>
+        </div>
 
         {/* Live Right Now Section */}
         {liveEvents.length > 0 && (
