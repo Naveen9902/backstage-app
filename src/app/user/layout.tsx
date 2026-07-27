@@ -148,7 +148,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
             </div>
           </header>
         )}
-        <div className={isChatRoom ? "flex-1 h-[calc(100dvh-64px)] md:h-screen p-0" : "p-4 md:p-10 md:pt-0 flex-1"}>
+        <div className={isChatRoom ? "flex-none h-[calc(100dvh-64px)] md:h-screen p-0" : "p-4 md:p-10 md:pt-0 flex-1"}>
           {children}
         </div>
       </main>

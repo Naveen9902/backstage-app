@@ -336,7 +336,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   };
 
   return (
-    <div className="flex h-full w-full bg-white overflow-hidden text-[#242424] relative md:rounded-xl shadow-sm md:border border-gray-200">
+    <div className="flex h-full w-full bg-white overflow-hidden text-[#242424] relative md:rounded-xl shadow-sm md:border border-gray-200 pt-safe">
       
       {/* ============================================================== */}
       {/* ANIMATED SPLASH SCREEN OVERLAY */}
