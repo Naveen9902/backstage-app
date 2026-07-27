@@ -12,7 +12,7 @@ export default function Register() {
   const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
   
   useEffect(() => {
-    let flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'OPS';
+    let flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'WEB';
     if (typeof window !== 'undefined') {
       const ua = navigator.userAgent;
       if (ua.includes('BackstageFlavor/Ops')) {
@@ -123,6 +123,16 @@ export default function Register() {
                 {role === 'MANAGER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
                 Manager
               </button>
+              {appFlavor === 'WEB' && (
+                <button
+                  type="button"
+                  onClick={() => setRole('USER')}
+                  className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'USER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+                >
+                  {role === 'USER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+                  Fan
+                </button>
+              )}
             </div>
           )}
 
