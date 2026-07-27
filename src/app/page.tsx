@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles, AlertCircle, CheckCircle2, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import Navbar from '@/components/Navbar';
@@ -221,21 +221,31 @@ export default function AppGateway() {
         <Navbar />
 
         {/* Hero Section */}
-        <main className="max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          <div className="flex-1 space-y-8">
+        <main className="max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 relative z-10">
+          
+          <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#CD7F32]/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen animate-pulse" />
+          <div className="absolute top-20 left-10 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="flex-1 space-y-8 relative z-10"
+          >
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight font-serif text-[#CD7F32]"
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight font-serif text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-[#CD7F32]"
             >
               Event Staffing & On-Ground Operations
             </motion.h1>
 
             <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-lg text-white/80 max-w-lg leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="text-lg text-white/80 max-w-lg leading-relaxed font-medium"
             >
               Connect with top-tier event professionals, find the perfect opportunities, and build your career in the events industry. BackStage is the all-in-one platform for event staffing, runners, and community building.
             </motion.p>
@@ -243,120 +253,164 @@ export default function AppGateway() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex items-center gap-4 pt-2"
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="flex items-center gap-4 pt-4"
             >
-              <Link href="/register" className="bg-[#CD7F32] hover:bg-[#b06a29] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-[#CD7F32]/30 flex items-center gap-2 text-base">
-                <span>Start Free Trial</span>
-                <ArrowRight className="w-5 h-5" />
+              <Link href="/register" className="relative group overflow-hidden bg-[#CD7F32] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-[0_0_40px_rgba(205,127,50,0.4)] hover:shadow-[0_0_60px_rgba(205,127,50,0.6)] hover:-translate-y-1 flex items-center gap-2 text-base">
+                <span className="relative z-10">Start Free Trial</span>
+                <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] skew-x-12" />
               </Link>
-              <Link href="/login" className="bg-white/10 hover:bg-white/15 text-white border border-white/20 px-8 py-4 rounded-xl font-bold transition-all text-base">
+              <Link href="/login" className="bg-white/5 hover:bg-white/10 text-white border border-white/20 hover:border-[#CD7F32]/50 px-8 py-4 rounded-xl font-bold transition-all text-base hover:-translate-y-1">
                 Sign In to Dashboard
               </Link>
             </motion.div>
 
-            <div className="pt-8 border-t border-white/10 flex items-center gap-8 text-sm text-white/60">
-              <div className="flex items-center gap-2 font-semibold text-white">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 1 }}
+              className="pt-10 border-t border-white/10 flex items-center gap-8 text-sm text-white/60"
+            >
+              <div className="flex items-center gap-2 font-semibold text-white bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-[ping_2s_infinite] shadow-[0_0_10px_#22c55e]" />
                 Live Staffing Active
               </div>
-              <div>• 10,000+ Verified Workers</div>
-              <div>• Instant Errand Dispatch</div>
-            </div>
-          </div>
+              <div className="hover:text-white transition-colors cursor-default">• 10,000+ Verified Workers</div>
+              <div className="hover:text-white transition-colors cursor-default">• Instant Errand Dispatch</div>
+            </motion.div>
+          </motion.div>
 
-          <div className="flex-1 w-full max-w-lg lg:max-w-none">
-            <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#121212] p-8 rounded-3xl border border-white/10 shadow-2xl">
-              <div className="absolute -top-6 -right-6 bg-[#CD7F32] text-white font-mono text-xs font-bold px-4 py-2 rounded-full shadow-lg uppercase tracking-wider">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, rotateY: -15 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
+            className="flex-1 w-full max-w-lg lg:max-w-none perspective-1000"
+          >
+            <motion.div 
+              whileHover={{ scale: 1.02, rotateX: 2, rotateY: -2 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative bg-gradient-to-br from-[#1a1a1a]/80 to-[#0a0a0a]/90 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden group"
+            >
+              {/* Glass Glare Effect */}
+              <div className="absolute -inset-full bg-gradient-to-b from-transparent via-white/5 to-transparent rotate-45 group-hover:animate-[glare_2s_ease-in-out_infinite] pointer-events-none" />
+              
+              <div className="absolute -top-6 -right-6 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] text-white font-mono text-xs font-bold px-5 py-2.5 rounded-full shadow-[0_10px_30px_rgba(205,127,50,0.5)] uppercase tracking-wider z-20">
                 ⚡ Live Dispatch Portal
               </div>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <div className="flex items-center gap-3">
-                    <Logo size="md" showText={false} />
+
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-white/5 rounded-xl border border-white/10 group-hover:border-[#CD7F32]/50 transition-colors">
+                      <Logo size="md" showText={false} />
+                    </div>
                     <div>
-                      <h4 className="font-bold text-white font-serif">BackStage Network</h4>
-                      <p className="text-xs text-gray-400">Real-Time Event Operations</p>
+                      <h4 className="font-bold text-white font-serif text-lg">BackStage Network</h4>
+                      <p className="text-xs text-[#CD7F32] uppercase tracking-wider mt-0.5">Real-Time Operations</p>
                     </div>
                   </div>
-                  <span className="text-xs bg-emerald-500/20 text-emerald-400 font-mono px-3 py-1 rounded-full font-bold border border-emerald-500/30">ONLINE</span>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-black px-3 py-1.5 rounded-full border border-emerald-500/20 tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.2)]">ONLINE</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                    <div className="text-2xl font-bold text-[#CD7F32] font-mono">500+</div>
-                    <div className="text-xs text-gray-400 font-medium uppercase mt-1">Active Runners</div>
+                  <div className="bg-black/60 backdrop-blur-md p-5 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#CD7F32]/10 rounded-bl-full pointer-events-none" />
+                    <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 font-mono">500+</div>
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-2">Active Runners</div>
                   </div>
-                  <div className="bg-black/40 p-4 rounded-2xl border border-white/5">
-                    <div className="text-2xl font-bold text-white font-mono">100%</div>
-                    <div className="text-xs text-gray-400 font-medium uppercase mt-1">Payment Guarantee</div>
+                  <div className="bg-black/60 backdrop-blur-md p-5 rounded-2xl border border-white/5 group-hover:border-white/10 transition-colors relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-bl-full pointer-events-none" />
+                    <div className="text-3xl font-black text-white font-mono flex items-start gap-1">100<span className="text-xl text-[#CD7F32]">%</span></div>
+                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-2">Payment Guarantee</div>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-amber-500/10 to-[#CD7F32]/10 p-4 rounded-2xl border border-[#CD7F32]/30">
-                  <div className="flex items-center justify-between">
+                <div className="bg-gradient-to-r from-amber-500/10 via-[#CD7F32]/5 to-transparent p-5 rounded-2xl border border-[#CD7F32]/30 group-hover:bg-[#CD7F32]/10 transition-colors relative overflow-hidden">
+                  <div className="flex items-center justify-between relative z-10">
                     <span className="text-sm font-bold text-[#CD7F32] flex items-center gap-2 font-serif">
-                      <Sparkles className="w-4 h-4" /> Why BackStage?
+                      <Sparkles className="w-4 h-4 animate-pulse" /> Why BackStage?
                     </span>
-                    <Link href="/register" className="text-xs font-bold text-white underline">Join Now &rarr;</Link>
+                    <Link href="/register" className="text-xs font-black text-white hover:text-[#CD7F32] transition-colors flex items-center gap-1">
+                      Join Now <ArrowRight className="w-3 h-3" />
+                    </Link>
                   </div>
-                  <p className="text-xs text-gray-300 mt-2 leading-relaxed">
+                  <p className="text-sm text-gray-300 mt-3 leading-relaxed relative z-10">
                     Zero middlemen. Direct transparent dispatches between event managers and on-ground talent with instant payment confirmation.
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </main>
 
         {/* Live Right Now Section */}
         {liveEvents.length > 0 && (
-          <section className="py-16 bg-black border-y border-white/10 relative overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-[#CD7F32]/10 blur-[120px] pointer-events-none rounded-full" />
+          <section className="py-20 bg-black border-y border-white/10 relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[400px] bg-[#CD7F32]/10 blur-[150px] pointer-events-none rounded-full" />
             
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]"></div>
-                  <h2 className="text-3xl font-bold font-serif text-white tracking-tight">Live Right Now</h2>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="flex items-center justify-between mb-10"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-3.5 h-3.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_20px_rgba(34,197,94,0.8)]"></div>
+                  <h2 className="text-4xl font-bold font-serif text-white tracking-tight">Live Right Now</h2>
                 </div>
-                <Link href="/events" className="text-sm font-bold text-[#CD7F32] hover:underline">View All &rarr;</Link>
-              </div>
+                <Link href="/events" className="text-sm font-bold text-[#CD7F32] hover:text-white transition-colors flex items-center gap-1 group">
+                  View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
 
-              <div className="flex overflow-x-auto pb-6 -mx-6 px-6 gap-6 snap-x hide-scrollbar">
+              <div className="flex overflow-x-auto pb-8 -mx-6 px-6 gap-8 snap-x hide-scrollbar">
                 {liveEvents.map((event, i) => (
-                  <Link href={`/events/${event.id}`} key={event.id} className="min-w-[320px] md:min-w-[400px] snap-start shrink-0 group">
-                    <div className="bg-[#1a1a1a] border border-white/10 hover:border-[#CD7F32]/50 rounded-2xl overflow-hidden transition-all duration-300 relative h-full flex flex-col shadow-lg">
-                      <div className="absolute top-4 left-4 z-10">
-                        <span className="bg-black/80 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                          ONGOING
-                        </span>
-                      </div>
-                      
-                      <div className="h-48 w-full overflow-hidden bg-gray-800 relative">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
-                        <img 
-                          src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-0"
-                        />
-                      </div>
-                      
-                      <div className="p-6 flex flex-col flex-grow bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a]">
-                        <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
-                        <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                          <span className="line-clamp-1">{event.location}</span>
+                  <motion.div 
+                    key={event.id}
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                    className="min-w-[320px] md:min-w-[420px] snap-start shrink-0"
+                  >
+                    <Link href={`/events/${event.id}`} className="group block relative h-full">
+                      <div className="bg-[#1a1a1a] border border-white/5 group-hover:border-[#CD7F32]/60 rounded-3xl overflow-hidden transition-all duration-500 relative h-full flex flex-col shadow-[0_10px_30px_rgba(0,0,0,0.5)] group-hover:shadow-[0_20px_50px_rgba(205,127,50,0.2)] group-hover:-translate-y-2">
+                        
+                        <div className="absolute top-5 left-5 z-20">
+                          <span className="bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            ONGOING
+                          </span>
                         </div>
                         
-                        <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-xs text-gray-400 font-medium">By {event.managerProfile?.user?.name || 'Manager'}</span>
-                          <span className="text-xs font-bold text-[#CD7F32] uppercase tracking-wider group-hover:underline">View Live →</span>
+                        <div className="h-56 w-full overflow-hidden bg-black relative">
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-transparent to-transparent z-10"></div>
+                          <img 
+                            src={event.coverImageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
+                            alt={event.title}
+                            className="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 relative z-0 opacity-90 group-hover:opacity-100"
+                          />
+                        </div>
+                        
+                        <div className="p-8 flex flex-col flex-grow bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a]">
+                          <h3 className="text-2xl font-bold text-white mb-3 line-clamp-1 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                          <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
+                            <MapPin className="w-4 h-4 text-gray-500" />
+                            <span className="line-clamp-1">{event.location}</span>
+                          </div>
+                          
+                          <div className="mt-auto pt-5 border-t border-white/10 flex items-center justify-between">
+                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">By {event.managerProfile?.user?.name || 'Manager'}</span>
+                            <span className="text-xs font-black text-[#CD7F32] uppercase tracking-wider flex items-center gap-1 group-hover:underline">
+                              View Live <ArrowRight className="w-3 h-3" />
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -364,12 +418,27 @@ export default function AppGateway() {
         )}
 
         {/* Discover Events Section */}
-        <section id="features" className="py-24 bg-white text-[#242424]">
-          <div className="max-w-7xl mx-auto px-6 text-center">
-            <h2 className="text-4xl lg:text-5xl font-bold font-serif text-[#CD7F32] mb-4">Discover Event Opportunities</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto mb-16 text-base">
+        <section id="features" className="py-24 bg-[#0a0a0a] text-white relative border-t border-white/5 overflow-hidden">
+          <div className="absolute -top-[300px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#CD7F32]/5 rounded-[100%] blur-[100px] pointer-events-none" />
+          
+          <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              className="text-4xl lg:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 mb-4"
+            >
+              Discover Event Opportunities
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ delay: 0.1 }}
+              className="text-gray-400 max-w-2xl mx-auto mb-20 text-lg"
+            >
               Find the perfect events that match your skills and interests. From campus fests to corporate networking, we have it all.
-            </p>
+            </motion.p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
               {[
@@ -380,70 +449,106 @@ export default function AppGateway() {
                 { title: "Career & Job Fairs", desc: "Campus placements, job fairs, and internship summits" },
                 { title: "Music & Entertainment", desc: "College gigs, DJ nights, open mics, and cultural performances" }
               ].map((category, i) => (
-                <div key={i} className="group bg-[#f8f9fa] p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-[#CD7F32]/50 transition-all duration-300 flex flex-col">
-                  <div className="w-12 h-12 rounded-xl bg-[#CD7F32]/10 flex items-center justify-center mb-6 text-[#CD7F32] group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-6 h-6" />
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="group relative bg-[#121212] p-8 rounded-3xl border border-white/5 hover:border-[#CD7F32]/50 transition-all duration-500 flex flex-col overflow-hidden shadow-[0_0_0_rgba(0,0,0,0)] hover:shadow-[0_20px_40px_rgba(205,127,50,0.1)] hover:-translate-y-2 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/0 via-[#CD7F32]/0 to-[#CD7F32]/0 group-hover:from-[#CD7F32]/10 group-hover:to-transparent transition-all duration-700 pointer-events-none" />
+                  
+                  <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-8 text-[#CD7F32] group-hover:scale-110 group-hover:bg-[#CD7F32]/20 transition-all duration-500 border border-white/5 group-hover:border-[#CD7F32]/30 shadow-lg relative z-10">
+                    <Sparkles className="w-7 h-7" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 font-serif group-hover:text-[#CD7F32] transition-colors">{category.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{category.desc}</p>
-                </div>
+                  <h3 className="text-2xl font-bold mb-3 font-serif group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-[#CD7F32] transition-colors relative z-10">{category.title}</h3>
+                  <p className="text-base text-gray-500 leading-relaxed group-hover:text-gray-300 transition-colors relative z-10">{category.desc}</p>
+                  
+                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-4 transition-all duration-500">
+                    <ArrowRight className="w-6 h-6 text-[#CD7F32]" />
+                  </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
         {/* Dynamic Top Events Grid */}
-        <section className="py-24 bg-[#F5F5F5] text-[#242424]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-              <div>
-                <h2 className="text-3xl font-bold font-serif text-gray-900 mb-2">Featured Staffing Events</h2>
-                <p className="text-gray-600 text-base">Explore top opportunities currently hiring on-ground talent.</p>
-              </div>
-              <Link href="/events" className="text-[#CD7F32] font-bold text-base hover:underline flex items-center gap-1">
-                <span>View All Events</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+        <section className="py-24 bg-[#050505] text-white relative">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none" />
+          
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-3xl lg:text-4xl font-bold font-serif text-white mb-2 tracking-tight">Featured Staffing Events</h2>
+                <p className="text-gray-400 text-base">Explore top opportunities currently hiring on-ground talent.</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+              >
+                <Link href="/events" className="text-[#CD7F32] font-bold text-base hover:text-white transition-colors flex items-center gap-2 group">
+                  <span>View All Events</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
             </div>
 
             {eventsLoading ? (
               <div className="grid md:grid-cols-3 gap-8">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="aspect-[4/5] bg-white rounded-2xl shadow-sm border border-gray-200 animate-pulse" />
+                  <div key={i} className="aspect-[4/5] bg-white/5 rounded-3xl border border-white/10 animate-pulse" />
                 ))}
               </div>
             ) : topEvents.length === 0 ? (
-              <div className="bg-white p-12 rounded-2xl border border-gray-200 shadow-sm text-center text-gray-500 font-medium">
+              <div className="bg-white/5 p-12 rounded-3xl border border-white/10 text-center text-gray-500 font-medium">
                 No featured events available at the moment.
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {topEvents.slice(0, 6).map(event => (
-                  <Link href={`/events/${event.id}`} key={event.id} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 border border-gray-200 hover:border-[#CD7F32]/40 transition-all duration-300">
-                    <div className="aspect-[4/3] rounded-t-2xl overflow-hidden bg-gray-100 relative">
-                      <img 
-                        src={event.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 
-                        alt={event.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 left-3">
-                        <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[#CD7F32] shadow-sm uppercase">
-                          {event.status || 'UPCOMING'}
-                        </span>
+                {topEvents.slice(0, 6).map((event, idx) => (
+                  <motion.div 
+                    key={event.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ delay: idx * 0.1, duration: 0.6 }}
+                  >
+                    <Link href={`/events/${event.id}`} className="group cursor-pointer flex flex-col h-full bg-[#121212] rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_rgba(205,127,50,0.15)] border border-white/5 hover:border-[#CD7F32]/40 transition-all duration-500 hover:-translate-y-2">
+                      <div className="aspect-[4/3] overflow-hidden bg-black relative">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent z-10" />
+                        <img 
+                          src={event.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 
+                          alt={event.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-all duration-700 opacity-90 group-hover:opacity-100"
+                        />
+                        <div className="absolute top-4 left-4 z-20">
+                          <span className="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-lg uppercase">
+                            {event.status || 'UPCOMING'}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="p-6 flex flex-col flex-1">
-                      <h3 className="font-bold text-gray-900 mb-2 text-lg leading-snug line-clamp-2 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-1 mb-4 flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span>{event.location || 'Online / India'}</span>
-                      </p>
-                      <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-bold">
-                        <span className="text-gray-500 uppercase">{event.bands || 'Staffing'}</span>
-                        <span className="text-[#CD7F32]">View Roles &rarr;</span>
+                      <div className="p-8 flex flex-col flex-1 relative bg-gradient-to-b from-[#121212] to-[#0a0a0a]">
+                        <h3 className="font-bold text-white mb-3 text-xl leading-snug line-clamp-2 group-hover:text-[#CD7F32] transition-colors">{event.title}</h3>
+                        <p className="text-sm text-gray-400 line-clamp-1 mb-6 flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span>{event.location || 'Online / India'}</span>
+                        </p>
+                        <div className="mt-auto pt-5 border-t border-white/10 flex items-center justify-between text-xs font-bold">
+                          <span className="text-gray-500 uppercase tracking-wider">{event.bands || 'Staffing'}</span>
+                          <span className="text-[#CD7F32] group-hover:underline flex items-center gap-1">
+                            View Roles <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             )}
