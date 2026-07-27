@@ -20,7 +20,8 @@ export default function AppGateway() {
   const [showSplash, setShowSplash] = useState(true);
 
   const [appFlavor, setAppFlavor] = useState<string>('USER');
-  
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+
   useEffect(() => {
     setAppFlavor(localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER');
   }, []);
@@ -42,23 +43,20 @@ export default function AppGateway() {
       }
     }).catch(() => {});
 
-    // 1. Auth Check - Redirect directly to dashboard if already logged in
+    // 1. Auth Check - Store redirect URL instead of redirecting instantly
     fetch('/api/auth/me')
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {
           const role = data.user.role || data.role;
-          if (role === 'ADMIN') window.location.href = '/admin';
-          else if (role === 'MANAGER') window.location.href = '/manager/dashboard';
-          else if (role === 'USER') window.location.href = '/user';
-          else window.location.href = '/worker';
-        } else {
-          setCheckingAuth(false);
+          if (role === 'ADMIN') setRedirectUrl('/admin');
+          else if (role === 'MANAGER') setRedirectUrl('/manager/dashboard');
+          else if (role === 'USER') setRedirectUrl('/user');
+          else setRedirectUrl('/worker');
         }
       })
-      .catch(() => {
-        setCheckingAuth(false);
-      });
+      .catch(() => {})
+      .finally(() => setCheckingAuth(false));
 
     // 2. Fetch Events for Web Application Landing Page
     Promise.all([
@@ -71,10 +69,26 @@ export default function AppGateway() {
       .finally(() => setEventsLoading(false));
   }, []);
 
-  // Removed boxed login functions since mobile now redirects to /login
+  const handleSplashComplete = () => {
+    // If the animation finishes and we have a redirect ready, go there!
+    if (redirectUrl && !checkingAuth) {
+      window.location.href = redirectUrl;
+    } else if (!checkingAuth) {
+      setShowSplash(false);
+    }
+    // If still checking auth when splash ends, we wait.
+    // We handle the edge case in a useEffect below.
+  };
 
-  if (checkingAuth || showSplash) {
-    return <AnimatedSplash onComplete={() => setShowSplash(false)} appFlavor={appFlavor} />;
+  useEffect(() => {
+    // Edge case: Auth check took longer than the 5-second splash screen
+    if (!showSplash && !checkingAuth && redirectUrl) {
+      window.location.href = redirectUrl;
+    }
+  }, [showSplash, checkingAuth, redirectUrl]);
+
+  if (showSplash || checkingAuth) {
+    return <AnimatedSplash onComplete={handleSplashComplete} appFlavor={appFlavor} />;
   }
 
   return (
