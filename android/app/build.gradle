@@ -4,7 +4,7 @@ android {
     namespace "com.backstage.app"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.backstage.app"
+        applicationId "com.backstage.ops"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 7
