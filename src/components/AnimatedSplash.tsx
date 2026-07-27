@@ -125,7 +125,7 @@ export default function AnimatedSplash({ onComplete, appFlavor }: AnimatedSplash
               <div className="relative mb-8 group perspective-[1000px]">
                 <motion.div
                   animate={{ scale: [1, 1.05, 1], rotate: [0, 1.5, -1.5, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 4, ease: "easeInOut" }}
                   className="relative z-10"
                 >
                   <Logo size="xl" showText={false} />
@@ -145,7 +145,12 @@ export default function AnimatedSplash({ onComplete, appFlavor }: AnimatedSplash
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] rounded-full border-[1px] border-[#CD7F32]/40 border-b-amber-200 pointer-events-none [transform-style:preserve-3d]"
                 />
                 
-                <div className="absolute inset-0 bg-[#CD7F32]/40 blur-[50px] rounded-full scale-150 animate-pulse pointer-events-none" />
+                <motion.div 
+                  initial={{ opacity: 0.8, scale: 1 }}
+                  animate={{ opacity: [0.8, 0.3, 0.8], scale: [1.5, 1.6, 1.5] }}
+                  transition={{ duration: 2, ease: "easeInOut" }}
+                  className="absolute inset-0 bg-[#CD7F32]/40 blur-[50px] rounded-full pointer-events-none" 
+                />
               </div>
               
               <motion.h2 
