@@ -105,32 +105,26 @@ export default function Register() {
           )}
 
           <div className="space-y-5">
-          <div className="flex p-1 bg-black/60 rounded-xl border border-white/10 mb-6 backdrop-blur-md relative overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setRole('WORKER')}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'WORKER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
-            >
-              {role === 'WORKER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
-              Worker
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('MANAGER')}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'MANAGER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
-            >
-              {role === 'MANAGER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
-              Manager
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('USER')}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'USER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
-            >
-              {role === 'USER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
-              User
-            </button>
-          </div>
+          {appFlavor !== 'USER' && (
+            <div className="flex p-1 bg-black/60 rounded-xl border border-white/10 mb-6 backdrop-blur-md relative overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setRole('WORKER')}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'WORKER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+              >
+                {role === 'WORKER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+                Worker
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('MANAGER')}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all relative z-10 ${role === 'MANAGER' ? 'text-white shadow-lg' : 'text-[#F5F5DC]/50 hover:text-[#F5F5DC]'}`}
+              >
+                {role === 'MANAGER' && <motion.div layoutId="roleBg" className="absolute inset-0 bg-gradient-to-r from-[#CD7F32] to-[#b06a29] rounded-lg -z-10" />}
+                Manager
+              </button>
+            </div>
+          )}
 
             <div className="flex gap-4">
               <div className="flex-1">
