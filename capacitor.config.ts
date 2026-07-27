@@ -5,6 +5,6 @@ const config: CapacitorConfig = {
   webDir: 'out',
   backgroundColor: '#111111',
   server: { url: 'https://back-stage-theta.vercel.app', cleartext: false },
-  appendUserAgent: 'BackstageFlavor/User'
+  appendUserAgent: 'BackstageFlavor/Ops'
 };
 export default config;
