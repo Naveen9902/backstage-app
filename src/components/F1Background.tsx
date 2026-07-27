@@ -9,7 +9,7 @@ export default function F1Background() {
 
   useEffect(() => {
     setMounted(true);
-    setLines(Array.from({ length: 30 }).map((_, i) => {
+    setLines(Array.from({ length: 12 }).map((_, i) => {
       const left = Math.random() * 100;
       const delay = Math.random() * 2;
       const duration = 1 + Math.random() * 2;
@@ -47,8 +47,7 @@ export default function F1Background() {
             className="absolute w-[2px] bg-gradient-to-b from-transparent via-[#CD7F32] to-transparent shadow-[0_0_15px_#CD7F32]"
             style={{ 
               left: `${l.left}%`, 
-              height: `${l.height}px`,
-              filter: `blur(${Math.random()}px)`
+              height: `${l.height}px`
             }}
           />
         ))}

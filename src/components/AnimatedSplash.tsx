@@ -17,7 +17,8 @@ export default function AnimatedSplash({ onComplete, appFlavor }: AnimatedSplash
 
   useEffect(() => {
     setMounted(true);
-    setParticles(Array.from({ length: 200 }).map((_, i) => {
+    // Reduced from 200 to 40 to prevent mobile lag
+    setParticles(Array.from({ length: 40 }).map((_, i) => {
       const angle = Math.random() * Math.PI * 2;
       const distance = 300 + Math.random() * 800; // start far away
       const startX = Math.cos(angle) * distance;
@@ -25,7 +26,8 @@ export default function AnimatedSplash({ onComplete, appFlavor }: AnimatedSplash
       const startZ = -1000 - Math.random() * 1500; // start deep in 3D space
       return { id: i, startX, startY, startZ, size: Math.random() * 4 + 1 };
     }));
-    setF1Lines(Array.from({ length: 60 }).map((_, i) => {
+    // Reduced from 60 to 15 to prevent mobile lag
+    setF1Lines(Array.from({ length: 15 }).map((_, i) => {
       const angle = Math.random() * Math.PI * 2;
       const distance = 50 + Math.random() * 400; 
       const x = Math.cos(angle) * distance;
