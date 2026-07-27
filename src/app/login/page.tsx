@@ -261,16 +261,14 @@ export default function Login() {
             </div>
           )}
 
-          {appFlavor !== 'OPS' && (
-            <div className="mt-8 text-center">
-              <p className="text-[#F5F5DC]/60 text-sm">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-[#CD7F32] font-semibold hover:underline">
-                  Sign Up
-                </Link>
-              </p>
-            </div>
-          )}
+          <div className="mt-8 text-center">
+            <p className="text-[#F5F5DC]/60 text-sm">
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-[#CD7F32] font-semibold hover:underline">
+                Sign Up
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
