@@ -188,7 +188,7 @@ export default function ManagerDashboard() {
               </div>
             ) : (
               <div className="space-y-3">
-                {eventsData.filter(e => e.status !== 'COMPLETED').slice(0, 4).map((event, index) => (
+                {eventsData.filter(e => e.status !== 'COMPLETED').slice(0, 2).map((event, index) => (
                   <motion.div
                     key={event.id}
                     initial={{ opacity: 0, x: -10 }}
