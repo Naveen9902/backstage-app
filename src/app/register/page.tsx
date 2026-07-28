@@ -263,6 +263,9 @@ export default function Register() {
                       scopes: ['profile', 'email'],
                       grantOfflineAccess: false,
                     });
+                    // Force account chooser by clearing previous native session
+                    try { await (window as any).Capacitor.Plugins.GoogleAuth.signOut(); } catch(e) {}
+                    
                     const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                     if (result.authentication?.idToken) {
                       const res = await fetch('/api/auth/google/native', {
