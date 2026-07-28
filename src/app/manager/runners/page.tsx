@@ -19,6 +19,14 @@ export default function RunnersPage() {
   const [selectedEventView, setSelectedEventView] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'In Progress' | 'Completed' | 'Pending'>('ALL');
   const [boardHistoryTab, setBoardHistoryTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const board = params.get('board');
+      if (board) setSelectedEventView(board);
+    }
+  }, []);
   
   // Assign to specific worker
   const [assignModal, setAssignModal] = useState<{userId: string, name: string, eventId: string | null, isExternal: boolean, isBroadcast?: boolean} | null>(null);
@@ -543,102 +551,119 @@ export default function RunnersPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {displayedGroupNames.map(groupName => {
-                        const groupDispatches = eventGroups[groupName] || [];
-                        const isExternalGroup = groupName.includes('External') || groupName.includes('Errands') || groupName.includes('Errand');
-                        const isClosed = isBoardClosed(groupName);
-                        const totalTasks = groupDispatches.length;
-                        const completedTasks = groupDispatches.filter((d: any) => d.status === 'Completed').length;
-                        const inProgressTasks = groupDispatches.filter((d: any) => d.status === 'In Progress').length;
-                        const pendingTasksCount = totalTasks - completedTasks - inProgressTasks;
-                        const totalPayout = groupDispatches.reduce((sum: number, d: any) => sum + (d.price ? Number(d.price) : 0), 0);
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {displayedGroupNames.slice(0, 3).map(groupName => {
+                          const groupDispatches = eventGroups[groupName] || [];
+                          const isExternalGroup = groupName.includes('External') || groupName.includes('Errands') || groupName.includes('Errand');
+                          const isClosed = isBoardClosed(groupName);
+                          const totalTasks = groupDispatches.length;
+                          const completedTasks = groupDispatches.filter((d: any) => d.status === 'Completed').length;
+                          const inProgressTasks = groupDispatches.filter((d: any) => d.status === 'In Progress').length;
+                          const pendingTasksCount = totalTasks - completedTasks - inProgressTasks;
+                          const totalPayout = groupDispatches.reduce((sum: number, d: any) => sum + (d.price ? Number(d.price) : 0), 0);
 
-                        return (
-                          <motion.div
-                            key={groupName}
-                            whileHover={{ scale: 1.025, y: -6 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                            onClick={() => { setSelectedEventView(groupName); setFilterStatus('ALL'); }}
-                            className={`group relative overflow-hidden rounded-3xl p-6.5 cursor-pointer transition-all duration-300 flex flex-col justify-between border-2 shadow-lg ${
-                              isClosed
-                                ? 'bg-[#181818] text-white border-gray-800 hover:border-[#CD7F32]/80 hover:shadow-[0_20px_40px_rgba(205,127,50,0.15)]'
-                                : isExternalGroup 
-                                ? 'bg-gradient-to-br from-[#242424] via-[#2a241f] to-[#181818] text-white border-[#CD7F32]/40 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]' 
-                                : 'bg-gradient-to-br from-[#242424] via-[#2a2a2a] to-[#1f1f1f] text-white border-gray-800 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]'
-                            }`}
-                          >
-                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30" />
+                          return (
+                            <motion.div
+                              key={groupName}
+                              whileHover={{ scale: 1.025, y: -6 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              onClick={() => { setSelectedEventView(groupName); setFilterStatus('ALL'); }}
+                              className={`group relative overflow-hidden rounded-3xl p-6.5 cursor-pointer transition-all duration-300 flex flex-col justify-between border-2 shadow-lg ${
+                                isClosed
+                                  ? 'bg-[#181818] text-white border-gray-800 hover:border-[#CD7F32]/80 hover:shadow-[0_20px_40px_rgba(205,127,50,0.15)]'
+                                  : isExternalGroup 
+                                  ? 'bg-gradient-to-br from-[#242424] via-[#2a241f] to-[#181818] text-white border-[#CD7F32]/40 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]' 
+                                  : 'bg-gradient-to-br from-[#242424] via-[#2a2a2a] to-[#1f1f1f] text-white border-gray-800 hover:border-[#CD7F32] hover:shadow-[0_20px_40px_rgba(205,127,50,0.25)]'
+                              }`}
+                            >
+                              <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 bg-[#CD7F32]/15 group-hover:bg-[#CD7F32]/30" />
 
-                            <div>
-                              <div className="flex items-start justify-between gap-3 mb-4">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30 text-2xl">
-                                  {isClosed ? '🏁' : isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
-                                </div>
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border font-mono shadow-2xs ${
-                                  isClosed
-                                    ? 'bg-[#242424] text-gray-300 border-gray-700'
-                                    : totalTasks > 0 
-                                    ? 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/40'
-                                    : 'bg-gray-700/50 text-gray-400 border-gray-600/50'
-                                }`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${isClosed ? 'bg-gray-400' : totalTasks > 0 ? 'bg-[#CD7F32] animate-pulse' : 'bg-gray-500'}`} />
-                                  {isClosed ? '🏁 Closed History' : totalTasks > 0 ? 'Active Board' : 'Standby'}
-                                </span>
-                              </div>
-
-                              <h3 className="text-xl font-bold font-serif tracking-tight leading-snug mb-2 transition-colors group-hover:text-[#CD7F32]">
-                                {groupName}
-                              </h3>
-
-                              <p className="text-xs text-gray-300 line-clamp-2 mb-6 leading-relaxed">
-                                {isExternalGroup 
-                                  ? 'Open broadcasts & third-party runner tasks dispatched on fixed payouts.' 
-                                  : 'Internal venue crew coordination, VIP requests, and on-ground stage dispatches.'}
-                              </p>
-                            </div>
-
-                            <div>
-                              <div className="grid grid-cols-3 gap-2 py-3 px-3.5 bg-black/40 rounded-2xl border border-white/10 mb-5 font-mono">
-                                <div className="text-center">
-                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Active</div>
-                                  <div className="text-sm font-extrabold text-sky-400 mt-0.5">{inProgressTasks}</div>
-                                </div>
-                                <div className="text-center border-x border-white/10">
-                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Done</div>
-                                  <div className="text-sm font-extrabold text-emerald-400 mt-0.5">{completedTasks}</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="text-[10px] text-gray-400 uppercase font-sans">Pending</div>
-                                  <div className="text-sm font-extrabold text-amber-400 mt-0.5">{pendingTasksCount}</div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                                {totalPayout > 0 ? (
-                                  <div className="flex items-center gap-1 text-emerald-400 font-mono font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                                    <DollarSign className="w-3.5 h-3.5" />
-                                    <span>₹{totalPayout} Payouts</span>
+                              <div>
+                                <div className="flex items-start justify-between gap-3 mb-4">
+                                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/30 text-2xl">
+                                    {isClosed ? '🏁' : isExternalGroup ? '⚡' : <FolderOpen className="w-6 h-6" />}
                                   </div>
-                                ) : (
-                                  <span className="text-xs text-gray-400 font-medium">
-                                    {totalTasks} {totalTasks === 1 ? 'Dispatch Task' : 'Total Dispatches'}
+                                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border font-mono shadow-2xs ${
+                                    isClosed
+                                      ? 'bg-[#242424] text-gray-300 border-gray-700'
+                                      : totalTasks > 0 
+                                      ? 'bg-[#CD7F32]/20 text-[#CD7F32] border-[#CD7F32]/40'
+                                      : 'bg-gray-700/50 text-gray-400 border-gray-600/50'
+                                  }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${isClosed ? 'bg-gray-400' : totalTasks > 0 ? 'bg-[#CD7F32] animate-pulse' : 'bg-gray-500'}`} />
+                                    {isClosed ? '🏁 Closed History' : totalTasks > 0 ? 'Active Board' : 'Standby'}
                                   </span>
-                                )}
+                                </div>
 
-                                <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
-                                  isClosed
-                                    ? 'bg-[#242424] text-white border border-[#CD7F32]/50 group-hover:bg-[#CD7F32]'
-                                    : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
-                                }`}>
-                                  <span>{isClosed ? 'History Board' : 'Open Board'}</span>
-                                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                <h3 className="text-xl font-bold font-serif tracking-tight leading-snug mb-2 transition-colors group-hover:text-[#CD7F32]">
+                                  {groupName}
+                                </h3>
+
+                                <p className="text-xs text-gray-300 line-clamp-2 mb-6 leading-relaxed">
+                                  {isExternalGroup 
+                                    ? 'Open broadcasts & third-party runner tasks dispatched on fixed payouts.' 
+                                    : 'Internal venue crew coordination, VIP requests, and on-ground stage dispatches.'}
+                                </p>
+                              </div>
+
+                              <div>
+                                <div className="grid grid-cols-3 gap-2 py-3 px-3.5 bg-black/40 rounded-2xl border border-white/10 mb-5 font-mono">
+                                  <div className="text-center">
+                                    <div className="text-[10px] text-gray-400 uppercase font-sans">Active</div>
+                                    <div className="text-sm font-extrabold text-sky-400 mt-0.5">{inProgressTasks}</div>
+                                  </div>
+                                  <div className="text-center border-x border-white/10">
+                                    <div className="text-[10px] text-gray-400 uppercase font-sans">Done</div>
+                                    <div className="text-sm font-extrabold text-emerald-400 mt-0.5">{completedTasks}</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="text-[10px] text-gray-400 uppercase font-sans">Pending</div>
+                                    <div className="text-sm font-extrabold text-amber-400 mt-0.5">{pendingTasksCount}</div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                                  {totalPayout > 0 ? (
+                                    <div className="flex items-center gap-1 text-emerald-400 font-mono font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                                      <DollarSign className="w-3.5 h-3.5" />
+                                      <span>₹{totalPayout} Payouts</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-xs text-gray-400 font-medium">
+                                      {totalTasks} {totalTasks === 1 ? 'Dispatch Task' : 'Total Dispatches'}
+                                    </span>
+                                  )}
+
+                                  <div className={`inline-flex items-center gap-1 text-xs font-extrabold uppercase tracking-wider py-1.5 px-3 rounded-xl transition-all ${
+                                    isClosed
+                                      ? 'bg-[#242424] text-white border border-[#CD7F32]/50 group-hover:bg-[#CD7F32]'
+                                      : 'bg-[#CD7F32] text-white group-hover:bg-[#df8a3c] shadow-md shadow-[#CD7F32]/20'
+                                  }`}>
+                                    <span>{isClosed ? 'History Board' : 'Open Board'}</span>
+                                    <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+
+                      {displayedGroupNames.length > 3 && (
+                        <div className="flex justify-center mt-6">
+                          <Link href="/manager/runners/dispatch-boards">
+                            <motion.button 
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="px-6 py-3 bg-[#CD7F32] text-white font-bold rounded-xl shadow-lg hover:shadow-[#CD7F32]/50 transition-all text-sm flex items-center gap-2"
+                            >
+                              <span>View All {displayedGroupNames.length} Dispatch Boards</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </motion.button>
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
