@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CapacitorAppLogic from "@/components/CapacitorAppLogic";
 import FlavorSetter from "@/components/FlavorSetter";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -85,6 +86,7 @@ export default function RootLayout({
           <FlavorSetter />
         </Suspense>
         {children}
+        <MobileBottomNav />
       </body>
     </html>
   );
