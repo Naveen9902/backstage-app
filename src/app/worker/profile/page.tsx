@@ -395,7 +395,7 @@ export default function WorkerProfile() {
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
-                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : 'Save Profile'}
+                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || (formData.tier && formData.tier !== formData.originalTier)) ? 'Apply for Tier Verification' : 'Save Profile'}
               </button>
             </div>
 
@@ -611,7 +611,7 @@ export default function WorkerProfile() {
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">
               <button type="submit" disabled={isSaveDisabled} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none">
-                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : 'Save Profile')}
+                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || (formData.tier && formData.tier !== formData.originalTier)) ? 'Apply for Tier Verification' : 'Save Profile')}
               </button>
             </div>
               </form>
