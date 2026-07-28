@@ -15,6 +15,7 @@ export default function FindJobs() {
   const [roleFilter, setRoleFilter] = useState<string>('All');
   const [eventTypeFilter, setEventTypeFilter] = useState<string>('All');
   const [dateFilter, setDateFilter] = useState<string>('');
+  const [showFilters, setShowFilters] = useState(false);
   
   // Custom Questions Flow
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
@@ -126,61 +127,111 @@ export default function FindJobs() {
           <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Find Jobs</h1>
           <p className="text-lg text-gray-700">Discover and apply for open positions at upcoming events</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <input 
-            type="text" 
-            placeholder="Search roles or events..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-64"
-          />
-          <div className="flex flex-wrap items-center gap-4">
-            <select
-              value={tierFilter}
-              onChange={(e) => setTierFilter(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <input 
+              type="text" 
+              placeholder="Search roles or events..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          
+          <div className="relative w-full sm:w-auto">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none hover:bg-gray-50 shadow-sm transition-colors"
             >
-              <option value="All">All Tiers</option>
-              <option value="Tier 1">Tier 1</option>
-              <option value="Tier 2">Tier 2</option>
-              <option value="Tier 3">Tier 3</option>
-            </select>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
-            >
-              <option value="All">All Roles</option>
-              {availableRoles.map(role => (
-                <option key={role as string} value={role as string}>{role as string}</option>
-              ))}
-            </select>
-            <select
-              value={eventTypeFilter}
-              onChange={(e) => setEventTypeFilter(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
-            >
-              <option value="All">All Event Types</option>
-              {availableEventTypes.map(type => (
-                <option key={type as string} value={type as string}>{type as string}</option>
-              ))}
-            </select>
-            <div className="flex items-center w-full sm:w-auto">
-              <input 
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full"
-              />
-              {dateFilter && (
-                <button 
-                  onClick={() => setDateFilter('')}
-                  className="ml-2 text-xs text-gray-500 hover:text-red-500 underline whitespace-nowrap"
-                >
-                  Clear Date
-                </button>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filters
+              {(tierFilter !== 'All' || roleFilter !== 'All' || eventTypeFilter !== 'All' || dateFilter) && (
+                <span className="w-2 h-2 rounded-full bg-[#CD7F32]"></span>
               )}
-            </div>
+            </button>
+
+            {/* Filter Dropdown */}
+            {showFilters && (
+              <div className="absolute right-0 sm:right-0 left-0 sm:left-auto mt-2 w-full sm:w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-20 p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-gray-800">Filters</h3>
+                  <button 
+                    onClick={() => {
+                      setTierFilter('All');
+                      setRoleFilter('All');
+                      setEventTypeFilter('All');
+                      setDateFilter('');
+                    }}
+                    className="text-xs text-red-500 hover:underline font-medium"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tier</label>
+                    <select
+                      value={tierFilter}
+                      onChange={(e) => setTierFilter(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#CD7F32]"
+                    >
+                      <option value="All">All Tiers</option>
+                      <option value="Tier 1">Tier 1</option>
+                      <option value="Tier 2">Tier 2</option>
+                      <option value="Tier 3">Tier 3</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Role</label>
+                    <select
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#CD7F32]"
+                    >
+                      <option value="All">All Roles</option>
+                      {availableRoles.map(role => (
+                        <option key={role as string} value={role as string}>{role as string}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Event Type</label>
+                    <select
+                      value={eventTypeFilter}
+                      onChange={(e) => setEventTypeFilter(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#CD7F32]"
+                    >
+                      <option value="All">All Types</option>
+                      {availableEventTypes.length > 0 ? (
+                        availableEventTypes.map(type => (
+                          <option key={type as string} value={type as string}>{type as string}</option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No event types available</option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
+                    <input 
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#CD7F32]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

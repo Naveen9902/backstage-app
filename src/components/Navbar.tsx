@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
 import Logo from './Logo';
+import PushNotificationManager from './PushNotificationManager';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -45,7 +46,17 @@ export default function Navbar() {
           <ThemeToggle />
           {session.loggedIn ? (
             <>
+              <PushNotificationManager />
               <span className="hidden sm:inline text-white/60 text-sm mr-2">Hi, {session.user?.name}</span>
+              <Link href="/">
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="hidden md:flex items-center gap-2 text-white/80 hover:text-white px-2 py-2 rounded-lg font-semibold text-xs md:text-sm transition-colors cursor-pointer"
+                >
+                  Home
+                </motion.div>
+              </Link>
               <Link href={getDashboardLink()}>
                 <motion.div 
                   whileHover={{ scale: 1.05 }}

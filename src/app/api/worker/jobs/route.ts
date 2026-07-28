@@ -29,6 +29,7 @@ export async function GET() {
             date: true,
             location: true,
             coverImageUrl: true,
+            attendeeCategory: true,
             manager: {
               select: {
                 managerProfile: {

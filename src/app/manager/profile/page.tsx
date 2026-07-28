@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
-import PushNotificationManager from '@/components/PushNotificationManager';
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
@@ -12,10 +11,15 @@ export default function ProfilePage() {
     company: '',
     bio: '',
     avatarUrl: '',
-    rating: 0
+    rating: 0,
+    location: '',
+    socialLink: '',
+    isVerified: false,
+    verificationStatus: 'PENDING'
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState('');
   const [reviews, setReviews] = useState<any[]>([]);
   const [myEvents, setMyEvents] = useState<any[]>([]);
@@ -31,7 +35,11 @@ export default function ProfilePage() {
               company: data.managerProfile?.company || '',
               bio: data.managerProfile?.bio || '',
               avatarUrl: data.avatarUrl || '',
-              rating: data.managerProfile?.rating || 0
+              rating: data.managerProfile?.rating || 0,
+              location: data.managerProfile?.location || '',
+              socialLink: data.managerProfile?.socialLink || '',
+              isVerified: data.managerProfile?.isVerified || false,
+              verificationStatus: data.managerProfile?.verificationStatus || 'PENDING'
             });
           }
         setLoading(false);
@@ -92,6 +100,42 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
+  const handleVerify = async () => {
+    setVerifying(true);
+    setMessage('');
+    
+    try {
+      // Step 1: Save the profile first to ensure all latest fields are in DB
+      const saveRes = await fetch('/api/manager/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!saveRes.ok) {
+        setMessage('Failed to save profile before verification.');
+        setVerifying(false);
+        return;
+      }
+
+      // Step 2: Request verification
+      const res = await fetch('/api/manager/profile/verify', {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage('Applied for verification!');
+        setFormData(prev => ({ ...prev, isVerified: false, verificationStatus: 'PENDING' }));
+        window.dispatchEvent(new Event('profileUpdated'));
+      } else {
+        setMessage(data.error || 'Failed to verify.');
+      }
+    } catch (err) {
+      setMessage('An error occurred during verification.');
+    }
+    setVerifying(false);
+  };
+
   return (
     <div className="text-[#242424] w-full max-w-5xl mx-auto space-y-8 font-sans pb-12">
       {/* Page Header */}
@@ -109,6 +153,22 @@ export default function ProfilePage() {
             <span className="text-xs font-bold text-[#CD7F32] uppercase tracking-widest ml-1">Rating</span>
           </div>
         )}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border shadow-sm self-start sm:self-auto bg-white border-gray-200">
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Status: {formData.isVerified ? <span className="text-green-600">Verified</span> : <span className="text-amber-500">{formData.verificationStatus}</span>}
+            </span>
+          </div>
+          {!formData.isVerified && (
+            <button 
+              onClick={handleVerify}
+              disabled={verifying}
+              className="text-xs font-bold bg-[#CD7F32] hover:bg-[#a86524] text-white px-4 py-2 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+            >
+              {verifying ? 'Verifying...' : 'Apply for Verification'}
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -204,9 +264,16 @@ export default function ProfilePage() {
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Bio & Experience</label>
                   <textarea rows={4} value={formData.bio} onChange={e=>setFormData({...formData, bio: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-medium outline-none transition-all duration-300 shadow-inner resize-y" placeholder="Tell workers a bit about your event management style..."></textarea>
                 </div>
+                <div className="space-y-1.5 group/input">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Location</label>
+                  <input type="text" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner" placeholder="City, Country" />
+                </div>
+                <div className="space-y-1.5 group/input">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Social Link (LinkedIn/Website)</label>
+                  <input type="url" value={formData.socialLink} onChange={e=>setFormData({...formData, socialLink: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner" placeholder="https://" />
+                </div>
                 
-                <div className="md:col-span-2">
-                  <PushNotificationManager />
+                <div className="md:col-span-2 space-y-6">
                 </div>
               </div>
             </div>
@@ -368,19 +435,14 @@ export default function ProfilePage() {
           )}
         </div>
         
-        <div className="lg:col-span-3 mt-6 mb-8 p-6 sm:p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full max-w-3xl mx-auto shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <h3 className="font-black text-[#CD7F32] text-xl mb-2 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-              DANGER ZONE
-            </h3>
-            <p className="text-[#EAE6DF] text-xs sm:text-sm mb-5 sm:mb-6 font-medium max-w-2xl leading-relaxed">Permanently delete your Back Stage manager account, including all your events, chats, and records. This action cannot be undone and all data will be permanently wiped.</p>
-            <button onClick={handleDeleteAccount} disabled={saving} className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-[#CD7F32] to-[#a86524] text-black font-black rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-[0_0_15px_rgba(205,127,50,0.5)] disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-              Delete My Account Permanently
-            </button>
-          </div>
+        <div className="lg:col-span-3 mt-12 mb-8 flex justify-center">
+          <button 
+            onClick={handleDeleteAccount} 
+            disabled={saving} 
+            className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors uppercase tracking-widest disabled:opacity-50"
+          >
+            Delete Account
+          </button>
         </div>
 
       </div>

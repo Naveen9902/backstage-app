@@ -23,7 +23,16 @@ export default function AppGateway() {
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    setAppFlavor(localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER');
+    let flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'USER';
+    if (typeof window !== 'undefined') {
+      const ua = navigator.userAgent;
+      if (ua.includes('BackstageFlavor/Ops')) {
+        flavor = 'OPS';
+      } else if (ua.includes('BackstageFlavor/User')) {
+        flavor = 'USER';
+      }
+    }
+    setAppFlavor(flavor);
   }, []);
   
   const activeAppMode = appFlavor === 'OPS' ? 'OPS' : 'USER';

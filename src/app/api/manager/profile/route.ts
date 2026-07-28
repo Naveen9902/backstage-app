@@ -63,7 +63,7 @@ export async function PUT(req: Request) {
     }
 
     // Force route recompilation 2
-    const { name, email, company, bio, avatarUrl } = await req.json();
+    const { name, email, company, bio, avatarUrl, location, socialLink } = await req.json();
 
     // Update user details
     const user = await prisma.user.update({
@@ -74,8 +74,8 @@ export async function PUT(req: Request) {
     // Update or create manager profile
     const profile = await prisma.managerProfile.upsert({
       where: { userId },
-      update: { company, bio },
-      create: { userId, company, bio }
+      update: { company, bio, location, socialLink, managerName: name, profilePictureUrl: avatarUrl },
+      create: { userId, company, bio, location, socialLink, managerName: name, profilePictureUrl: avatarUrl }
     });
 
     return NextResponse.json({ ...user, managerProfile: profile }, { status: 200 });

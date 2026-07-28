@@ -91,6 +91,10 @@ export default function ApplicationsPage() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-700 mb-2">
                     <span><strong>Skills:</strong> {app.workerProfile?.skills || 'N/A'}</span>
                     <span><strong>Exp:</strong> {app.workerProfile?.experience || 'N/A'}</span>
+                    <span className="flex items-center gap-1 text-[#CD7F32] font-bold">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      {app.workerProfile?.rating ? app.workerProfile.rating.toFixed(1) : '0.0'}
+                    </span>
                     {app.workerProfile?.tier && (
                       <span className="bg-orange-100 text-orange-800 px-2 rounded font-bold text-xs flex items-center">{app.workerProfile.tier}</span>
                     )}
@@ -167,12 +171,10 @@ export default function ApplicationsPage() {
                         {selectedProfile.tier}
                       </span>
                     )}
-                    {selectedProfile.rating > 0 && (
-                      <span className="bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-bold shadow-sm flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#CD7F32" stroke="#CD7F32"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        {selectedProfile.rating.toFixed(1)}
-                      </span>
-                    )}
+                    <span className="bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-bold shadow-sm flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#CD7F32" stroke="#CD7F32"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      {selectedProfile.rating ? selectedProfile.rating.toFixed(1) : '0.0'}
+                    </span>
                   </div>
                 </div>
               </div>

@@ -804,7 +804,7 @@ export default function WorkerDashboard() {
 
           <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-4 snap-x hide-scrollbar">
             {platformLiveEvents.map((event, i) => (
-              <Link href={`/events/${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
+              <Link href={`/worker/events/${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
                 <div className="bg-white border border-gray-200 hover:border-[#CD7F32] rounded-xl overflow-hidden transition-all duration-300 relative h-full flex flex-col shadow-sm hover:shadow-md">
                   <div className="absolute top-3 left-3 z-10">
                     <span className="bg-white/90 backdrop-blur-md border border-gray-200 text-gray-800 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">

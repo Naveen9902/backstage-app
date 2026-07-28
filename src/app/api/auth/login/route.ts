@@ -10,7 +10,21 @@ export async function POST(req: Request) {
       where: { email },
     });
 
-    if (!user || user.password !== password) { // In production, use bcrypt.compare
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    let isMatch = user.password === password;
+    if (!isMatch) {
+      const bcrypt = require('bcryptjs');
+      try {
+        isMatch = await bcrypt.compare(password, user.password);
+      } catch (e) {
+        // Not a bcrypt hash
+      }
+    }
+
+    if (!isMatch) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 

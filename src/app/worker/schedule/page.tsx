@@ -180,7 +180,7 @@ export default function MySchedule() {
                 const isSelected = selectedDayApps && selectedDayApps.length > 0 && new Date(selectedDayApps[0].staffingRequest.event.date).getDate() === day && new Date(selectedDayApps[0].staffingRequest.event.date).getMonth() === month;
                 const isCurrent = isToday(day);
 
-                let dayBgClass = 'text-gray-400 hover:bg-gray-50 cursor-default';
+                let dayBgClass = 'text-gray-400 hover:bg-gray-50 border border-transparent cursor-default';
                 let selectedBgClass = 'bg-[#CD7F32] text-white shadow-md scale-105';
 
                 if (hasGig) {
@@ -189,17 +189,17 @@ export default function MySchedule() {
                   const hasUpcoming = !hasLive && !hasCompleted;
 
                   if (hasLive) {
-                     dayBgClass = 'bg-green-100 text-green-900 hover:bg-green-200 cursor-pointer';
-                     selectedBgClass = 'bg-green-500 text-white shadow-md scale-105';
+                     dayBgClass = 'bg-white text-gray-900 border border-gray-100 hover:bg-green-50 hover:border-green-200 hover:text-green-700 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300';
+                     selectedBgClass = 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30 scale-105 border border-green-500';
                   } else if (hasUpcoming) {
-                     dayBgClass = 'bg-orange-100 text-orange-900 hover:bg-orange-200 cursor-pointer';
-                     selectedBgClass = 'bg-orange-500 text-white shadow-md scale-105';
+                     dayBgClass = 'bg-white text-gray-900 border border-gray-100 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-700 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300';
+                     selectedBgClass = 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white shadow-lg shadow-yellow-500/30 scale-105 border border-yellow-500';
                   } else {
-                     dayBgClass = 'bg-red-100 text-red-900 hover:bg-red-200 cursor-pointer';
-                     selectedBgClass = 'bg-red-500 text-white shadow-md scale-105';
+                     dayBgClass = 'bg-white text-gray-900 border border-gray-100 hover:bg-red-50 hover:border-red-200 hover:text-red-700 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300';
+                     selectedBgClass = 'bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg shadow-red-500/30 scale-105 border border-red-500';
                   }
                 } else if (isCurrent) {
-                  dayBgClass = 'bg-gray-100 text-gray-900 font-bold border border-gray-200';
+                  dayBgClass = 'bg-gray-50 text-gray-900 font-black border-2 border-gray-200 cursor-default shadow-inner';
                 }
 
                 return (
@@ -207,24 +207,24 @@ export default function MySchedule() {
                     <button
                       onClick={() => handleDayClick(day)}
                       disabled={!hasGig && !isCurrent}
-                      className={`w-full h-full rounded-2xl flex flex-col items-center justify-center relative transition-all duration-300
+                      className={`w-full h-full rounded-2xl flex flex-col items-center justify-center relative
                         ${isSelected ? selectedBgClass : dayBgClass}
                       `}
                     >
-                      <span className={`text-sm ${hasGig || isSelected || isCurrent ? 'font-bold' : 'font-medium'}`}>{day}</span>
+                      <span className={`text-sm ${hasGig || isSelected || isCurrent ? 'font-black' : 'font-medium'}`}>{day}</span>
                       
                       {/* Dots for shifts */}
                       {hasGig && (
-                        <div className="flex gap-0.5 absolute bottom-1.5">
+                        <div className="flex gap-1 absolute bottom-1.5">
                           {appsForDay.slice(0, 3).map((app, i) => {
-                            let dotColor = 'bg-orange-500';
-                            if (app.staffingRequest.event.status === 'ONGOING') dotColor = 'bg-green-500 animate-pulse';
-                            else if (app.staffingRequest.event.status === 'COMPLETED') dotColor = 'bg-red-500';
+                            let dotColor = 'bg-yellow-400 shadow-[0_0_5px_rgba(250,204,21,0.6)]'; // Yellow for upcoming
+                            if (app.staffingRequest.event.status === 'ONGOING') dotColor = 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)] animate-pulse';
+                            else if (app.staffingRequest.event.status === 'COMPLETED') dotColor = 'bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.6)]';
                             
                             return (
                               <span 
                                 key={i} 
-                                className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : dotColor}`}
+                                className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' : dotColor}`}
                               ></span>
                             );
                           })}

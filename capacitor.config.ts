@@ -1,11 +1,10 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
-  appId: process.env.NEXT_PUBLIC_APP_FLAVOR === 'USER' ? 'com.backstage.fan' : 'com.backstage.ops',
-  appName: process.env.NEXT_PUBLIC_APP_FLAVOR === 'USER' ? 'Backstage Fan' : 'Backstage Ops',
+  appId: process.env.NEXT_PUBLIC_APP_FLAVOR === 'OPS' ? 'com.backstage.ops' : 'com.backstage.fan',
+  appName: process.env.NEXT_PUBLIC_APP_FLAVOR === 'OPS' ? 'Backstage Ops' : 'Backstage Fan',
   webDir: 'out',
   backgroundColor: '#111111',
   server: { url: 'https://back-stage-theta.vercel.app', cleartext: false },
-  appendUserAgent: process.env.NEXT_PUBLIC_APP_FLAVOR === 'USER' ? 'BackstageFlavor/User' : 'BackstageFlavor/Ops',
   plugins: {
     GoogleAuth: {
       scopes: ["profile", "email"],

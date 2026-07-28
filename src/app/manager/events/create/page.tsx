@@ -26,6 +26,21 @@ export default function CreateEvent() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if manager is verified
+    fetch('/api/manager/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error && data.managerProfile) {
+          setIsVerified(data.managerProfile.isVerified);
+        } else {
+          setIsVerified(false);
+        }
+      })
+      .catch(() => setIsVerified(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +151,19 @@ export default function CreateEvent() {
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#CD7F32] to-[#ffb163]" />
               
+              {isVerified === false && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-md z-50 flex flex-col items-center justify-center p-8 text-center rounded-3xl border border-gray-200">
+                  <div className="w-16 h-16 bg-[#CD7F32]/10 text-[#CD7F32] flex items-center justify-center rounded-full mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-2">Verification Required</h3>
+                  <p className="text-sm text-gray-600 mb-6 max-w-md">You must complete your manager verification before you can create events. Please provide your Organization Name, Location, Social Link, and Profile Picture in your profile.</p>
+                  <Link href="/manager/profile" className="px-6 py-3 bg-[#CD7F32] text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                    Go to Profile
+                  </Link>
+                </div>
+              )}
+
               {error && (
                 <div className="mb-6 p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>

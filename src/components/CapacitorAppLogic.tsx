@@ -8,27 +8,32 @@ export default function CapacitorAppLogic() {
   useEffect(() => {
     // Only import Capacitor dynamically when in browser
     if (typeof window !== 'undefined') {
-      import('@capacitor/app').then(({ App }) => {
-        App.addListener('backButton', () => {
-          const path = window.location.pathname;
-          // If we are at a root screen, exit the app
-          if (path === '/' || path === '/worker' || path === '/manager') {
-            App.exitApp();
-          } else {
-            // Otherwise go back in browser history
-            window.history.back();
-          }
-        });
-      }).catch(err => {
-        console.warn('Capacitor App module not found, likely running in pure web mode', err);
-      });
+      import('@capacitor/core').then(({ Capacitor }) => {
+        if (Capacitor.isNativePlatform()) {
+          // App Plugin
+          import('@capacitor/app').then(({ App }) => {
+            App.addListener('backButton', () => {
+              const path = window.location.pathname;
+              if (path === '/' || path === '/worker' || path === '/manager') {
+                App.exitApp();
+              } else {
+                window.history.back();
+              }
+            });
+          }).catch(err => {
+            console.warn('Capacitor App module not found', err);
+          });
 
-      // Configure StatusBar
-      import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
-        StatusBar.setStyle({ style: Style.Light }).catch(console.warn);
-        StatusBar.setBackgroundColor({ color: '#F5F5DC' }).catch(console.warn);
+          // Configure StatusBar
+          import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+            StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+            StatusBar.setBackgroundColor({ color: '#F5F5DC' }).catch(() => {});
+          }).catch(err => {
+            console.warn('Capacitor StatusBar module not found', err);
+          });
+        }
       }).catch(err => {
-        console.warn('Capacitor StatusBar module not found', err);
+        console.warn('Capacitor Core module not found', err);
       });
     }
   }, [router]);

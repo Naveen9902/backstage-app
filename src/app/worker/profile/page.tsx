@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import PushNotificationManager from '@/components/PushNotificationManager';
 
 const TIER_CATEGORIES = {
   'Tier 1': [
@@ -460,7 +459,6 @@ export default function WorkerProfile() {
               </div>
 
               <div className="md:col-span-2">
-                <PushNotificationManager />
               </div>
             
 
@@ -564,62 +562,66 @@ export default function WorkerProfile() {
               {/* Requirements Box */}
               {formData.tier && (
                 <div className="bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
-                  <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Basic Verification Requirements</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Date of Birth</label>
-                      <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
-                      {isUnderage && <p className="text-red-500 text-xs mt-1 font-bold">You must be 18+ to work on Back Stage.</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Emergency Contact</label>
-                      <input type="text" placeholder="Name & Phone" value={formData.emergencyContact} onChange={e=>setFormData({...formData, emergencyContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="text-sm font-bold text-gray-700">Phone Verification (Required)</label>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-1">
-                        <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
-                        {formData.isPhoneVerified ? (
-                          <span className="px-6 py-2 rounded-lg font-bold text-sm bg-green-100 text-green-700 border border-green-200 flex items-center justify-center">Verified ✓</span>
-                        ) : (
-                          <button type="button" disabled={verifyingOtp || otpSent} onClick={handleSendOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#242424] text-white hover:bg-black transition-colors disabled:opacity-50">
-                            {verifyingOtp ? 'Sending...' : (otpSent ? 'OTP Sent' : 'Send OTP')}
-                          </button>
-                        )}
-                      </div>
+                  {formData.tier === 'Tier 1' && (
+                    <>
+                      <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Tier 1 Requirements (Basic Verification)</h3>
                       
-                      {otpSent && !formData.isPhoneVerified && (
-                        <div className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                          <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder="Enter 6-digit OTP" className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-[#CD7F32]" />
-                          <button type="button" disabled={verifyingOtp} onClick={handleVerifyOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors disabled:opacity-50">
-                            {verifyingOtp ? 'Verifying...' : 'Verify Code'}
-                          </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-bold text-gray-700">Date of Birth</label>
+                          <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
+                          {isUnderage && <p className="text-red-500 text-xs mt-1 font-bold">You must be 18+ to work on Back Stage.</p>}
                         </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1">Government ID (Any)</label>
-                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['govtIdUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
-                        {uploading['govtIdUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.govtIdUrl ? <span className="text-green-600 font-bold text-sm">ID Uploaded ✓</span> : <span className="text-gray-500 text-sm">Click to upload ID</span>)}
-                        <input type="file" disabled={uploading['govtIdUrl']} onChange={(e) => handleFileUpload(e, 'govtIdUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*,.pdf" />
+                        <div>
+                          <label className="text-sm font-bold text-gray-700">Emergency Contact</label>
+                          <input type="text" placeholder="Name & Phone" value={formData.emergencyContact} onChange={e=>setFormData({...formData, emergencyContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                        </div>
+                        
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-bold text-gray-700">Phone Verification (Required)</label>
+                          <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                            <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
+                            {formData.isPhoneVerified ? (
+                              <span className="px-6 py-2 rounded-lg font-bold text-sm bg-green-100 text-green-700 border border-green-200 flex items-center justify-center">Verified ✓</span>
+                            ) : (
+                              <button type="button" disabled={verifyingOtp || otpSent} onClick={handleSendOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#242424] text-white hover:bg-black transition-colors disabled:opacity-50">
+                                {verifyingOtp ? 'Sending...' : (otpSent ? 'OTP Sent' : 'Send OTP')}
+                              </button>
+                            )}
+                          </div>
+                          
+                          {otpSent && !formData.isPhoneVerified && (
+                            <div className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                              <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder="Enter 6-digit OTP" className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-[#CD7F32]" />
+                              <button type="button" disabled={verifyingOtp} onClick={handleVerifyOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors disabled:opacity-50">
+                                {verifyingOtp ? 'Verifying...' : 'Verify Code'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <label className="text-sm font-bold text-gray-700 block mb-1">Government ID (Any)</label>
+                          <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['govtIdUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
+                            {uploading['govtIdUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.govtIdUrl ? <span className="text-green-600 font-bold text-sm">ID Uploaded ✓</span> : <span className="text-gray-500 text-sm">Click to upload ID</span>)}
+                            <input type="file" disabled={uploading['govtIdUrl']} onChange={(e) => handleFileUpload(e, 'govtIdUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*,.pdf" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-sm font-bold text-gray-700 block mb-1">Live Selfie (Cam)</label>
+                          <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['liveSelfieUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
+                            {uploading['liveSelfieUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.liveSelfieUrl ? <span className="text-green-600 font-bold text-sm">Selfie Captured ✓</span> : <span className="text-gray-500 text-sm">Click to take selfie</span>)}
+                            <input type="file" capture="user" disabled={uploading['liveSelfieUrl']} onChange={(e) => handleFileUpload(e, 'liveSelfieUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*" />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1">Live Selfie (Cam)</label>
-                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['liveSelfieUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
-                        {uploading['liveSelfieUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.liveSelfieUrl ? <span className="text-green-600 font-bold text-sm">Selfie Captured ✓</span> : <span className="text-gray-500 text-sm">Click to take selfie</span>)}
-                        <input type="file" capture="user" disabled={uploading['liveSelfieUrl']} onChange={(e) => handleFileUpload(e, 'liveSelfieUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*" />
-                      </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                   
-                  {/* Professional Requirements (Tier 2 & 3) */}
-                  {(formData.tier === 'Tier 2' || formData.tier === 'Tier 3') && (
-                    <div className="pt-4 border-t border-[#e6decb] mt-4">
-                      <h3 className="font-bold text-lg pb-4 text-[#8b6125]">Professional Details</h3>
+                  {/* Professional Requirements (Tier 2) */}
+                  {formData.tier === 'Tier 2' && (
+                    <div className="pt-2">
+                      <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 mb-4 text-[#8b6125]">Tier 2 Requirements (Professional Details)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                           <label className="text-sm font-bold text-gray-700">Specialization</label>
@@ -641,8 +643,8 @@ export default function WorkerProfile() {
 
                   {/* Elite Requirements (Tier 3) */}
                   {formData.tier === 'Tier 3' && (
-                    <div className="pt-4 border-t border-[#e6decb] mt-4">
-                      <h3 className="font-bold text-lg pb-4 text-[#8b6125]">Elite Portfolio</h3>
+                    <div className="pt-2">
+                      <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 mb-4 text-[#8b6125]">Tier 3 Requirements (Elite Portfolio)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
                           <label className="text-sm font-bold text-gray-700">Past Work (Notable Events)</label>

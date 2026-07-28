@@ -71,6 +71,14 @@ model ManagerProfile {
   stripeCustomerId String? // To save payment methods
   rating           Float   @default(0.0)
 
+  // Verification fields
+  isVerified       Boolean @default(false)
+  managerName      String?
+  location         String?
+  socialLink       String?
+  profilePictureUrl String?
+  verificationStatus String @default("PENDING") // PENDING | APPROVED | REJECTED
+
   @@index([userId])
 }
 
