@@ -22,6 +22,12 @@ const TIER_CATEGORIES = {
   ]
 };
 
+const calculateAge = (dob: string) => {
+  const diffMs = Date.now() - new Date(dob).getTime();
+  const ageDt = new Date(diffMs);
+  return Math.abs(ageDt.getUTCFullYear() - 1970);
+};
+
 export default function WorkerProfile() {
   const [formData, setFormData] = useState({
     name: '',
