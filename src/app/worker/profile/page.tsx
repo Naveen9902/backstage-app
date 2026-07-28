@@ -168,7 +168,7 @@ export default function WorkerProfile() {
     bgCheck: false
   });
 
-  const fetchProfile = async () => {
+  const handleSendOtp = async () => {
     if (!formData.mobile) {
       alert("Enter a mobile number above first!");
       return;
