@@ -9,6 +9,7 @@ export default function FindJobs() {
   const [applyingTo, setApplyingTo] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  const [workerTier, setWorkerTier] = useState<string | null>(null);
   
   // Custom Questions Flow
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
@@ -28,6 +29,7 @@ export default function FindJobs() {
       }
       if (profileData && profileData.workerProfile) {
         setIsVerified(profileData.workerProfile.isVerified);
+        setWorkerTier(profileData.workerProfile.tier);
       }
     } catch (err) {
       console.error(err);
@@ -79,6 +81,16 @@ export default function FindJobs() {
     job.event?.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getTierLevel = (tier?: string) => {
+    if (!tier) return 0;
+    if (tier.includes('1')) return 1;
+    if (tier.includes('2')) return 2;
+    if (tier.includes('3')) return 3;
+    return 0;
+  };
+
+  const workerLevel = getTierLevel(workerTier || '');
+
   return (
     <div className="text-[#242424] max-w-5xl">
       <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-8 gap-4">
@@ -128,18 +140,41 @@ export default function FindJobs() {
                 className="bg-white rounded-xl p-6 border border-gray-100 flex flex-col md:flex-row justify-between gap-6"
                 style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
               >
-                <div className="space-y-3 flex-1">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-2xl font-bold font-serif text-[#CD7F32]">{job.roleName}</h3>
-                      <p className="text-lg font-semibold text-gray-800">{job.event?.title}</p>
-                      <p className="text-sm text-gray-500 mt-1">by {job.event?.manager?.managerProfile?.company || 'Event Manager'}</p>
-                    </div>
-                    <div className="md:text-right mt-2 md:mt-0 bg-gray-50 md:bg-transparent p-3 md:p-0 rounded-lg">
-                      <p className="text-2xl font-bold font-serif text-gray-800">₹{job.payRate} <span className="text-sm font-normal text-gray-500">{job.payType === 'FIXED' ? 'Total' : '/ hr'}</span></p>
-                      <p className="text-sm text-gray-500 font-medium">Need {job.quantity} people</p>
-                    </div>
+                <div className="space-y-3 flex-1 flex flex-col md:flex-row gap-4">
+                  {/* Event PFP */}
+                  <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-inner hidden sm:block">
+                    {job.event?.coverImageUrl ? (
+                      <img src={job.event.coverImageUrl} alt="Event PFP" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      </div>
+                    )}
                   </div>
+
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-2xl font-bold font-serif text-[#CD7F32]">{job.roleName}</h3>
+                          {job.tier && (
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase shadow-sm border ${
+                              job.tier.includes('1') ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                              job.tier.includes('2') ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                              'bg-purple-100 text-purple-800 border-purple-200'
+                            }`}>
+                              Requires {job.tier}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-lg font-semibold text-gray-800">{job.event?.title}</p>
+                        <p className="text-sm text-gray-500 mt-1">by {job.event?.manager?.managerProfile?.company || 'Event Manager'}</p>
+                      </div>
+                      <div className="md:text-right mt-2 md:mt-0 bg-gray-50 md:bg-transparent p-3 md:p-0 rounded-lg">
+                        <p className="text-2xl font-bold font-serif text-gray-800">₹{job.payRate} <span className="text-sm font-normal text-gray-500">{job.payType === 'FIXED' ? 'Total' : '/ hr'}</span></p>
+                        <p className="text-sm text-gray-500 font-medium">Need {job.quantity} people</p>
+                      </div>
+                    </div>
                   
                   <div className="flex flex-wrap items-center text-gray-600 text-sm gap-4 pt-2">
                     <span className="flex items-center gap-1.5 font-medium">
@@ -163,13 +198,20 @@ export default function FindJobs() {
                       {applicationStatus === 'ACCEPTED' ? 'Hired!' : applicationStatus === 'REJECTED' ? 'Declined' : 'Applied (Pending)'}
                     </div>
                   ) : (
-                    <button 
-                      onClick={() => initiateApply(job)}
-                      disabled={applyingTo === job.id || !isVerified}
-                      className="bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {applyingTo === job.id ? 'Applying...' : 'Apply Now'}
-                    </button>
+                    <div className="flex flex-col items-center">
+                      <button 
+                        onClick={() => initiateApply(job)}
+                        disabled={applyingTo === job.id || !isVerified || workerLevel < getTierLevel(job.tier)}
+                        className="w-full bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {applyingTo === job.id ? 'Applying...' : 'Apply Now'}
+                      </button>
+                      {!isVerified ? (
+                        <p className="text-[10px] text-red-500 font-bold uppercase mt-2">Verification Required</p>
+                      ) : workerLevel < getTierLevel(job.tier) ? (
+                        <p className="text-[10px] text-red-500 font-bold uppercase mt-2">Requires {job.tier}</p>
+                      ) : null}
+                    </div>
                   )}
                 </div>
               </motion.div>

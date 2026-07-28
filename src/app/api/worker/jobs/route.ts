@@ -27,6 +27,7 @@ export async function GET() {
             title: true,
             date: true,
             location: true,
+            coverImageUrl: true,
             manager: {
               select: {
                 managerProfile: {
