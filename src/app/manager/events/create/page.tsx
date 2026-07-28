@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Play, Film, Image as ImageIcon, Sparkles, MapPin, Calendar, Clock, Globe } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function CreateEvent() {
   const router = useRouter();
@@ -66,7 +67,7 @@ export default function CreateEvent() {
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
   const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'coverImageUrl' | 'videoUrl' | 'artistAvatarUrl') => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'coverImageUrl' | 'videoUrl' | 'artistAvatarUrl') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -81,11 +82,27 @@ export default function CreateEvent() {
     }
 
     setError(''); // clear any previous size error
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData(prev => ({ ...prev, [field]: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    setLoading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `event_${field}_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('worker-verifications')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('worker-verifications').getPublicUrl(filePath);
+      setFormData(prev => ({ ...prev, [field]: data.publicUrl }));
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setError(`Failed to upload file: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
