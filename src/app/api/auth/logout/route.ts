@@ -4,24 +4,29 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 
 export async function POST() {
-  try {
-    const cookieStore = await cookies();
-    const managerSessionToken = cookieStore.get('managerSessionToken')?.value;
+  const cookieStore = await cookies();
+  const managerSessionToken = cookieStore.get('managerSessionToken')?.value;
+  
+  // Always clear cookies immediately
+  cookieStore.delete('userId');
+  cookieStore.delete('adminUserId');
+  cookieStore.delete('managerUserId');
+  cookieStore.delete('workerUserId');
+  cookieStore.delete('fanUserId');
+  cookieStore.delete('managerSessionToken');
+  cookieStore.delete('token');
+  cookieStore.delete('auth_token');
 
+  try {
     if (managerSessionToken) {
       await prisma.session.deleteMany({
         where: { token: managerSessionToken }
       });
     }
 
-    cookieStore.delete('userId');
-    cookieStore.delete('adminUserId');
-    cookieStore.delete('managerUserId');
-    cookieStore.delete('workerUserId');
-    cookieStore.delete('fanUserId');
-    cookieStore.delete('managerSessionToken');
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to logout' }, { status: 500 });
+    // Return success anyway since the cookies were cleared
+    return NextResponse.json({ success: true, warning: 'DB session cleanup failed' }, { status: 200 });
   }
 }

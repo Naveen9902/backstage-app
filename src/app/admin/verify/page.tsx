@@ -22,20 +22,43 @@ type Worker = {
     email: string;
     mobile?: string;
   };
+  categories?: string[];
+};
+
+const TIER_CATEGORIES: Record<string, string[]> = {
+  'Tier 1': [
+    'Labor / Ground Crew', 'Runners', 'Guest Assistance Staff', 'Parking Staff',
+    'Setup/Breakdown Crew', 'Cleaning and Housekeeping Staff', 'Volunteers', 'General Help'
+  ],
+  'Tier 2': [
+    'Event Coordinators', 'MC / Anchor', 'Registration Desk', 'Front of House Staff',
+    'Photographer', 'Videographer', 'Media', 'Press Member', 'Paparazzi',
+    'Technical Crew Member (Sound, Lighting, Ops)', 'Hospitality / Catering',
+    'Stage Manager', 'Backstage Manager'
+  ],
+  'Tier 3': [
+    'Bands / Music Performers', 'Speaker', 'Keynote Guests', 'Comedians',
+    'Startup Performers', 'Celebrity', 'Influencer', 'DJ', 'Other Talents'
+  ]
 };
 
 export default function VerifyTalents() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  const [statusFilter, setStatusFilter] = useState('PENDING');
+  const [tierFilter, setTierFilter] = useState('ALL');
+  const [roleFilter, setRoleFilter] = useState('ALL');
 
   useEffect(() => {
     fetchWorkers();
-  }, []);
+  }, [statusFilter]);
 
   const fetchWorkers = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/admin/workers');
+      const res = await fetch(`/api/admin/workers?status=${statusFilter}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setWorkers(data);
@@ -102,11 +125,52 @@ export default function VerifyTalents() {
           transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
           className="bg-[#1a1a1a]/80 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
         >
-          <div className="bg-black/20 border-b border-white/10 p-5 md:p-6 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
-              <ShieldCheck size={16} />
+          <div className="bg-black/20 border-b border-white/10 p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)]">
+                <ShieldCheck size={16} />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold text-white tracking-wide">Worker Profiles</h2>
             </div>
-            <h2 className="text-lg md:text-xl font-bold text-white tracking-wide">Pending & Reviewed Profiles</h2>
+            
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <select 
+                value={statusFilter} 
+                onChange={e => setStatusFilter(e.target.value)} 
+                className="bg-[#242424] text-white border border-white/20 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[var(--primary)]"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+
+              <select 
+                value={tierFilter} 
+                onChange={e => {
+                  setTierFilter(e.target.value);
+                  setRoleFilter('ALL');
+                }} 
+                className="bg-[#242424] text-white border border-white/20 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[var(--primary)]"
+              >
+                <option value="ALL">All Tiers</option>
+                {Object.keys(TIER_CATEGORIES).map(tier => (
+                  <option key={tier} value={tier}>{tier}</option>
+                ))}
+              </select>
+              
+              <select 
+                value={roleFilter} 
+                onChange={e => setRoleFilter(e.target.value)} 
+                className="bg-[#242424] text-white border border-white/20 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[var(--primary)] max-w-[200px]"
+                disabled={tierFilter === 'ALL'}
+              >
+                <option value="ALL">All Roles</option>
+                {tierFilter !== 'ALL' && TIER_CATEGORIES[tierFilter].map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="overflow-x-auto p-0">
@@ -122,18 +186,25 @@ export default function VerifyTalents() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {workers.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-16 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
-                        <ShieldCheck size={24} className="text-gray-500" />
-                      </div>
-                      <p className="text-gray-400 font-medium text-lg">No worker profiles found.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  workers.map((worker) => (
-                    <Fragment key={worker.id}>
+                {(() => {
+                  const filteredWorkers = workers.filter(w => {
+                    const matchesTier = tierFilter === 'ALL' || w.requestedTier === tierFilter;
+                    const matchesRole = roleFilter === 'ALL' || (w.categories && w.categories.includes(roleFilter));
+                    return matchesTier && matchesRole;
+                  });
+
+                  return filteredWorkers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-16 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
+                          <ShieldCheck size={24} className="text-gray-500" />
+                        </div>
+                        <p className="text-gray-400 font-medium text-lg">No worker profiles found matching criteria.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredWorkers.map((worker) => (
+                      <Fragment key={worker.id}>
                     <tr className="hover:bg-white/[0.02] transition-colors group cursor-pointer" onClick={() => setExpandedId(expandedId === worker.id ? null : worker.id)}>
                       <td className="p-5 pl-6">
                         <div className="font-semibold text-gray-200 group-hover:text-[var(--primary)] transition-colors">{worker.user.name}</div>
@@ -224,8 +295,9 @@ export default function VerifyTalents() {
                       </tr>
                     )}
                     </Fragment>
-                  ))
-                )}
+                    ))
+                  );
+                })()}
               </tbody>
             </table>
           </div>

@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
       name, email, mobile, avatarUrl, dateOfBirth, emergencyContact, isPhoneVerified,
       categories, specialization, pastWork, rates, portfolioLinks, isRunnerAvailable,
       govtIdUrl, liveSelfieUrl, proofOfExperienceType, proofOfExperienceUrl, 
-      socialMediaUrl, referenceEvent, referenceContact, tier, requestedTier
+      socialMediaUrl, referenceEvent, referenceContact, tier, requestedTier, location
     } = body;
 
     // Update user details
@@ -64,6 +64,7 @@ export async function PUT(req: Request) {
     const updateData: any = {
       categories: Array.isArray(categories) ? categories : [],
       specialization,
+      location,
       pastWork,
       rates,
       portfolioLinks,

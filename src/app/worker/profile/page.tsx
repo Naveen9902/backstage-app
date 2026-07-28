@@ -60,7 +60,8 @@ export default function WorkerProfile() {
     verificationStatus: 'PENDING',
     requestedTier: '',
     originalTier: '',
-    originalCategories: [] as string[]
+    originalCategories: [] as string[],
+    location: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,7 +73,6 @@ export default function WorkerProfile() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [verifyingOtp, setVerifyingOtp] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [verifyingTier, setVerifyingTier] = useState(false);
 
   useEffect(() => {
@@ -111,7 +111,8 @@ export default function WorkerProfile() {
             verificationStatus: data.workerProfile?.verificationStatus || 'PENDING',
             requestedTier: data.workerProfile?.requestedTier || '',
             originalTier: data.workerProfile?.tier || '',
-            originalCategories: data.workerProfile?.categories || []
+            originalCategories: data.workerProfile?.categories || [],
+            location: data.workerProfile?.location || ''
           });
         }
         setLoading(false);
@@ -251,7 +252,6 @@ export default function WorkerProfile() {
         const updated = await res.json();
         setFormData(prev => ({ ...prev, verificationStatus: 'PENDING', requestedTier: formData.tier }));
         alert('Sent for verification!');
-        setShowUpgradeModal(false);
         window.dispatchEvent(new Event('profileUpdated'));
       } else {
         alert('Failed to submit for verification.');
@@ -442,101 +442,13 @@ export default function WorkerProfile() {
                   <label className="text-sm font-bold text-gray-700">Mobile Number</label>
                   <input type="text" value={formData.mobile} onChange={e=>setFormData({...formData, mobile: e.target.value})} placeholder="+1 (555) 000-0000" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="md:col-span-2">
-                <label className="text-sm font-bold text-gray-700 mb-2 block">Role Applied For</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-                  <div>
-                    <label className="text-xs font-bold text-[#CD7F32] mb-1 block">Select Tier</label>
-                    <select 
-                      value={formData.tier} 
-                      onChange={e => setFormData({...formData, tier: e.target.value, categories: []})} 
-                      className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none text-sm"
-                    >
-                      <option value="">-- Choose Tier --</option>
-                      {Object.keys(TIER_CATEGORIES).map(tier => (
-                        <option key={tier} value={tier}>{tier}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-[#CD7F32] mb-1 block">Specific Role(s)</label>
-                    {formData.tier === 'Tier 1' ? (
-                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto bg-white border border-gray-200 rounded-lg p-3">
-                        {TIER_CATEGORIES['Tier 1'].map((cat: string) => (
-                          <label key={cat} className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              checked={formData.categories.includes(cat)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData({...formData, categories: [...formData.categories, cat]});
-                                } else {
-                                  setFormData({...formData, categories: formData.categories.filter(c => c !== cat)});
-                                }
-                              }}
-                              className="text-[#CD7F32] focus:ring-[#CD7F32]"
-                            />
-                            <span className="text-sm text-gray-700">{cat}</span>
-                          </label>
-                        ))}
-                      </div>
-                    ) : (
-                      <select 
-                        value={formData.categories[0] || ''} 
-                        onChange={handleRoleChange}
-                        disabled={!formData.tier}
-                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none text-sm disabled:opacity-50"
-                      >
-                        <option value="">-- Choose Role --</option>
-                        {formData.tier && (TIER_CATEGORIES as any)[formData.tier].map((cat: string) => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
+                <div>
+                  <label className="text-sm font-bold text-gray-700">Location</label>
+                  <input type="text" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} placeholder="e.g. Mumbai, India" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
-                {formData.isVerified && (formData.tier !== formData.originalTier || (['Tier 2', 'Tier 3'].includes(formData.tier) && JSON.stringify(formData.categories) !== JSON.stringify(formData.originalCategories))) && formData.verificationStatus !== 'PENDING' && (
-                   <button type="button" onClick={() => {
-                     setFormData({...formData, requestedTier: formData.tier});
-                     setTimeout(() => alert('Please click Save Profile at the bottom to submit your update request.'), 100);
-                   }} className="mt-4 px-4 py-2 bg-[#CD7F32] text-white text-xs font-bold rounded-lg uppercase tracking-wider hover:bg-[#a86524] transition-colors">
-                     Confirm {formData.tier} Update Request
-                   </button>
-                )}
-              </div>
-
               
-              <div className="md:col-span-2">
-                <label className="text-sm font-bold text-gray-700">Specialization</label>
-                <input type="text" value={formData.specialization} onChange={e=>setFormData({...formData, specialization: e.target.value})} placeholder="e.g. Stage Manager, Lighting Tech" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-              </div>
 
-              <div className="md:col-span-2">
-                <label className="text-sm font-bold text-gray-700">Skills & Keywords</label>
-                <input type="text" value={formData.skills} onChange={e=>setFormData({...formData, skills: e.target.value})} placeholder="e.g. Ableton, Rigging, First Aid" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="text-sm font-bold text-gray-700">Experience / Bio</label>
-                <textarea rows={3} value={formData.experience} onChange={e=>setFormData({...formData, experience: e.target.value})} placeholder="Describe your relevant event experience..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"></textarea>
-              </div>
-              
-              <div className="md:col-span-2">
-                <label className="text-sm font-bold text-gray-700">Past Work (Notable Events)</label>
-                <textarea rows={2} value={formData.pastWork} onChange={e=>setFormData({...formData, pastWork: e.target.value})} placeholder="e.g. Coachella 2023, Local Food Market" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"></textarea>
-              </div>
-
-              <div>
-                <label className="text-sm font-bold text-gray-700">Standard Rates</label>
-                <input type="text" value={formData.rates} onChange={e=>setFormData({...formData, rates: e.target.value})} placeholder="e.g. ₹30/hr or ₹250/day" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-              </div>
-              <div>
-                <label className="text-sm font-bold text-gray-700">Portfolio / Social Links</label>
-                <input type="text" value={formData.portfolioLinks} onChange={e=>setFormData({...formData, portfolioLinks: e.target.value})} placeholder="LinkedIn, Instagram, Website..." className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-              </div>
-              
-              <div className="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between">
+              <div className="md:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between mt-6">
                 <div>
                   <h3 className="font-bold text-gray-800">In-App Notifications</h3>
                   <p className="text-sm text-gray-500">Receive alerts when your applications are accepted, when you get a new review, etc.</p>
@@ -550,9 +462,8 @@ export default function WorkerProfile() {
               <div className="md:col-span-2">
                 <PushNotificationManager />
               </div>
-
-            </div>
             
+
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">
               <button type="submit" disabled={saving || loading || isUnderage} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none flex items-center gap-2">
@@ -596,14 +507,187 @@ export default function WorkerProfile() {
               </div>
             </div>
             
-            <div className="mt-8 border-t border-gray-100 pt-8 flex justify-end">
-              <button 
-                type="button"
-                onClick={() => setShowUpgradeModal(true)}
-                className="bg-[#CD7F32] hover:bg-[#a86524] text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-              >
-                {!formData.isVerified ? 'Apply for Verification' : 'Upgrade Tier'}
-              </button>
+            <div className="space-y-6 pt-6 border-t border-gray-100">
+              {/* Role Selection */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Select Target Tier</label>
+                <select 
+                  value={formData.tier} 
+                  onChange={e => setFormData({...formData, tier: e.target.value, categories: []})} 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:border-[#CD7F32] outline-none font-medium"
+                >
+                  <option value="">-- Choose Tier --</option>
+                  {Object.keys(TIER_CATEGORIES).map(tier => (
+                    <option key={tier} value={tier}>{tier}</option>
+                  ))}
+                </select>
+              </div>
+
+              {formData.tier && (
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Specific Role(s)</label>
+                  {formData.tier === 'Tier 1' ? (
+                    <div className="flex flex-col gap-2 max-h-40 overflow-y-auto bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      {TIER_CATEGORIES['Tier 1'].map((cat) => (
+                        <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={formData.categories.includes(cat)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({...formData, categories: [...formData.categories, cat]});
+                              } else {
+                                setFormData({...formData, categories: formData.categories.filter(c => c !== cat)});
+                              }
+                            }}
+                            className="text-[#CD7F32] focus:ring-[#CD7F32]"
+                          />
+                          <span className="text-sm text-gray-700 font-medium">{cat}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <select 
+                      value={formData.categories[0] || ''} 
+                      onChange={handleRoleChange}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:border-[#CD7F32] outline-none font-medium"
+                    >
+                      <option value="">-- Choose Role --</option>
+                      {TIER_CATEGORIES[formData.tier].map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+
+              {/* Requirements Box */}
+              {formData.tier && (
+                <div className="bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
+                  <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Basic Verification Requirements</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-bold text-gray-700">Date of Birth</label>
+                      <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
+                      {isUnderage && <p className="text-red-500 text-xs mt-1 font-bold">You must be 18+ to work on Back Stage.</p>}
+                    </div>
+                    <div>
+                      <label className="text-sm font-bold text-gray-700">Emergency Contact</label>
+                      <input type="text" placeholder="Name & Phone" value={formData.emergencyContact} onChange={e=>setFormData({...formData, emergencyContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-bold text-gray-700">Phone Verification (Required)</label>
+                      <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                        <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
+                        {formData.isPhoneVerified ? (
+                          <span className="px-6 py-2 rounded-lg font-bold text-sm bg-green-100 text-green-700 border border-green-200 flex items-center justify-center">Verified ✓</span>
+                        ) : (
+                          <button type="button" disabled={verifyingOtp || otpSent} onClick={handleSendOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#242424] text-white hover:bg-black transition-colors disabled:opacity-50">
+                            {verifyingOtp ? 'Sending...' : (otpSent ? 'OTP Sent' : 'Send OTP')}
+                          </button>
+                        )}
+                      </div>
+                      
+                      {otpSent && !formData.isPhoneVerified && (
+                        <div className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                          <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder="Enter 6-digit OTP" className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-[#CD7F32]" />
+                          <button type="button" disabled={verifyingOtp} onClick={handleVerifyOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors disabled:opacity-50">
+                            {verifyingOtp ? 'Verifying...' : 'Verify Code'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1">Government ID (Any)</label>
+                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['govtIdUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
+                        {uploading['govtIdUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.govtIdUrl ? <span className="text-green-600 font-bold text-sm">ID Uploaded ✓</span> : <span className="text-gray-500 text-sm">Click to upload ID</span>)}
+                        <input type="file" disabled={uploading['govtIdUrl']} onChange={(e) => handleFileUpload(e, 'govtIdUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*,.pdf" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-bold text-gray-700 block mb-1">Live Selfie (Cam)</label>
+                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['liveSelfieUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
+                        {uploading['liveSelfieUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.liveSelfieUrl ? <span className="text-green-600 font-bold text-sm">Selfie Captured ✓</span> : <span className="text-gray-500 text-sm">Click to take selfie</span>)}
+                        <input type="file" capture="user" disabled={uploading['liveSelfieUrl']} onChange={(e) => handleFileUpload(e, 'liveSelfieUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Professional Requirements (Tier 2 & 3) */}
+                  {(formData.tier === 'Tier 2' || formData.tier === 'Tier 3') && (
+                    <div className="pt-4 border-t border-[#e6decb] mt-4">
+                      <h3 className="font-bold text-lg pb-4 text-[#8b6125]">Professional Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-bold text-gray-700">Specialization</label>
+                          <input type="text" value={formData.specialization} onChange={e=>setFormData({...formData, specialization: e.target.value})} placeholder="e.g. Stage Manager, Lighting Tech" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-bold text-gray-700">Skills & Keywords</label>
+                          <input type="text" value={formData.skills} onChange={e=>setFormData({...formData, skills: e.target.value})} placeholder="e.g. Ableton, Rigging, First Aid" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-bold text-gray-700">Experience / Bio</label>
+                          <textarea rows={3} value={formData.experience} onChange={e=>setFormData({...formData, experience: e.target.value})} placeholder="Describe your relevant event experience..." className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Elite Requirements (Tier 3) */}
+                  {formData.tier === 'Tier 3' && (
+                    <div className="pt-4 border-t border-[#e6decb] mt-4">
+                      <h3 className="font-bold text-lg pb-4 text-[#8b6125]">Elite Portfolio</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-bold text-gray-700">Past Work (Notable Events)</label>
+                          <textarea rows={2} value={formData.pastWork} onChange={e=>setFormData({...formData, pastWork: e.target.value})} placeholder="e.g. Coachella 2023, Local Food Market" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none"></textarea>
+                        </div>
+
+                        <div>
+                          <label className="text-sm font-bold text-gray-700">Standard Rates</label>
+                          <input type="text" value={formData.rates} onChange={e=>setFormData({...formData, rates: e.target.value})} placeholder="e.g. ₹30/hr or ₹250/day" className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-bold text-gray-700">Portfolio / Social Links</label>
+                          <input type="text" value={formData.portfolioLinks} onChange={e=>setFormData({...formData, portfolioLinks: e.target.value})} placeholder="LinkedIn, Instagram, Website..." className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="md:col-span-2 mt-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-bold text-sm text-gray-800 mb-2">Required Agreements</h4>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={agreements.infoAccurate} onChange={e=>setAgreements({...agreements, infoAccurate: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                      <span className="text-sm text-gray-700">I confirm that all information provided is accurate and true.</span>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={agreements.guidelines} onChange={e=>setAgreements({...agreements, guidelines: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                      <span className="text-sm text-gray-700">I have read and agree to the Back Stage Worker Guidelines.</span>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={agreements.bgCheck} onChange={e=>setAgreements({...agreements, bgCheck: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                      <span className="text-sm text-gray-700">I consent to a basic background check for identity verification.</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4 border-t border-gray-100">
+                <button 
+                  onClick={handleApplyForVerification}
+                  disabled={verifyingTier || isUnderage || (formData.tier === 'Tier 1' && !isTier1Complete) || formData.categories.length === 0}
+                  className="bg-[#CD7F32] hover:bg-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
+                >
+                  {verifyingTier ? 'Submitting...' : 'Apply for Verification'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -706,160 +790,8 @@ export default function WorkerProfile() {
         </div>
         
         
-      {/* UPGRADE TIER MODAL */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto border border-gray-100">
-            <button 
-              onClick={() => setShowUpgradeModal(false)}
-              className="absolute top-6 right-6 p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-            
-            <h2 className="text-2xl font-black font-serif text-[#CD7F32] mb-6">Tier Verification Request</h2>
-            
-            <div className="space-y-6">
-              {/* Role Selection */}
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-2 block">Select Target Tier</label>
-                <select 
-                  value={formData.tier} 
-                  onChange={e => setFormData({...formData, tier: e.target.value, categories: []})} 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:border-[#CD7F32] outline-none font-medium"
-                >
-                  <option value="">-- Choose Tier --</option>
-                  {Object.keys(TIER_CATEGORIES).map(tier => (
-                    <option key={tier} value={tier}>{tier}</option>
-                  ))}
-                </select>
-              </div>
-
-              {formData.tier && (
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-2 block">Specific Role(s)</label>
-                  {formData.tier === 'Tier 1' ? (
-                    <div className="flex flex-col gap-2 max-h-40 overflow-y-auto bg-gray-50 border border-gray-200 rounded-lg p-3">
-                      {TIER_CATEGORIES['Tier 1'].map((cat) => (
-                        <label key={cat} className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.categories.includes(cat)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setFormData({...formData, categories: [...formData.categories, cat]});
-                              } else {
-                                setFormData({...formData, categories: formData.categories.filter(c => c !== cat)});
-                              }
-                            }}
-                            className="text-[#CD7F32] focus:ring-[#CD7F32]"
-                          />
-                          <span className="text-sm text-gray-700 font-medium">{cat}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ) : (
-                    <select 
-                      value={formData.categories[0] || ''} 
-                      onChange={handleRoleChange}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:border-[#CD7F32] outline-none font-medium"
-                    >
-                      <option value="">-- Choose Role --</option>
-                      {TIER_CATEGORIES[formData.tier].map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              )}
-
-              {/* Requirements Box */}
-              {formData.tier === 'Tier 1' && (
-                <div className="bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
-                  <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Tier 1 Requirements</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Date of Birth</label>
-                      <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
-                      {isUnderage && <p className="text-red-500 text-xs mt-1 font-bold">You must be 18+ to work on Back Stage.</p>}
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Emergency Contact</label>
-                      <input type="text" placeholder="Name & Phone" value={formData.emergencyContact} onChange={e=>setFormData({...formData, emergencyContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="text-sm font-bold text-gray-700">Phone Verification (Required)</label>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-1">
-                        <input type="text" disabled value={formData.mobile} placeholder="Enter your mobile number above first" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 outline-none text-gray-500" />
-                        {formData.isPhoneVerified ? (
-                          <span className="px-6 py-2 rounded-lg font-bold text-sm bg-green-100 text-green-700 border border-green-200 flex items-center justify-center">Verified ✓</span>
-                        ) : (
-                          <button type="button" disabled={verifyingOtp || otpSent} onClick={handleSendOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#242424] text-white hover:bg-black transition-colors disabled:opacity-50">
-                            {verifyingOtp ? 'Sending...' : (otpSent ? 'OTP Sent' : 'Send OTP')}
-                          </button>
-                        )}
-                      </div>
-                      
-                      {otpSent && !formData.isPhoneVerified && (
-                        <div className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                          <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} placeholder="Enter 6-digit OTP" className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:border-[#CD7F32]" />
-                          <button type="button" disabled={verifyingOtp} onClick={handleVerifyOtp} className="px-6 py-2 rounded-lg font-bold text-sm whitespace-nowrap bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors disabled:opacity-50">
-                            {verifyingOtp ? 'Verifying...' : 'Verify Code'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1">Government ID (Any)</label>
-                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['govtIdUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
-                        {uploading['govtIdUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.govtIdUrl ? <span className="text-green-600 font-bold text-sm">ID Uploaded ✓</span> : <span className="text-gray-500 text-sm">Click to upload ID</span>)}
-                        <input type="file" disabled={uploading['govtIdUrl']} onChange={(e) => handleFileUpload(e, 'govtIdUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*,.pdf" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-bold text-gray-700 block mb-1">Live Selfie (Cam)</label>
-                      <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-white hover:bg-gray-50 transition-colors ${uploading['liveSelfieUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
-                        {uploading['liveSelfieUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.liveSelfieUrl ? <span className="text-green-600 font-bold text-sm">Selfie Captured ✓</span> : <span className="text-gray-500 text-sm">Click to take selfie</span>)}
-                        <input type="file" capture="user" disabled={uploading['liveSelfieUrl']} onChange={(e) => handleFileUpload(e, 'liveSelfieUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="image/*" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="md:col-span-2 mt-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
-                    <h4 className="font-bold text-sm text-gray-800 mb-2">Required Agreements</h4>
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input type="checkbox" checked={agreements.infoAccurate} onChange={e=>setAgreements({...agreements, infoAccurate: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
-                      <span className="text-sm text-gray-700">I confirm that all information provided is accurate and true.</span>
-                    </label>
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input type="checkbox" checked={agreements.guidelines} onChange={e=>setAgreements({...agreements, guidelines: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
-                      <span className="text-sm text-gray-700">I have read and agree to the Back Stage Worker Guidelines.</span>
-                    </label>
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input type="checkbox" checked={agreements.bgCheck} onChange={e=>setAgreements({...agreements, bgCheck: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
-                      <span className="text-sm text-gray-700">I consent to a basic background check for identity verification.</span>
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-4 border-t border-gray-100">
-                <button 
-                  onClick={handleApplyForVerification}
-                  disabled={verifyingTier || isUnderage || (formData.tier === 'Tier 1' && !isTier1Complete) || formData.categories.length === 0}
-                  className="bg-[#CD7F32] hover:bg-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
-                >
-                  {verifyingTier ? 'Submitting...' : 'Submit for Verification'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-<div className="lg:col-span-3 mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full shadow-2xl relative overflow-hidden group">
+      {/* TIER MODAL REMOVED (NOW INLINE) */}
+      <div className="lg:col-span-3 mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="relative z-10">
             <h3 className="font-black text-[#CD7F32] text-xl mb-2 flex items-center gap-2">

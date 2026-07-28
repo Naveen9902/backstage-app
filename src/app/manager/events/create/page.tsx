@@ -71,17 +71,7 @@ export default function CreateEvent() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isVideo = field === 'videoUrl';
-    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
-    const limitLabel = isVideo ? '50 MB' : '10 MB';
-
-    if (file.size > maxSize) {
-      setError(`File too large! ${isVideo ? 'Videos' : 'Images'} must be under ${limitLabel}. Your file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
-      e.target.value = ''; // reset the input
-      return;
-    }
-
-    setError(''); // clear any previous size error
+    setError(''); 
     setLoading(true);
 
     try {
@@ -99,7 +89,7 @@ export default function CreateEvent() {
       setFormData(prev => ({ ...prev, [field]: data.publicUrl }));
     } catch (err: any) {
       console.error('Upload error:', err);
-      setError(`Failed to upload file: ${err.message}`);
+      setError(`Failed to upload file for ${field}: ${err.message}. Please try again.`);
     } finally {
       setLoading(false);
     }

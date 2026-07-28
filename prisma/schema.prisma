@@ -102,6 +102,7 @@ model WorkerProfile {
   isRunnerAvailable Boolean @default(false)
   latitude          Float?
   longitude         Float?
+  location          String?
 
   applications Application[]
   stripeAccountId     String?  // Stripe Connect Account ID for payouts

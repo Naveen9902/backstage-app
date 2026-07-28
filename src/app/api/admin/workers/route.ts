@@ -17,15 +17,18 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status') || 'PENDING';
+    const status = searchParams.get('status') || 'ALL';
+
+    const whereClause: any = {};
+    if (status !== 'ALL') {
+      whereClause.verificationStatus = status;
+    }
 
     const workers = await prisma.workerProfile.findMany({
-      where: {
-        verificationStatus: status
-      },
+      where: whereClause,
       include: {
         user: {
-          select: { name: true, email: true, avatarUrl: true, createdAt: true }
+          select: { name: true, email: true, avatarUrl: true, createdAt: true, mobile: true }
         }
       },
       orderBy: { user: { createdAt: 'desc' } }
