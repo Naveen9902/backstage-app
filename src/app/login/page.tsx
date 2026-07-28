@@ -291,7 +291,7 @@ export default function Login() {
                         setLoading(false);
                       } else {
                         // Web fallback
-                        window.location.href = `/api/auth/google?role=${appFlavor === 'OPS' ? 'WORKER' : 'USER'}`;
+                        window.location.href = `/api/auth/google?role=${appFlavor === 'OPS' ? 'WORKER' : 'USER'}&action=login`;
                       }
                     }}
                     className="w-full bg-white text-[#242424] rounded-xl py-3.5 font-bold shadow-lg flex items-center justify-center gap-3 hover:bg-gray-100 hover:scale-[1.02] active:scale-[0.98] transition-all"

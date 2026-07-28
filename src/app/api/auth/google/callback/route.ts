@@ -7,7 +7,9 @@ import { Role } from '@prisma/client';
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
-  const roleState = (url.searchParams.get('state') as Role) || 'WORKER';
+  const rawState = url.searchParams.get('state') || 'login_WORKER';
+  const [action, roleStateStr] = rawState.includes('_') ? rawState.split('_') : ['login', rawState];
+  const roleState = (roleStateStr as Role) || 'WORKER';
 
   if (!code) {
     return NextResponse.redirect(`${url.origin}/login?error=NoCode`);
@@ -86,6 +88,26 @@ export async function GET(req: Request) {
             company: '',
           },
         });
+      }
+    } else {
+      // User exists, but they might be registering with a different role
+      if (action === 'register' && user.role !== roleState) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { role: roleState }
+        });
+        
+        if (roleState === 'WORKER') {
+          const existingProfile = await prisma.workerProfile.findUnique({ where: { userId: user.id } });
+          if (!existingProfile) {
+            await prisma.workerProfile.create({ data: { userId: user.id, skills: '', experience: '' } });
+          }
+        } else if (roleState === 'MANAGER') {
+          const existingProfile = await prisma.managerProfile.findUnique({ where: { userId: user.id } });
+          if (!existingProfile) {
+            await prisma.managerProfile.create({ data: { userId: user.id, company: '' } });
+          }
+        }
       }
     }
 

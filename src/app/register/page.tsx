@@ -293,7 +293,7 @@ export default function Register() {
                 } else {
                   // Web fallback ONLY if we are truly in a desktop browser (or normal web app)
                   if (typeof window !== 'undefined' && !window.navigator.userAgent.includes('Mobile')) {
-                    window.location.href = `/api/auth/google?role=${role}`;
+                    window.location.href = `/api/auth/google?role=${role}&action=register`;
                   } else {
                     setError('Native Plugin not ready. Please try again.');
                   }
