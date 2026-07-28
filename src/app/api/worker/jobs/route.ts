@@ -24,6 +24,7 @@ export async function GET() {
       include: {
         event: {
           select: {
+            id: true,
             title: true,
             date: true,
             location: true,

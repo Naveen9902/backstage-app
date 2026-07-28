@@ -644,7 +644,7 @@ export default function WorkerDashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-2 gap-6 mb-6">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
