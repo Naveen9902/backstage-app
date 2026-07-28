@@ -98,6 +98,7 @@ export async function GET(req: Request) {
     cookieStore.delete('fanUserId');
     cookieStore.delete('adminUserId');
     cookieStore.delete('userId');
+    cookieStore.delete('managerSessionToken');
 
     const roleMap: Record<string, string> = {
       'WORKER': 'workerUserId',
@@ -128,6 +129,17 @@ export async function GET(req: Request) {
       value: user.id,
       ...cookieOptions
     });
+
+    if (user.role === 'MANAGER') {
+      const sessionToken = crypto.randomUUID();
+      await prisma.session.create({
+        data: {
+          userId: user.id,
+          token: sessionToken
+        }
+      });
+      cookieStore.set({ name: 'managerSessionToken', value: sessionToken, ...cookieOptions });
+    }
 
     // 5. Redirect to appropriate dashboard
     const redirectMap: Record<string, string> = {

@@ -90,6 +90,7 @@ export async function POST(req: Request) {
     cookieStore.delete('fanUserId');
     cookieStore.delete('adminUserId');
     cookieStore.delete('userId');
+    cookieStore.delete('managerSessionToken');
 
     const roleMap: Record<string, string> = {
       'WORKER': 'workerUserId',
@@ -111,6 +112,17 @@ export async function POST(req: Request) {
 
     cookieStore.set({ name: cookieName, value: user.id, ...cookieOptions });
     cookieStore.set({ name: 'userId', value: user.id, ...cookieOptions });
+
+    if (user.role === 'MANAGER') {
+      const sessionToken = crypto.randomUUID();
+      await prisma.session.create({
+        data: {
+          userId: user.id,
+          token: sessionToken
+        }
+      });
+      cookieStore.set({ name: 'managerSessionToken', value: sessionToken, ...cookieOptions });
+    }
 
     const redirectMap: Record<string, string> = {
       'WORKER': '/worker',
