@@ -251,24 +251,13 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={async (e) => {
-                      // Check if running natively inside Capacitor
-                      const isNative = typeof window !== 'undefined' && (
-                        window.navigator.userAgent.includes('BackstageFlavor') ||
-                        !!(window as any).Capacitor?.isNativePlatform?.() ||
-                        !!(window as any).Capacitor
-                      );
-                      if (isNative) {
+                      // Check if running natively inside Capacitor by checking if the plugin bridge exists
+                      const hasNativePlugin = typeof window !== 'undefined' && !!(window as any).Capacitor?.Plugins?.GoogleAuth;
+                      if (hasNativePlugin) {
                         e.preventDefault();
                         setLoading(true);
                         try {
-                          const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
-                          await GoogleAuth.initialize({
-                            clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com',
-                            scopes: ['profile', 'email'],
-                            grantOfflineAccess: false,
-                          });
-                          
-                          const result = await GoogleAuth.signIn();
+                          const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                           if (result.authentication?.idToken) {
                             const res = await fetch('/api/auth/google/native', {
                               method: 'POST',
