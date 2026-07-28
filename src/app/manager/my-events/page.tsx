@@ -217,7 +217,7 @@ export default function MyEvents() {
               </Link>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sortedEvents.map((event, index) => {
                 const live = isLive(event.status);
                 const completed = event.status === 'COMPLETED';
@@ -227,15 +227,15 @@ export default function MyEvents() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.08 }}
-                    className={`bg-white/90 backdrop-blur-md rounded-2xl p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-8 transition-all duration-300 relative overflow-hidden group ${live ? 'border border-green-300 shadow-[0_8px_30px_rgba(34,197,94,0.12)]' : completed ? 'border border-gray-200 opacity-75 shadow-sm' : 'border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(205,127,50,0.1)] hover:border-[#CD7F32]/30'}`}
+                    className={`bg-white/90 backdrop-blur-md rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-5 transition-all duration-300 relative overflow-hidden group ${live ? 'border border-green-300 shadow-[0_8px_30px_rgba(34,197,94,0.12)]' : completed ? 'border border-gray-200 opacity-75 shadow-sm' : 'border border-gray-100 shadow-[0_8px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(205,127,50,0.1)] hover:border-[#CD7F32]/30'}`}
                   >
                     {/* Accent border bar on left */}
                     <div className={`absolute top-0 left-0 w-1.5 h-full ${live ? 'bg-green-500' : completed ? 'bg-gray-300' : 'bg-gradient-to-b from-[#CD7F32] to-[#ffb163]'}`} />
 
                     {/* Left — Event Info */}
-                    <Link href={`/manager/events/${event.id}`} className="space-y-4 flex-1 pl-2 block hover:opacity-80 transition-opacity cursor-pointer">
+                    <Link href={`/manager/events/${event.id}`} className="space-y-3 flex-1 pl-2 block hover:opacity-80 transition-opacity cursor-pointer">
                       <div className="flex flex-wrap items-center gap-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center text-[#CD7F32] font-bold text-xl">
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center text-[#CD7F32] font-bold text-lg">
                           {event.coverImageUrl ? (
                             <img src={event.coverImageUrl} alt={event.title} className="w-full h-full object-cover" />
                           ) : (
@@ -254,45 +254,45 @@ export default function MyEvents() {
                             Closed
                           </span>
                         )}
-                        <h3 className="text-2xl font-bold font-serif text-gray-900 leading-tight group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
-                          {event.title}
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-[#CD7F32] group-hover:translate-x-1 transition-all"><path d="m9 18 6-6-6-6"/></svg>
-                        </h3>
                       </div>
+                      
+                      <h3 className="text-xl font-bold font-serif text-gray-900 leading-tight group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
+                        <span className="line-clamp-2">{event.title}</span>
+                      </h3>
 
-                      <div className="flex flex-wrap items-center text-sm font-medium text-gray-500 gap-x-6 gap-y-3">
+                      <div className="flex flex-col text-[13px] font-medium text-gray-500 gap-2.5">
                         <span className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                          <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                           </div>
                           {new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                         {event.startTime && (
                           <span className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                             {event.startTime}
                           </span>
                         )}
                         <span className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                          <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                           </div>
-                          <span className="line-clamp-1 max-w-[200px]">{event.location}</span>
+                          <span className="line-clamp-1">{event.location}</span>
                         </span>
                         
-                        <div className="h-4 w-px bg-gray-200 hidden md:block"></div>
-                        
-                        <span className="flex items-center gap-2 text-[#CD7F32] bg-[#CD7F32]/5 px-3 py-1 rounded-lg border border-[#CD7F32]/10">
-                          <span className="font-bold">{event.staffingRequests?.length || 0}</span> 
-                          <span className="text-xs uppercase tracking-wider font-bold">Staff Roles</span>
-                        </span>
+                        <div className="mt-1">
+                          <span className="inline-flex items-center gap-2 text-[#CD7F32] bg-[#CD7F32]/5 px-2.5 py-1 rounded-lg border border-[#CD7F32]/10 text-xs">
+                            <span className="font-bold">{event.staffingRequests?.length || 0}</span> 
+                            <span className="uppercase tracking-wider font-bold">Staff Roles</span>
+                          </span>
+                        </div>
                       </div>
                     </Link>
 
                     {/* Right — Controls */}
-                    <div className="flex flex-col gap-3 min-w-[220px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-100 pt-5 lg:pt-0 lg:pl-8">
+                    <div className="flex flex-col gap-3 shrink-0 border-t border-gray-100 pt-4 pl-2">
 
                       {/* ===== LIVE TOGGLE ===== */}
                       {!completed && (
