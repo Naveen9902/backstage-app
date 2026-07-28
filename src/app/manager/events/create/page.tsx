@@ -38,7 +38,15 @@ export default function CreateEvent() {
         body: JSON.stringify(formData)
       });
       
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        // Vercel returns plain text for payload-too-large errors
+        setError('Request too large. Please use smaller image/video files.');
+        setLoading(false);
+        return;
+      }
       
       if (res.ok) {
         router.push('/manager/my-events');
@@ -47,7 +55,7 @@ export default function CreateEvent() {
       }
     } catch (err: any) {
       console.error('Create event client error:', err);
-      setError(err?.message || 'An unexpected error occurred. The cover image may be too large — try a smaller file.');
+      setError(err?.message || 'An unexpected error occurred.');
     }
     setLoading(false);
   };
@@ -55,15 +63,29 @@ export default function CreateEvent() {
   const inputClasses = "w-full bg-white/50 border border-gray-200 rounded-xl px-4 py-3.5 focus:outline-none focus:border-[#CD7F32] focus:ring-4 focus:ring-[#CD7F32]/10 transition-all text-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.03)] hover:border-[#CD7F32]/40";
   const labelClasses = "text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1.5 block";
 
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'coverImageUrl' | 'videoUrl' | 'artistAvatarUrl') => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, [field]: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const isVideo = field === 'videoUrl';
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+    const limitLabel = isVideo ? '50 MB' : '10 MB';
+
+    if (file.size > maxSize) {
+      setError(`File too large! ${isVideo ? 'Videos' : 'Images'} must be under ${limitLabel}. Your file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+      e.target.value = ''; // reset the input
+      return;
     }
+
+    setError(''); // clear any previous size error
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, [field]: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
   };
 
   return (

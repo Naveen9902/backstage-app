@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Allow up to 60 seconds for large uploads
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
@@ -74,10 +75,11 @@ export async function POST(req: Request) {
       eventDate.setHours(hours, minutes, 0, 0);
     }
 
-    // Truncate base64 images if too large (> 2MB) to prevent DB issues
-    const maxImageSize = 2 * 1024 * 1024; // 2MB
+    // Size limits: 10MB for images, 50MB for video
+    const maxImageSize = 10 * 1024 * 1024; // 10MB
+    const maxVideoSize = 50 * 1024 * 1024; // 50MB
     const safeCoverImage = coverImageUrl && coverImageUrl.length > maxImageSize ? null : (coverImageUrl || null);
-    const safeVideo = videoUrl && videoUrl.length > maxImageSize ? null : (videoUrl || null);
+    const safeVideo = videoUrl && videoUrl.length > maxVideoSize ? null : (videoUrl || null);
     const safeArtistAvatar = artistAvatarUrl && artistAvatarUrl.length > maxImageSize ? null : (artistAvatarUrl || null);
 
     const event = await prisma.event.create({

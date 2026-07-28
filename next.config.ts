@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
     // Ignore TypeScript errors during production build
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: [],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '60mb',
+    },
+  },
   images: {
     remotePatterns: [
       {
