@@ -326,38 +326,40 @@ export default function RunnersPage() {
                       <p className="text-xs text-gray-400 mt-1">Hire staff in the Staffing tab first.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3 my-2 max-h-[450px] overflow-y-auto pr-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-2 max-h-[450px] overflow-y-auto pr-2">
                       {hiredStaff.map((staff, i) => (
                         <motion.div 
                           key={i}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="group bg-white p-4 rounded-2xl border border-gray-100/80 hover:border-[#CD7F32]/40 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
+                          className="group bg-white p-5 rounded-2xl border border-gray-100/80 hover:border-[#CD7F32]/40 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                          <div className="flex items-center gap-3.5 flex-1 min-w-0 pr-2">
-                            <div className="w-11 h-11 shrink-0 rounded-full bg-gradient-to-tr from-gray-900 to-gray-700 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 shrink-0 rounded-full bg-gradient-to-tr from-gray-900 to-gray-700 text-white font-bold flex items-center justify-center text-sm shadow-inner">
                               {staff.name ? staff.name.charAt(0).toUpperCase() : 'R'}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2 truncate">
+                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2 truncate text-[15px] mb-1">
                                 <span className="truncate">{staff.name}</span>
-                                <span className="text-[10px] bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-md shrink-0">Internal</span>
                               </div>
-                              <div className="text-xs text-gray-500 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                                <span className="truncate max-w-[80px]">{staff.roleName}</span> 
-                                <span className="text-gray-300">&bull;</span> 
-                                <span className="text-gray-400 truncate flex-1 min-w-[50px]">{staff.eventName}</span>
+                              <div className="text-xs text-gray-500 flex flex-col gap-1.5">
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 font-medium w-fit">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  {staff.roleName}
+                                </span>
+                                <span className="truncate text-gray-400 font-medium" title={staff.eventName}>{staff.eventName}</span>
                               </div>
                             </div>
                           </div>
-                          <button 
-                            onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId, isExternal: false })}
-                            className="bg-[#242424] hover:bg-[#CD7F32] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow flex items-center gap-1.5 group/btn"
-                          >
-                            <span>Assign</span>
-                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform" />
-                          </button>
+                          <div className="mt-auto border-t border-gray-100 pt-4">
+                            <button 
+                              onClick={() => setAssignModal({ userId: staff.userId, name: staff.name, eventId: staff.eventId, isExternal: false })}
+                              className="w-full justify-center bg-[#242424] hover:bg-[#CD7F32] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 group/btn"
+                            >
+                              <span>Assign Task</span>
+                              <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-1 transition-transform" />
+                            </button>
+                          </div>
                         </motion.div>
                       ))}
                     </div>
@@ -396,42 +398,43 @@ export default function RunnersPage() {
                       <p className="text-xs text-gray-400 mt-1">Runners will appear when active in your vicinity.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3 my-2 max-h-[450px] overflow-y-auto pr-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-2 max-h-[450px] overflow-y-auto pr-2">
                       {nearbyRunners.map((runner, i) => (
                         <motion.div 
                           key={i}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="group bg-white p-4 rounded-2xl border border-gray-100 hover:border-[#CD7F32]/50 flex items-center justify-between shadow-sm hover:shadow-md transition-all duration-200"
+                          className="group bg-white p-5 rounded-2xl border border-gray-100 hover:border-[#CD7F32]/50 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                          <div className="flex items-center gap-3.5 flex-1 min-w-0 pr-2">
-                            <div className="w-11 h-11 shrink-0 rounded-full bg-[#242424] text-[#CD7F32] font-bold flex items-center justify-center text-sm shadow-inner border border-[#CD7F32]/30">
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 shrink-0 rounded-full bg-[#242424] text-[#CD7F32] font-bold flex items-center justify-center text-sm shadow-inner border border-[#CD7F32]/30">
                               {runner.name ? runner.name.charAt(0).toUpperCase() : 'Q'}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2 truncate">
+                              <div className="font-bold text-gray-900 group-hover:text-[#CD7F32] transition-colors flex items-center gap-2 truncate text-[15px] mb-1">
                                 <span className="truncate">{runner.name}</span>
-                                <span className="flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase shrink-0">
+                                <span className="flex items-center gap-1 text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold uppercase shrink-0">
                                   <span className="w-1 h-1 bg-emerald-500 rounded-full animate-ping"></span> Live
                                 </span>
                               </div>
-                              <div className="text-xs text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
-                                <span className="flex items-center gap-1 font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded shrink-0">
+                              <div className="text-xs text-gray-500 flex flex-col gap-1.5">
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200 font-semibold text-gray-700 w-fit">
                                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                                   {runner.distance}
                                 </span>
-                                <span className="text-gray-400">&bull;</span>
-                                <span className="truncate flex-1 min-w-[50px] text-gray-500">{runner.skills || 'Quick Delivery & Errands'}</span>
+                                <span className="truncate text-gray-400" title={runner.skills || 'Quick Delivery & Errands'}>{runner.skills || 'Quick Delivery & Errands'}</span>
                               </div>
                             </div>
                           </div>
-                          <button 
-                            onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
-                            className="bg-[#242424] hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-1.5 group/btn border border-gray-800"
-                          >
-                            <span>Dispatch</span>
-                            <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-0.5 transition-transform text-[#CD7F32]" />
-                          </button>
+                          <div className="mt-auto border-t border-gray-100 pt-4">
+                            <button 
+                              onClick={() => setAssignModal({ userId: runner.userId, name: runner.name, eventId: null, isExternal: true })}
+                              className="w-full justify-center bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-black hover:to-black text-[#CD7F32] text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-sm border border-gray-800 flex items-center gap-2 group/btn"
+                            >
+                              <span>Dispatch</span>
+                              <Send className="w-3.5 h-3.5 transform group-hover/btn:translate-x-1 transition-transform" />
+                            </button>
+                          </div>
                         </motion.div>
                       ))}
                     </div>
