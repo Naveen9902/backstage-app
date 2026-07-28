@@ -9,6 +9,10 @@ export default function FindJobs() {
   const [applyingTo, setApplyingTo] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  
+  // Custom Questions Flow
+  const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
+  const [answers, setAnswers] = useState<string[]>([]);
 
   const fetchJobs = async () => {
     try {
@@ -36,13 +40,13 @@ export default function FindJobs() {
     fetchJobs();
   }, []);
 
-  const handleApply = async (staffingRequestId: string) => {
+  const handleApply = async (staffingRequestId: string, customAnswers: string[] = []) => {
     setApplyingTo(staffingRequestId);
     try {
       const res = await fetch('/api/worker/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ staffingRequestId })
+        body: JSON.stringify({ staffingRequestId, answers: customAnswers })
       });
       
       if (res.ok) {
@@ -56,6 +60,17 @@ export default function FindJobs() {
       alert('An error occurred while applying.');
     } finally {
       setApplyingTo(null);
+      setActiveJobForQuestions(null);
+      setAnswers([]);
+    }
+  };
+
+  const initiateApply = (job: any) => {
+    if (Array.isArray(job.questions) && job.questions.length > 0) {
+      setActiveJobForQuestions(job);
+      setAnswers(new Array(job.questions.length).fill(''));
+    } else {
+      handleApply(job.id);
     }
   };
 
@@ -149,7 +164,7 @@ export default function FindJobs() {
                     </div>
                   ) : (
                     <button 
-                      onClick={() => handleApply(job.id)}
+                      onClick={() => initiateApply(job)}
                       disabled={applyingTo === job.id || !isVerified}
                       className="bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -160,6 +175,68 @@ export default function FindJobs() {
               </motion.div>
             );
           })}
+        </div>
+      )}
+
+      {/* Questions Modal */}
+      {activeJobForQuestions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="text-xl font-bold font-serif text-gray-900">Application Questions</h3>
+                <p className="text-sm text-gray-500 mt-1">Please answer the screening questions for {activeJobForQuestions.roleName}</p>
+              </div>
+              <button 
+                onClick={() => setActiveJobForQuestions(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+              {activeJobForQuestions.questions.map((q: string, idx: number) => (
+                <div key={idx} className="space-y-2">
+                  <label className="block text-sm font-bold text-gray-700">
+                    <span className="text-[#CD7F32] mr-2">Q{idx + 1}.</span> {q} <span className="text-red-400">*</span>
+                  </label>
+                  <textarea 
+                    required
+                    rows={3}
+                    value={answers[idx]}
+                    onChange={(e) => {
+                      const newA = [...answers];
+                      newA[idx] = e.target.value;
+                      setAnswers(newA);
+                    }}
+                    placeholder="Your answer..."
+                    className="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#CD7F32] focus:ring-4 focus:ring-[#CD7F32]/10 transition-all resize-none shadow-sm"
+                  />
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+              <button 
+                onClick={() => setActiveJobForQuestions(null)}
+                className="px-6 py-2.5 rounded-lg font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleApply(activeJobForQuestions.id, answers)}
+                disabled={applyingTo === activeJobForQuestions.id || answers.some(a => !a.trim())}
+                className="bg-[#CD7F32] hover:bg-[#a06227] text-white px-8 py-2.5 rounded-lg font-bold shadow-md shadow-[#CD7F32]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {applyingTo === activeJobForQuestions.id ? 'Submitting...' : 'Submit Application'}
+              </button>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

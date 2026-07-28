@@ -78,7 +78,20 @@ export async function POST(
       return NextResponse.json({ error: 'Cannot add staffing requests to a completed event' }, { status: 400 });
     }
 
-    const { roleName, quantity, payRate, payType, tierTarget } = await req.json();
+    const { roleName, quantity, payRate, payType, tierTarget, questions } = await req.json();
+
+    const targetTier = tierTarget || 'Tier 1';
+    let finalQuestions: string[] = [];
+
+    if (targetTier === 'Tier 2' || targetTier === 'Tier 3') {
+      if (!Array.isArray(questions) || questions.length < 1) {
+        return NextResponse.json({ error: `At least 1 custom question is mandatory for ${targetTier} roles.` }, { status: 400 });
+      }
+      finalQuestions = questions.filter(q => typeof q === 'string' && q.trim() !== '');
+      if (finalQuestions.length < 1) {
+         return NextResponse.json({ error: `At least 1 valid custom question is mandatory for ${targetTier} roles.` }, { status: 400 });
+      }
+    }
 
     const request = await prisma.staffingRequest.create({
       data: {
@@ -87,7 +100,8 @@ export async function POST(
         quantity: parseInt(quantity, 10),
         payRate: parseFloat(payRate),
         payType: payType || 'HOURLY',
-        tier: tierTarget || 'Tier 1'
+        tier: targetTier,
+        questions: finalQuestions
       }
     });
 

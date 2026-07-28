@@ -155,6 +155,7 @@ model StaffingRequest {
   payRate      Float
   payType      String        @default("HOURLY") // HOURLY | FIXED
   tier         String?
+  questions    String[]      @default([]) // Custom questions for applicants
   applications Application[]
 
   @@index([eventId])
@@ -170,6 +171,7 @@ model Application {
   createdAt         DateTime          @default(now())
   checkInTime       DateTime?
   checkOutTime      DateTime?
+  answers           String[]          @default([]) // Answers to StaffingRequest questions
   payments          PaymentTransaction[]
 
   @@index([workerProfileId])

@@ -64,7 +64,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { staffingRequestId } = await req.json();
+    const { staffingRequestId, answers } = await req.json();
+
+    if (!staffingRequestId) {
+      return NextResponse.json({ error: 'Missing staffing request ID' }, { status: 400 });
+    }
 
     const workerProfile = await prisma.workerProfile.findUnique({
       where: { userId }
@@ -78,25 +82,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'You must be approved by an Admin before applying for jobs' }, { status: 403 });
     }
 
-    // Check if already applied
-    const existing = await prisma.application.findFirst({
-      where: {
-        workerProfileId: workerProfile.id,
-        staffingRequestId
-      }
+    // Verify if already applied
+    const existingApplication = await prisma.application.findFirst({
+      where: { workerProfileId: workerProfile.id, staffingRequestId }
     });
 
-    if (existing) {
+    if (existingApplication) {
       return NextResponse.json({ error: 'Already applied' }, { status: 400 });
     }
 
+    // Validate tier
     const targetStaffingRequest = await prisma.staffingRequest.findUnique({
       where: { id: staffingRequestId },
       include: { event: true }
     });
 
-    if (!targetStaffingRequest || !targetStaffingRequest.event) {
-      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    if (!targetStaffingRequest) {
+       return NextResponse.json({ error: 'Staffing request not found' }, { status: 404 });
+    }
+
+    const workerTier = workerProfile.tier || 'Tier 1';
+    const reqTier = targetStaffingRequest.tier || 'Tier 1';
+    const tierMap: Record<string, number> = { 'Tier 1': 1, 'Tier 2': 2, 'Tier 3': 3 };
+
+    if (tierMap[workerTier] < tierMap[reqTier]) {
+       return NextResponse.json({ error: `This role requires ${reqTier}. You are currently ${workerTier}.` }, { status: 403 });
+    }
+
+    // Validate Questions/Answers if Tier 2 or Tier 3
+    if (reqTier === 'Tier 2' || reqTier === 'Tier 3') {
+      const requiredQuestionsCount = (targetStaffingRequest.questions as string[])?.length || 0;
+      if (requiredQuestionsCount > 0) {
+        if (!Array.isArray(answers) || answers.length !== requiredQuestionsCount) {
+          return NextResponse.json({ error: 'You must answer all required questions.' }, { status: 400 });
+        }
+        for (const answer of answers) {
+          if (typeof answer !== 'string' || answer.trim() === '') {
+            return NextResponse.json({ error: 'All answers must be filled out.' }, { status: 400 });
+          }
+        }
+      }
     }
 
     const startOfDay = new Date(targetStaffingRequest.event.date);
@@ -127,7 +152,8 @@ export async function POST(req: Request) {
       data: {
         workerProfileId: workerProfile.id,
         staffingRequestId,
-        status: 'PENDING'
+        status: 'PENDING',
+        answers: Array.isArray(answers) ? answers : []
       },
       include: {
         staffingRequest: {

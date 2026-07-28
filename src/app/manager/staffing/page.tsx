@@ -17,12 +17,20 @@ function StaffingContent() {
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [searchTalentReq, setSearchTalentReq] = useState<{ id: string, roleName: string } | null>(null);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    tierTarget: string;
+    roleName: string;
+    quantity: number | '';
+    payRate: string;
+    payType: string;
+    questions: string[];
+  }>({
     tierTarget: 'Tier 1',
     roleName: 'Labor / Ground Crew',
     quantity: 1,
     payRate: '',
-    payType: 'HOURLY'
+    payType: 'HOURLY',
+    questions: ['']
   });
 
   const rolesByTier: Record<string, string[]> = {
@@ -84,10 +92,14 @@ function StaffingContent() {
       });
       if (res.ok) {
         fetchRequests();
-        setFormData(prev => ({ ...prev, quantity: 1, payRate: '' }));
+        setFormData(prev => ({ ...prev, quantity: 1, payRate: '', questions: [''] }));
+      } else {
+        const errData = await res.json();
+        alert(errData.error || 'Failed to add role');
       }
     } catch (err) {
       console.error(err);
+      alert('An error occurred');
     }
   };
 
@@ -216,6 +228,47 @@ function StaffingContent() {
                 <label className="text-sm font-bold text-gray-700">{formData.payType === 'HOURLY' ? 'Hourly Rate' : 'Total Fixed Pay'}</label>
                 <input required value={formData.payRate} onChange={e=>setFormData({...formData, payRate: e.target.value})} type="number" step="0.01" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" placeholder="₹" />
               </div>
+
+              {/* Custom Questions Section */}
+              {formData.tierTarget !== 'Tier 1' && (
+                <div className="pt-4 border-t border-gray-100">
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">
+                    Application Questions (Mandatory)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">Ask questions to screen candidates for this role. You must ask at least one question.</p>
+                  
+                  {formData.questions.map((q, idx) => (
+                    <div key={idx} className="flex items-center gap-2 mb-2">
+                      <input 
+                        type="text" 
+                        required
+                        value={q} 
+                        onChange={(e) => {
+                          const newQ = [...formData.questions];
+                          newQ[idx] = e.target.value;
+                          setFormData({...formData, questions: newQ});
+                        }} 
+                        placeholder={`Question ${idx + 1}`}
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none text-sm" 
+                      />
+                      {formData.questions.length > 1 && (
+                        <button type="button" onClick={() => {
+                          const newQ = formData.questions.filter((_, i) => i !== idx);
+                          setFormData({...formData, questions: newQ});
+                        }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  
+                  <button type="button" onClick={() => setFormData({...formData, questions: [...formData.questions, '']})} className="text-sm font-bold text-[#CD7F32] flex items-center gap-1 hover:underline mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Another Question
+                  </button>
+                </div>
+              )}
+
                 <button type="submit" className="w-full bg-[#CD7F32] text-white py-2.5 rounded-lg font-bold hover:bg-[#a06227] transition-colors mt-2">
                   Add Role
                 </button>
@@ -341,6 +394,23 @@ function StaffingContent() {
                                               <span className="opacity-70">Out:</span> Pending
                                             </div>
                                           )}
+                                        </div>
+                                      )}
+
+                                      {/* Custom Answers */}
+                                      {Array.isArray(req.questions) && req.questions.length > 0 && (
+                                        <div className="mt-3 bg-white p-3 rounded-lg border border-gray-100 text-sm">
+                                          <p className="font-bold text-xs text-gray-500 uppercase tracking-wider mb-2">Screening Answers</p>
+                                          <ul className="space-y-2">
+                                            {req.questions.map((q: string, i: number) => (
+                                              <li key={i}>
+                                                <p className="font-medium text-gray-800 text-xs">Q: {q}</p>
+                                                <p className="text-gray-600 text-xs mt-0.5 bg-gray-50 p-1.5 rounded border border-gray-100">
+                                                  {app.answers?.[i] || <span className="italic text-gray-400">No answer provided</span>}
+                                                </p>
+                                              </li>
+                                            ))}
+                                          </ul>
                                         </div>
                                       )}
                                     </div>
