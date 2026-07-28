@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Play, Film, Image as ImageIcon, Sparkles, MapPin, Calendar, Clock, Globe } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
