@@ -257,6 +257,11 @@ export default function Login() {
                         e.preventDefault();
                         setLoading(true);
                         try {
+                          await (window as any).Capacitor.Plugins.GoogleAuth.initialize({
+                            clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com',
+                            scopes: ['profile', 'email'],
+                            grantOfflineAccess: false,
+                          });
                           const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                           if (result.authentication?.idToken) {
                             const res = await fetch('/api/auth/google/native', {
