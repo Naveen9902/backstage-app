@@ -13,6 +13,8 @@ export default function FindJobs() {
   const [workerCategories, setWorkerCategories] = useState<string[]>([]);
   const [tierFilter, setTierFilter] = useState<string>('All');
   const [roleFilter, setRoleFilter] = useState<string>('All');
+  const [eventTypeFilter, setEventTypeFilter] = useState<string>('All');
+  const [dateFilter, setDateFilter] = useState<string>('');
   
   // Custom Questions Flow
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
@@ -90,19 +92,31 @@ export default function FindJobs() {
 
   const workerLevel = getTierLevel(workerTier || '');
   const availableRoles = Array.from(new Set(jobs.map(j => j.roleName))).sort();
+  const availableEventTypes = Array.from(new Set(jobs.map(j => j.event?.attendeeCategory).filter(Boolean))).sort();
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.roleName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           job.event?.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTierFilter = tierFilter === 'All' || job.tier === tierFilter;
     const matchesRoleFilter = roleFilter === 'All' || job.roleName === roleFilter;
+    const matchesEventTypeFilter = eventTypeFilter === 'All' || job.event?.attendeeCategory === eventTypeFilter;
+    
+    let matchesDateFilter = true;
+    if (dateFilter) {
+      if (job.event?.date) {
+        const jobDate = new Date(job.event.date).toISOString().split('T')[0];
+        matchesDateFilter = jobDate === dateFilter;
+      } else {
+        matchesDateFilter = false;
+      }
+    }
     
     // Authorization logic
     const jobTierLevel = getTierLevel(job.tier);
     const hasSufficientTier = workerLevel >= jobTierLevel;
     const hasSpecificRole = jobTierLevel > 1 ? workerCategories.includes(job.roleName) : true;
     
-    return matchesSearch && matchesTierFilter && matchesRoleFilter && hasSufficientTier && hasSpecificRole;
+    return matchesSearch && matchesTierFilter && matchesRoleFilter && matchesEventTypeFilter && matchesDateFilter && hasSufficientTier && hasSpecificRole;
   });
 
   return (
@@ -120,26 +134,54 @@ export default function FindJobs() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-64"
           />
-          <select
-            value={tierFilter}
-            onChange={(e) => setTierFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
-          >
-            <option value="All">All Tiers</option>
-            <option value="Tier 1">Tier 1</option>
-            <option value="Tier 2">Tier 2</option>
-            <option value="Tier 3">Tier 3</option>
-          </select>
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
-          >
-            <option value="All">All Roles</option>
-            {availableRoles.map(role => (
-              <option key={role} value={role}>{role}</option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-4">
+            <select
+              value={tierFilter}
+              onChange={(e) => setTierFilter(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
+            >
+              <option value="All">All Tiers</option>
+              <option value="Tier 1">Tier 1</option>
+              <option value="Tier 2">Tier 2</option>
+              <option value="Tier 3">Tier 3</option>
+            </select>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
+            >
+              <option value="All">All Roles</option>
+              {availableRoles.map(role => (
+                <option key={role as string} value={role as string}>{role as string}</option>
+              ))}
+            </select>
+            <select
+              value={eventTypeFilter}
+              onChange={(e) => setEventTypeFilter(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
+            >
+              <option value="All">All Event Types</option>
+              {availableEventTypes.map(type => (
+                <option key={type as string} value={type as string}>{type as string}</option>
+              ))}
+            </select>
+            <div className="flex items-center w-full sm:w-auto">
+              <input 
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full"
+              />
+              {dateFilter && (
+                <button 
+                  onClick={() => setDateFilter('')}
+                  className="ml-2 text-xs text-gray-500 hover:text-red-500 underline whitespace-nowrap"
+                >
+                  Clear Date
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       
