@@ -58,8 +58,6 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
               <span className="whitespace-nowrap">SWIPE TO TURN OFF</span>
             </>
-          ) : !isVerified ? (
-            <span className="whitespace-nowrap text-[10px] text-red-400">TIER VERIFICATION REQUIRED</span>
           ) : (
             <>
               <span className="whitespace-nowrap">SWIPE TO RUNNER</span>
