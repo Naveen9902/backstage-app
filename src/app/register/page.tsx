@@ -274,7 +274,8 @@ export default function Register() {
                         body: JSON.stringify({ 
                           idToken: result.authentication.idToken,
                           role: role,
-                          clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com'
+                          clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com',
+                          action: 'register'
                         })
                       });
                       const data = await res.json();

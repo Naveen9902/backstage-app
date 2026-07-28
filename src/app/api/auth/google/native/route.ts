@@ -7,7 +7,7 @@ import { Role } from '@prisma/client';
 
 export async function POST(req: Request) {
   try {
-    const { idToken, role, clientId } = await req.json();
+    const { idToken, role, clientId, action } = await req.json();
     if (!idToken || !clientId) {
       return NextResponse.json({ error: 'Missing token or client ID' }, { status: 400 });
     }
@@ -27,32 +27,59 @@ export async function POST(req: Request) {
 
     const roleState = (role as Role) || 'USER';
 
-    // Find or create user
+    // Find user
     let user = await prisma.user.findUnique({
       where: { email: payload.email },
     });
 
-    if (!user) {
-      const hashedPassword = await bcrypt.hash(Math.random().toString(36).slice(-8) + Date.now(), 10);
-      user = await prisma.user.create({
-        data: {
-          email: payload.email,
-          name: payload.name || 'Google User',
-          avatarUrl: payload.picture,
-          password: hashedPassword,
-          role: roleState,
-        },
-      });
+    if (action === 'login') {
+      if (!user) {
+        return NextResponse.json({ error: 'Account not found. Please register first.' }, { status: 404 });
+      }
+    } else {
+      // action === 'register'
+      if (!user) {
+        const hashedPassword = await bcrypt.hash(Math.random().toString(36).slice(-8) + Date.now(), 10);
+        user = await prisma.user.create({
+          data: {
+            email: payload.email,
+            name: payload.name || 'Google User',
+            avatarUrl: payload.picture,
+            password: hashedPassword,
+            role: roleState,
+          },
+        });
 
-      // Create profile based on role
-      if (roleState === 'WORKER') {
-        await prisma.workerProfile.create({
-          data: { userId: user.id, skills: '', experience: '' },
-        });
-      } else if (roleState === 'MANAGER') {
-        await prisma.managerProfile.create({
-          data: { userId: user.id, company: '' },
-        });
+        // Create profile based on role
+        if (roleState === 'WORKER') {
+          await prisma.workerProfile.create({
+            data: { userId: user.id, skills: '', experience: '' },
+          });
+        } else if (roleState === 'MANAGER') {
+          await prisma.managerProfile.create({
+            data: { userId: user.id, company: '' },
+          });
+        }
+      } else {
+        // User exists, but they are registering again (maybe switching roles)
+        if (user.role !== roleState) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { role: roleState }
+          });
+          
+          if (roleState === 'WORKER') {
+            const existingProfile = await prisma.workerProfile.findUnique({ where: { userId: user.id } });
+            if (!existingProfile) {
+              await prisma.workerProfile.create({ data: { userId: user.id, skills: '', experience: '' } });
+            }
+          } else if (roleState === 'MANAGER') {
+            const existingProfile = await prisma.managerProfile.findUnique({ where: { userId: user.id } });
+            if (!existingProfile) {
+              await prisma.managerProfile.create({ data: { userId: user.id, company: '' } });
+            }
+          }
+        }
       }
     }
 

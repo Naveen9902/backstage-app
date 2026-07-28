@@ -273,7 +273,8 @@ export default function Login() {
                               body: JSON.stringify({ 
                                 idToken: result.authentication.idToken,
                                 role: appFlavor === 'OPS' ? 'WORKER' : 'USER',
-                                clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com'
+                                clientId: '785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com',
+                                action: 'login'
                               })
                             });
                             const data = await res.json();
