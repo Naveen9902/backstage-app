@@ -12,7 +12,7 @@ export default function Navbar() {
   const [session, setSession] = useState<{loggedIn: boolean, user?: any}>({ loggedIn: false });
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setSession(data))
       .catch(() => {});

@@ -44,7 +44,7 @@ export default function AppGateway() {
     }).catch(() => {});
 
     // 1. Auth Check - Store redirect URL instead of redirecting instantly
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {

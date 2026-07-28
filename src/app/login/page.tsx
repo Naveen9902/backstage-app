@@ -31,7 +31,7 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {

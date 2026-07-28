@@ -22,7 +22,7 @@ export default function NotificationBell() {
           setUserId(data[0].userId);
         } else {
           // If no notifications, try to fetch current user to get ID for realtime filtering
-          const meRes = await fetch('/api/auth/me');
+          const meRes = await fetch('/api/auth/me', { cache: 'no-store' });
           if (meRes.ok) {
             const meData = await meRes.json();
             if (meData.user?.id) setUserId(meData.user.id);
