@@ -186,6 +186,7 @@ export default function FindJobs() {
                       {job.event?.location}
                     </span>
                   </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col justify-end">
