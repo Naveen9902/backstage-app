@@ -37,7 +37,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl, socialLink } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseErr) {
+      return NextResponse.json({ error: 'Invalid request body. The cover image may be too large. Try a smaller image.' }, { status: 400 });
+    }
+
+    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl, socialLink } = body;
+
+    if (!title || !description || !date || !location) {
+      return NextResponse.json({ error: 'Title, description, date, and location are required.' }, { status: 400 });
+    }
 
     // Check manager subscription tier limits (visual/simple count check)
     const manager = await prisma.user.findUnique({
@@ -55,10 +66,19 @@ export async function POST(req: Request) {
 
     // Combine date + startTime into a single DateTime if both provided
     let eventDate = new Date(date);
+    if (isNaN(eventDate.getTime())) {
+      return NextResponse.json({ error: 'Invalid date format.' }, { status: 400 });
+    }
     if (startTime) {
       const [hours, minutes] = startTime.split(':').map(Number);
       eventDate.setHours(hours, minutes, 0, 0);
     }
+
+    // Truncate base64 images if too large (> 2MB) to prevent DB issues
+    const maxImageSize = 2 * 1024 * 1024; // 2MB
+    const safeCoverImage = coverImageUrl && coverImageUrl.length > maxImageSize ? null : (coverImageUrl || null);
+    const safeVideo = videoUrl && videoUrl.length > maxImageSize ? null : (videoUrl || null);
+    const safeArtistAvatar = artistAvatarUrl && artistAvatarUrl.length > maxImageSize ? null : (artistAvatarUrl || null);
 
     const event = await prisma.event.create({
       data: {
@@ -69,28 +89,38 @@ export async function POST(req: Request) {
         startTime: startTime || null,
         location,
         status: 'UPCOMING',
-        coverImageUrl: coverImageUrl || null,
-        videoUrl: videoUrl || null,
+        coverImageUrl: safeCoverImage,
+        videoUrl: safeVideo,
         attendeeCategory: attendeeCategory || null,
         tags: tags || null,
         language: language || 'English',
         duration: duration || '2 Hours',
         bands: bands || null,
-        artistAvatarUrl: artistAvatarUrl || null,
+        artistAvatarUrl: safeArtistAvatar,
         socialLink: socialLink || null
       }
     });
 
-    // Notify all users about the new event
-    const allUsers = await prisma.user.findMany({ select: { id: true } });
-    for (const user of allUsers) {
-      await sendNotification(user.id, `New Event Announced: ${title} in ${location}!`);
+    // Notify all users about the new event (non-blocking - don't let notification failures block response)
+    try {
+      const allUsers = await prisma.user.findMany({ select: { id: true } });
+      // Send notifications in batches to avoid timeout
+      const batchSize = 20;
+      for (let i = 0; i < allUsers.length; i += batchSize) {
+        const batch = allUsers.slice(i, i + batchSize);
+        await Promise.allSettled(
+          batch.map(user => sendNotification(user.id, `New Event Announced: ${title} in ${location}!`))
+        );
+      }
+    } catch (notifErr) {
+      console.error('Notification send failed (non-blocking):', notifErr);
     }
 
     return NextResponse.json(event, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('CREATE EVENT ERROR:', error);
-    return NextResponse.json({ error: 'Failed to create event' }, { status: 500 });
+    const message = error?.message || 'Failed to create event';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

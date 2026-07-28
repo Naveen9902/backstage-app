@@ -45,8 +45,9 @@ export default function CreateEvent() {
       } else {
         setError(data.error || 'Failed to create event');
       }
-    } catch (err) {
-      setError('An unexpected error occurred.');
+    } catch (err: any) {
+      console.error('Create event client error:', err);
+      setError(err?.message || 'An unexpected error occurred. The cover image may be too large — try a smaller file.');
     }
     setLoading(false);
   };
