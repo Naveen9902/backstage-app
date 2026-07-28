@@ -53,7 +53,8 @@ export default function WorkerProfile() {
     stripeAccountId: null as string | null,
     verificationStatus: 'PENDING',
     requestedTier: '',
-    originalTier: ''
+    originalTier: '',
+    originalCategories: [] as string[]
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,7 +102,8 @@ export default function WorkerProfile() {
             stripeAccountId: data.workerProfile?.stripeAccountId || null,
             verificationStatus: data.workerProfile?.verificationStatus || 'PENDING',
             requestedTier: data.workerProfile?.requestedTier || '',
-            originalTier: data.workerProfile?.tier || ''
+            originalTier: data.workerProfile?.tier || '',
+            originalCategories: data.workerProfile?.categories || []
           });
         }
         setLoading(false);
@@ -254,8 +256,7 @@ export default function WorkerProfile() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          // Always send requestedTier as the selected tier if they are saving and not approved yet, OR if they explicitly asked for it
-          requestedTier: (!formData.isVerified || formData.verificationStatus === 'PENDING') ? formData.tier : formData.requestedTier
+          requestedTier: (!formData.isVerified || formData.verificationStatus === 'PENDING' || isTierUpgradeOrRoleChange) ? formData.tier : formData.requestedTier
         })
       });
       if (res.ok) {
@@ -277,6 +278,7 @@ export default function WorkerProfile() {
   const requiresTier1 = formData.tier === 'Tier 1';
   const isTier1Complete = agreements.infoAccurate && agreements.guidelines && agreements.bgCheck;
   const isSaveDisabled = saving || loading || isUnderage || (!formData.isVerified && requiresTier1 && !isTier1Complete);
+  const isTierUpgradeOrRoleChange = formData.tier !== formData.originalTier || (['Tier 2', 'Tier 3'].includes(formData.tier) && JSON.stringify(formData.categories) !== JSON.stringify(formData.originalCategories));
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -395,7 +397,7 @@ export default function WorkerProfile() {
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
-                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || (formData.tier && formData.tier !== formData.originalTier)) ? 'Apply for Tier Verification' : 'Save Profile'}
+                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Profile'}
               </button>
             </div>
 
@@ -464,26 +466,48 @@ export default function WorkerProfile() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-[#CD7F32] mb-1 block">Specific Role</label>
-                    <select 
-                      value={formData.categories[0] || ''} 
-                      onChange={handleRoleChange}
-                      disabled={!formData.tier}
-                      className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none text-sm disabled:opacity-50"
-                    >
-                      <option value="">-- Choose Role --</option>
-                      {formData.tier && (TIER_CATEGORIES as any)[formData.tier].map((cat: string) => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
+                    <label className="text-xs font-bold text-[#CD7F32] mb-1 block">Specific Role(s)</label>
+                    {formData.tier === 'Tier 1' ? (
+                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto bg-white border border-gray-200 rounded-lg p-3">
+                        {TIER_CATEGORIES['Tier 1'].map((cat: string) => (
+                          <label key={cat} className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={formData.categories.includes(cat)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData({...formData, categories: [...formData.categories, cat]});
+                                } else {
+                                  setFormData({...formData, categories: formData.categories.filter(c => c !== cat)});
+                                }
+                              }}
+                              className="text-[#CD7F32] focus:ring-[#CD7F32]"
+                            />
+                            <span className="text-sm text-gray-700">{cat}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <select 
+                        value={formData.categories[0] || ''} 
+                        onChange={handleRoleChange}
+                        disabled={!formData.tier}
+                        className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 focus:border-[#CD7F32] outline-none text-sm disabled:opacity-50"
+                      >
+                        <option value="">-- Choose Role --</option>
+                        {formData.tier && (TIER_CATEGORIES as any)[formData.tier].map((cat: string) => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
-                {formData.isVerified && formData.tier !== formData.originalTier && formData.verificationStatus !== 'PENDING' && (
+                {formData.isVerified && (formData.tier !== formData.originalTier || (['Tier 2', 'Tier 3'].includes(formData.tier) && JSON.stringify(formData.categories) !== JSON.stringify(formData.originalCategories))) && formData.verificationStatus !== 'PENDING' && (
                    <button type="button" onClick={() => {
                      setFormData({...formData, requestedTier: formData.tier});
-                     setTimeout(() => alert('Please click Save Profile at the bottom to submit your upgrade request.'), 100);
+                     setTimeout(() => alert('Please click Save Profile at the bottom to submit your update request.'), 100);
                    }} className="mt-4 px-4 py-2 bg-[#CD7F32] text-white text-xs font-bold rounded-lg uppercase tracking-wider hover:bg-[#a86524] transition-colors">
-                     Confirm {formData.tier} Upgrade Request
+                     Confirm {formData.tier} Update Request
                    </button>
                 )}
               </div>
@@ -611,7 +635,7 @@ export default function WorkerProfile() {
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">
               <button type="submit" disabled={isSaveDisabled} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none">
-                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || (formData.tier && formData.tier !== formData.originalTier)) ? 'Apply for Tier Verification' : 'Save Profile')}
+                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Profile')}
               </button>
             </div>
               </form>
