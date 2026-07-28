@@ -162,7 +162,13 @@ export default function WorkerProfile() {
     }
   };
 
-  const handleSendOtp = async () => {
+  const [agreements, setAgreements] = useState({
+    infoAccurate: false,
+    guidelines: false,
+    bgCheck: false
+  });
+
+  const fetchProfile = async () => {
     if (!formData.mobile) {
       alert("Enter a mobile number above first!");
       return;
@@ -266,15 +272,11 @@ export default function WorkerProfile() {
     setSaving(false);
   };
 
-  const requiresTier2 = formData.tier === 'Tier 2';
-  const requiresTier3 = formData.tier === 'Tier 3';
-  
-  const calculateAge = (dob: string) => {
-    if (!dob) return 0;
-    const diff = Date.now() - new Date(dob).getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-  };
   const isUnderage = formData.dateOfBirth ? calculateAge(formData.dateOfBirth) < 18 : false;
+  
+  const requiresTier1 = formData.tier === 'Tier 1';
+  const isTier1Complete = agreements.infoAccurate && agreements.guidelines && agreements.bgCheck;
+  const isSaveDisabled = saving || loading || isUnderage || (!formData.isVerified && requiresTier1 && !isTier1Complete);
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -388,12 +390,12 @@ export default function WorkerProfile() {
             </div>
               <button 
                 onClick={handleSubmit} 
-                disabled={saving || loading || isUnderage} 
+                disabled={isSaveDisabled} 
                 className="w-full sm:w-auto justify-center bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_30px_rgba(205,127,50,0.3)] hover:-translate-y-1 disabled:opacity-50 disabled:hover:transform-none flex items-center gap-2"
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
-                ) : isUnderage ? 'Cannot Save' : 'Save Profile'}
+                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : 'Save Profile'}
               </button>
             </div>
 
@@ -487,10 +489,11 @@ export default function WorkerProfile() {
               </div>
 
               {/* TIER 1 VERIFICATION */}
-              <div className="md:col-span-2 bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
-                <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Tier 1 Verification (Required for all)</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {requiresTier1 && (
+                <div className="md:col-span-2 bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
+                  <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Tier 1 Verification (Required for all)</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-bold text-gray-700">Date of Birth</label>
                     <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
@@ -540,66 +543,24 @@ export default function WorkerProfile() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* TIER 2 VERIFICATION */}
-              {requiresTier2 && (
-                <div className="md:col-span-2 bg-[#f5f8fc] p-6 rounded-xl border border-[#d6e4f5] space-y-4">
-                  <h3 className="font-bold text-lg border-b border-[#d6e4f5] pb-2 text-[#3b6d9e]">Tier 2 Verification (Skilled Roles)</h3>
-                  <p className="text-sm text-gray-600 mb-2">Please provide proof of relevant experience for your selected skilled roles.</p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Proof Type</label>
-                      <select value={formData.proofOfExperienceType} onChange={e=>setFormData({...formData, proofOfExperienceType: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none">
-                        <option value="">Select Proof Type</option>
-                        <option value="video_link">Link to Past Video</option>
-                        <option value="social_handle">Insta/YT Handle</option>
-                        <option value="intro_clip">30s Self-Recorded Intro Clip (Upload)</option>
-                      </select>
+                  {!formData.isVerified && (
+                    <div className="md:col-span-2 mt-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-bold text-sm text-gray-800 mb-2">Required Agreements</h4>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" checked={agreements.infoAccurate} onChange={e=>setAgreements({...agreements, infoAccurate: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                        <span className="text-sm text-gray-700">I confirm that all information provided is accurate and true.</span>
+                      </label>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" checked={agreements.guidelines} onChange={e=>setAgreements({...agreements, guidelines: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                        <span className="text-sm text-gray-700">I have read and agree to the Back Stage Worker Guidelines.</span>
+                      </label>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" checked={agreements.bgCheck} onChange={e=>setAgreements({...agreements, bgCheck: e.target.checked})} className="mt-1 w-4 h-4 text-[#CD7F32] focus:ring-[#CD7F32]" />
+                        <span className="text-sm text-gray-700">I consent to a basic background check for identity verification.</span>
+                      </label>
                     </div>
-                    <div>
-                      {formData.proofOfExperienceType === 'intro_clip' ? (
-                        <>
-                          <label className="text-sm font-bold text-gray-700">Upload Intro Clip</label>
-                          <div className={`relative border-2 border-dashed border-gray-300 rounded-lg p-2 mt-1 text-center bg-white hover:bg-gray-50 ${uploading['proofOfExperienceUrl'] ? 'opacity-50' : 'cursor-pointer'}`}>
-                            {uploading['proofOfExperienceUrl'] ? <span className="text-blue-500 font-bold text-sm">Uploading...</span> : (formData.proofOfExperienceUrl ? <span className="text-green-600 font-bold text-sm">Clip Uploaded ✓</span> : <span className="text-gray-500 text-sm">Upload Video</span>)}
-                            <input type="file" disabled={uploading['proofOfExperienceUrl']} onChange={(e) => handleFileUpload(e, 'proofOfExperienceUrl')} className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" accept="video/*" />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <label className="text-sm font-bold text-gray-700">Link / Handle</label>
-                          <input type="text" placeholder="e.g. @myhandle or https://..." value={formData.proofOfExperienceUrl} onChange={e=>setFormData({...formData, proofOfExperienceUrl: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TIER 3 VERIFICATION */}
-              {requiresTier3 && (
-                <div className="md:col-span-2 bg-[#fff5f5] p-6 rounded-xl border border-[#f5d6d6] space-y-4">
-                  <h3 className="font-bold text-lg border-b border-[#f5d6d6] pb-2 text-[#9e3b3b]">Tier 3 Verification (High Visibility Talent)</h3>
-                  <p className="text-sm text-gray-600 mb-2">High visibility roles require background and reference checks.</p>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-bold text-gray-700">Active Social Media Link (Genuine Followers)</label>
-                      <input type="text" placeholder="e.g. https://instagram.com/myprofile" value={formData.socialMediaUrl} onChange={e=>setFormData({...formData, socialMediaUrl: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-bold text-gray-700">Verifiable Past Event Name</label>
-                        <input type="text" placeholder="e.g. Coachella 2023" value={formData.referenceEvent} onChange={e=>setFormData({...formData, referenceEvent: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-bold text-gray-700">Reference Contact (Client/Organizer)</label>
-                        <input type="text" placeholder="Name & Phone number" value={formData.referenceContact} onChange={e=>setFormData({...formData, referenceContact: e.target.value})} className="w-full bg-white border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
               <div className="md:col-span-2">
@@ -649,8 +610,8 @@ export default function WorkerProfile() {
             </div>
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">
-              <button type="submit" disabled={saving || isUnderage} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none">
-                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : 'Save Profile')}
+              <button type="submit" disabled={isSaveDisabled} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none">
+                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : 'Save Profile')}
               </button>
             </div>
               </form>
