@@ -252,8 +252,8 @@ export default function Login() {
                     type="button"
                     onClick={async (e) => {
                       // Check if running natively inside Capacitor
-                      const { Capacitor } = await import('@capacitor/core');
-                      if (Capacitor.isNativePlatform()) {
+                      const isNative = typeof window !== 'undefined' && window.navigator.userAgent.includes('BackstageFlavor');
+                      if (isNative) {
                         e.preventDefault();
                         setLoading(true);
                         try {
