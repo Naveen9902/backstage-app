@@ -306,6 +306,19 @@ export default function CreateEvent() {
                   </div>
                 </div>
 
+                {/* Terms and Conditions */}
+                <div className="flex items-start gap-3 mt-4">
+                  <input 
+                    type="checkbox" 
+                    id="terms" 
+                    required
+                    className="mt-1 w-4 h-4 text-[#CD7F32] bg-white border-gray-300 rounded focus:ring-[#CD7F32]"
+                  />
+                  <label htmlFor="terms" className="text-xs text-gray-500 leading-relaxed">
+                    I agree to the <Link href="#" className="text-[#CD7F32] hover:underline">Terms & Conditions</Link> and <Link href="#" className="text-[#CD7F32] hover:underline">Privacy Policy</Link>. I confirm that the event details provided are accurate and comply with platform guidelines.
+                  </label>
+                </div>
+
                 {/* Action Buttons */}
                 <div className="pt-6 mt-4 flex justify-end gap-4 border-t border-gray-100">
                   <Link href="/manager/dashboard" className="px-6 py-3.5 font-bold text-gray-500 hover:text-gray-900 transition-colors inline-block text-sm bg-white border border-gray-200 rounded-xl hover:bg-gray-50">

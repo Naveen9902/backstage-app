@@ -349,7 +349,7 @@ function StaffingContent() {
                                             Top Talent
                                           </span>
                                         )}
-                                        {app.workerProfile?.isVerified && app.workerProfile?.tier && (
+                                        {app.workerProfile?.isVerified && app.workerProfile?.tier ? (
                                           <span className={`flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase shadow-sm border ${
                                             app.workerProfile.tier === 'Tier 1' ? 'bg-orange-100 text-orange-800 border-orange-200' :
                                             app.workerProfile.tier === 'Tier 2' ? 'bg-blue-100 text-blue-800 border-blue-200' :
@@ -357,6 +357,10 @@ function StaffingContent() {
                                           }`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                             Verified {app.workerProfile.tier}
+                                          </span>
+                                        ) : (
+                                          <span className="bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded text-[8px] tracking-widest uppercase border border-gray-200 shadow-sm">
+                                            Unverified
                                           </span>
                                         )}
                                       </div>
