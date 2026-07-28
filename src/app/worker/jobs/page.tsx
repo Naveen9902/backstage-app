@@ -10,6 +10,8 @@ export default function FindJobs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const [workerTier, setWorkerTier] = useState<string | null>(null);
+  const [workerCategories, setWorkerCategories] = useState<string[]>([]);
+  const [tierFilter, setTierFilter] = useState<string>('All');
   
   // Custom Questions Flow
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
@@ -30,6 +32,7 @@ export default function FindJobs() {
       if (profileData && profileData.workerProfile) {
         setIsVerified(profileData.workerProfile.isVerified);
         setWorkerTier(profileData.workerProfile.tier);
+        setWorkerCategories(profileData.workerProfile.categories || []);
       }
     } catch (err) {
       console.error(err);
@@ -76,11 +79,6 @@ export default function FindJobs() {
     }
   };
 
-  const filteredJobs = jobs.filter(job => 
-    job.roleName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    job.event?.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const getTierLevel = (tier?: string) => {
     if (!tier) return 0;
     if (tier.includes('1')) return 1;
@@ -91,6 +89,19 @@ export default function FindJobs() {
 
   const workerLevel = getTierLevel(workerTier || '');
 
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.roleName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          job.event?.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTierFilter = tierFilter === 'All' || job.tier === tierFilter;
+    
+    // Authorization logic
+    const jobTierLevel = getTierLevel(job.tier);
+    const hasSufficientTier = workerLevel >= jobTierLevel;
+    const hasSpecificRole = jobTierLevel > 1 ? workerCategories.includes(job.roleName) : true;
+    
+    return matchesSearch && matchesTierFilter && hasSufficientTier && hasSpecificRole;
+  });
+
   return (
     <div className="text-[#242424] max-w-5xl">
       <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-8 gap-4">
@@ -98,14 +109,24 @@ export default function FindJobs() {
           <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Find Jobs</h1>
           <p className="text-lg text-gray-700">Discover and apply for open positions at upcoming events</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <input 
             type="text" 
             placeholder="Search roles or events..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full md:w-64"
+            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-64"
           />
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#CD7F32] shadow-sm w-full sm:w-auto"
+          >
+            <option value="All">All Tiers</option>
+            <option value="Tier 1">Tier 1</option>
+            <option value="Tier 2">Tier 2</option>
+            <option value="Tier 3">Tier 3</option>
+          </select>
         </div>
       </div>
       
@@ -140,11 +161,10 @@ export default function FindJobs() {
                 className="bg-white rounded-xl p-6 border border-gray-100 flex flex-col md:flex-row justify-between gap-6"
                 style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
               >
-                <div className="space-y-3 flex-1 flex flex-col md:flex-row gap-4">
-                  {/* Event PFP */}
-                  <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-inner hidden sm:block">
+                <Link href={`/worker/events/${job.event?.id}`} className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-1 hover:opacity-80 transition-opacity">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl flex-shrink-0 border border-gray-200 overflow-hidden relative">
                     {job.event?.coverImageUrl ? (
-                      <img src={job.event.coverImageUrl} alt="Event PFP" className="w-full h-full object-cover" />
+                      <img src={job.event.coverImageUrl} alt="Event Cover" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -187,7 +207,7 @@ export default function FindJobs() {
                     </span>
                   </div>
                   </div>
-                </div>
+                </Link>
 
                 <div className="flex flex-col justify-end">
                   {hasApplied ? (

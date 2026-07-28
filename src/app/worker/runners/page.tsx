@@ -126,10 +126,24 @@ export default function LiveRunnersBoard() {
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [isRunnerAvailable, setIsRunnerAvailable] = useState(false);
   const [togglingRunner, setTogglingRunner] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<string | undefined>(undefined);
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/worker/runners');
+      const [res, profileRes] = await Promise.all([
+        fetch('/api/worker/runners'),
+        fetch('/api/worker/profile')
+      ]);
+      
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        if (profileData && profileData.workerProfile) {
+          setIsVerified(profileData.workerProfile.isVerified);
+          setVerificationStatus(profileData.workerProfile.verificationStatus);
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         setPendingTasks(data.pending || []);
@@ -298,6 +312,8 @@ export default function LiveRunnersBoard() {
               isRunnerAvailable={isRunnerAvailable}
               onToggle={handleToggleRunner}
               loading={togglingRunner}
+              isVerified={isVerified}
+              verificationStatus={verificationStatus}
             />
           </div>
         </div>

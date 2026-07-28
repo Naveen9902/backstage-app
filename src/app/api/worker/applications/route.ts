@@ -30,6 +30,7 @@ export async function GET() {
                 startTime: true,
                 status: true,
                 location: true,
+                coverImageUrl: true,
                 managerId: true,
                 manager: {
                   select: {

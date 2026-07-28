@@ -7,12 +7,22 @@ interface SwipeToToggleRunnerProps {
   isRunnerAvailable: boolean;
   onToggle: (newVal: boolean) => void;
   loading?: boolean;
+  isVerified?: boolean;
+  verificationStatus?: string;
 }
 
-export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loading = false }: SwipeToToggleRunnerProps) {
+export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loading = false, isVerified = true, verificationStatus }: SwipeToToggleRunnerProps) {
   const isDraggingRef = useRef(false);
 
   const handleContainerClick = () => {
+    if (!isVerified) {
+      if (verificationStatus === 'PENDING') {
+        alert("Verification sent. Please wait for admin approval.");
+      } else {
+        alert("Please complete tier verification in your profile before going online as a runner.");
+      }
+      return;
+    }
     if (!loading && !isDraggingRef.current) {
       if (typeof window !== 'undefined') {
         import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
@@ -59,12 +69,15 @@ export default function SwipeToToggleRunner({ isRunnerAvailable, onToggle, loadi
       {/* Swipe Thumb */}
       {!loading && (
         <motion.div
-          drag="x"
+          drag={isVerified ? "x" : false}
           dragConstraints={isRunnerAvailable ? { left: -260, right: 0 } : { left: 0, right: 260 }}
           dragElastic={0.05}
           dragSnapToOrigin
-          onDragStart={() => { isDraggingRef.current = true; }}
+          onDragStart={() => { 
+            if (isVerified) isDraggingRef.current = true; 
+          }}
           onDragEnd={(e, info) => {
+            if (!isVerified) return;
             setTimeout(() => { isDraggingRef.current = false; }, 150);
             if (!isRunnerAvailable && info.offset.x > 45) {
               if (typeof window !== 'undefined') {

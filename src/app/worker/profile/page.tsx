@@ -265,14 +265,14 @@ export default function WorkerProfile() {
           requestedTier: (!formData.isVerified || formData.verificationStatus === 'PENDING' || isTierUpgradeOrRoleChange) ? formData.tier : formData.requestedTier
         })
       });
-      if (res.ok) {
-        const updated = await res.json();
-        setFormData(prev => ({ ...prev, verificationStatus: updated.workerProfile?.verificationStatus || prev.verificationStatus, requestedTier: updated.workerProfile?.requestedTier || prev.requestedTier }));
-        setMessage('Profile updated successfully!');
-        window.dispatchEvent(new Event('profileUpdated'));
-      } else {
-        setMessage('Failed to update profile.');
-      }
+        if (res.ok) {
+          const updated = await res.json();
+          setFormData(prev => ({ ...prev, verificationStatus: updated.workerProfile?.verificationStatus || prev.verificationStatus, requestedTier: updated.workerProfile?.requestedTier || prev.requestedTier }));
+          alert('Profile updated successfully!');
+          window.dispatchEvent(new Event('profileUpdated'));
+        } else {
+          alert('Failed to update profile.');
+        }
     } catch (err) {
       setMessage('An error occurred.');
     }
@@ -358,7 +358,7 @@ export default function WorkerProfile() {
                   )}
                   <label htmlFor="avatarUpload" className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center transition-all duration-300 backdrop-blur-[2px] cursor-pointer text-white">
                     <Camera size={28} className="mb-2 scale-75 group-hover/avatar:scale-100 transition-transform duration-300" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/90">Update Image</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/90">Change Image</span>
                   </label>
                   <input 
                     type="file" 
@@ -403,7 +403,7 @@ export default function WorkerProfile() {
               >
                 {saving ? (
                   <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</>
-                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Profile'}
+                ) : isUnderage ? 'Cannot Save' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Changes'}
               </button>
             </div>
 
@@ -641,7 +641,7 @@ export default function WorkerProfile() {
             
             <div className="pt-8 border-t border-gray-100 flex justify-end">
               <button type="submit" disabled={isSaveDisabled} className="bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:transform-none">
-                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Profile')}
+                {saving ? 'Saving...' : (isUnderage ? 'Cannot Save (Under 18)' : (!formData.isVerified && requiresTier1 && !isTier1Complete) ? 'Complete Checkboxes' : (!formData.isVerified || isTierUpgradeOrRoleChange) ? 'Apply for Tier Verification' : 'Save Changes')}
               </button>
             </div>
               </form>

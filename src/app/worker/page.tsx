@@ -324,6 +324,8 @@ export default function WorkerDashboard() {
             isRunnerAvailable={isRunnerAvailable}
             onToggle={handleToggleRunner}
             loading={togglingRunner}
+            isVerified={profile?.workerProfile?.isVerified}
+            verificationStatus={profile?.workerProfile?.verificationStatus}
           />
           <Link href="/worker/jobs" className="w-full sm:w-auto">
             <motion.button
@@ -358,8 +360,8 @@ export default function WorkerDashboard() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeMyTasks.map((task) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {activeMyTasks.slice(0, 4).map((task) => {
                   const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
                   const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
 
@@ -461,8 +463,8 @@ export default function WorkerDashboard() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {tasksData.pending.map((task) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {tasksData.pending.slice(0, 4).map((task) => {
                   const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
                   const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
 
@@ -642,7 +644,7 @@ export default function WorkerDashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
