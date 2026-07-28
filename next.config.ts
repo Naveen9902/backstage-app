@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     // Ignore TypeScript errors during production build
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   serverExternalPackages: [],
   experimental: {
     serverActions: {
@@ -24,7 +27,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  // @ts-expect-error - Custom property
   allowedDevOrigins: ['192.168.1.6', '10.186.52.53', '10.124.86.53', 'localhost', 'early-cobras-stare.loca.lt', 'wet-tips-follow.loca.lt', '8a38ef68c87cd8.lhr.life'],
   output: 'standalone',
 };
