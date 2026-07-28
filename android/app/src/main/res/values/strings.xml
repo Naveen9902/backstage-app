@@ -4,4 +4,5 @@
     <string name="title_activity_main">Backstage Ops</string>
     <string name="package_name">com.backstage.ops</string>
     <string name="custom_url_scheme">com.backstage.ops</string>
+    <string name="server_client_id">785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com</string>
 </resources>
