@@ -437,7 +437,7 @@ export default function WorkerProfile() {
                     </div>
                   ) : (
                     <button type="button" onClick={handleVerifyIdentity} disabled={saving} className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#CD7F32] text-white hover:bg-[#a86524] transition-colors shadow-sm flex items-center gap-1">
-                      {formData.verificationStatus === 'PENDING' && !formData.isVerified && formData.name ? 'Verify Identity & Background Check' : 'Verification Failed - Retry'}
+                      Apply for Verification
                     </button>
                   )}
                   {formData.rating > 0 && (

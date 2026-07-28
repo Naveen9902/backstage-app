@@ -25,7 +25,7 @@ export async function GET() {
         workerProfile: {
           include: {
             user: {
-              select: { name: true, email: true }
+              select: { name: true, email: true, avatarUrl: true }
             }
           }
         },
