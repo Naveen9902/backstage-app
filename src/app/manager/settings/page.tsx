@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -122,36 +123,6 @@ export default function SettingsPage() {
       }
     } catch (err) {
       setPasswordStatus({ type: 'error', message: 'An unexpected error occurred' });
-    } finally {
-      setUpdatingPassword(false);
-    }
-  };
-
-  const [deletingAccount, setDeletingAccount] = useState(false);
-
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you ABSOLUTELY sure? This action cannot be undone. All your events and data will be permanently deleted.")) {
-      return;
-    }
-    
-    setDeletingAccount(true);
-    try {
-      const res = await fetch('/api/user/profile', { method: 'DELETE' });
-      const data = await res.json();
-      if (res.ok) {
-        alert("Your account has been deleted.");
-        router.push('/');
-        router.refresh();
-      } else {
-        alert(data.error || "Failed to delete account");
-        setDeletingAccount(false);
-      }
-    } catch (err) {
-      alert("An error occurred while deleting account.");
-      setDeletingAccount(false);
-    }
-  };
-
   return (
     <div className="text-[#242424] max-w-4xl">
       <div className="mb-8">
@@ -315,21 +286,12 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Danger Zone */}
+        {/* SMALL DELETE BUTTON */}
         <div className="mt-8 pt-8 border-t border-red-100 max-w-md">
-          <h3 className="text-xl font-bold font-serif mb-2 text-red-600 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-            Danger Zone
-          </h3>
-          <p className="text-sm text-gray-500 mb-6 font-medium">Permanently delete your Back Stage manager account, including all your events, chats, and data. This action cannot be undone.</p>
-          <button 
-            onClick={handleDeleteAccount} 
-            disabled={deletingAccount} 
-            className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-            {deletingAccount ? 'Deleting...' : 'Delete My Account'}
-          </button>
+          <Link href="/delete-account" className="inline-flex bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm border border-red-100 items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            Delete Account
+          </Link>
         </div>
 
       </motion.div>

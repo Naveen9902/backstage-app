@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 const TIER_CATEGORIES = {
   'Tier 1': [
@@ -244,48 +245,6 @@ export default function WorkerProfile() {
   };
 
   const handleApplyForVerification = async () => {
-    setVerifyingTier(true);
-    try {
-      const res = await fetch('/api/worker/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          requestedTier: formData.tier,
-          verificationStatus: 'PENDING'
-        })
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setFormData(prev => ({ ...prev, verificationStatus: 'PENDING', requestedTier: formData.tier }));
-        alert('Sent for verification!');
-        window.dispatchEvent(new Event('profileUpdated'));
-      } else {
-        alert('Failed to submit for verification.');
-      }
-    } catch (e) {
-      alert('An error occurred submitting for verification.');
-    }
-    setVerifyingTier(false);
-  };
-
-  const handleDeleteAccount = async () => {
-    if (confirm("DANGER: Are you sure you want to permanently delete your account? This action cannot be undone.")) {
-      setSaving(true);
-      try {
-        const res = await fetch('/api/user/profile', { method: 'DELETE' });
-        if (res.ok) {
-          window.location.href = '/';
-        } else {
-          alert('Failed to delete account');
-          setSaving(false);
-        }
-      } catch (e) {
-        alert('An error occurred');
-        setSaving(false);
-      }
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -822,22 +781,12 @@ export default function WorkerProfile() {
             )}
           </div>
         </div>
-        
-        
-      {/* TIER MODAL REMOVED (NOW INLINE) */}
-      <div className="lg:col-span-3 mt-8 mb-12 p-8 bg-[#111111] border border-[#CD7F32]/50 rounded-[2rem] w-full shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#CD7F32]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="relative z-10">
-            <h3 className="font-black text-[#CD7F32] text-xl mb-2 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-              DANGER ZONE
-            </h3>
-            <p className="text-[#EAE6DF] text-sm mb-6 font-medium max-w-2xl">Permanently delete your Back Stage worker account, including all your applications, chats, and profile data. This action cannot be undone and all data will be permanently wiped.</p>
-            <button onClick={handleDeleteAccount} disabled={saving} className="px-8 py-3 bg-gradient-to-r from-[#CD7F32] to-[#a86524] text-black font-black rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-[0_0_15px_rgba(205,127,50,0.5)] disabled:opacity-50 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-              Delete My Account Permanently
-            </button>
-          </div>
+        {/* SMALL DELETE BUTTON */}
+        <div className="lg:col-span-3 mt-4 mb-8 flex justify-end">
+          <Link href="/delete-account" className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors shadow-sm border border-red-100 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            Delete Account
+          </Link>
         </div>
 
       </div>
