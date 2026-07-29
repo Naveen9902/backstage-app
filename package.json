@@ -42,10 +42,10 @@
     "otplib": "^13.4.1",
     "pg": "^8.22.0",
     "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
-    "stripe": "^22.3.2",
     "twilio": "^6.0.2",
     "web-push": "^3.6.7"
   },

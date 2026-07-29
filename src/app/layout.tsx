@@ -4,6 +4,7 @@ import "./globals.css";
 import CapacitorAppLogic from "@/components/CapacitorAppLogic";
 import FlavorSetter from "@/components/FlavorSetter";
 import { Suspense } from "react";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,6 +86,7 @@ export default function RootLayout({
           <FlavorSetter />
         </Suspense>
         {children}
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );

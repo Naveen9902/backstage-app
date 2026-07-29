@@ -54,8 +54,8 @@ export default function WorkerProfile() {
     isRunnerAvailable: false,
     isVerified: false,
     rating: 0,
-    stripeAccountStatus: 'PENDING',
-    stripeAccountId: null as string | null,
+    razorpayAccountStatus: 'PENDING',
+    razorpayAccountId: null as string | null,
     verificationStatus: 'PENDING',
     requestedTier: '',
     originalTier: '',
@@ -105,8 +105,8 @@ export default function WorkerProfile() {
             isRunnerAvailable: data.workerProfile?.isRunnerAvailable || false,
             isVerified: data.workerProfile?.isVerified || false,
             rating: data.workerProfile?.rating || 0,
-            stripeAccountStatus: data.workerProfile?.stripeAccountStatus || 'PENDING',
-            stripeAccountId: data.workerProfile?.stripeAccountId || null,
+            razorpayAccountStatus: data.workerProfile?.razorpayAccountStatus || 'PENDING',
+            razorpayAccountId: data.workerProfile?.razorpayAccountId || null,
             verificationStatus: data.workerProfile?.verificationStatus || 'PENDING',
             requestedTier: data.workerProfile?.requestedTier || '',
             originalTier: data.workerProfile?.tier || '',
@@ -155,15 +155,23 @@ export default function WorkerProfile() {
     }
   };
 
-  const handleVerifyIdentity = async () => {
+  const handleRazorpayOnboard = async () => {
     try {
       setSaving(true);
-      const res = await fetch('/api/stripe/identity', { method: 'POST' });
-      const data = await res.json();
+      // We pass the worker profile id to our Razorpay onboarding API
+      // Wait, we don't have the workerId locally easily accessible unless we fetch it from formData. 
+      // Actually, the API can figure it out from the session token! 
+      // Let's modify our Razorpay API to use cookies instead if possible. 
+      // But we passed workerProfileId to it... let's check.
+      const res = await fetch('/api/worker/profile');
+      const profileData = await res.json();
+      
+      const rzpRes = await fetch(`/api/razorpay/onboard?workerProfileId=${profileData.workerProfile.id}`, { method: 'POST' });
+      const data = await rzpRes.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        setMessage(data.error || 'Failed to start verification.');
+        setMessage(data.error || 'Failed to start Razorpay onboarding.');
         setSaving(false);
       }
     } catch (err) {
@@ -662,6 +670,30 @@ export default function WorkerProfile() {
                       </div>
                     </div>
                   )}
+
+                  {/* Razorpay Onboarding */}
+                  <div className="md:col-span-2 mt-4 space-y-3 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h4 className="font-bold text-lg text-gray-900 border-b border-gray-100 pb-2 mb-4">Payout Settings</h4>
+                    <p className="text-sm text-gray-600 mb-4">You must link a bank account via Razorpay to receive payouts for your work.</p>
+                    
+                    <div className="flex items-center gap-4">
+                      {formData.razorpayAccountStatus === 'ACTIVE' ? (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg font-bold text-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          Razorpay Linked
+                        </div>
+                      ) : (
+                        <button 
+                          type="button"
+                          onClick={handleRazorpayOnboard} 
+                          disabled={saving}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg transition-colors shadow-sm"
+                        >
+                          Link Bank Account (Razorpay)
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="md:col-span-2 mt-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
                     <h4 className="font-bold text-sm text-gray-800 mb-2">Required Agreements</h4>
