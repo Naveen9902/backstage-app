@@ -2,6 +2,7 @@ services:
   - type: web
     name: backstage-app
     env: node
+    plan: free
     # Build Command
     buildCommand: npm install && npm run build
     # Start Command
