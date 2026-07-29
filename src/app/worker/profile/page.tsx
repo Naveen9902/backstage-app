@@ -245,7 +245,30 @@ export default function WorkerProfile() {
   };
 
   const handleApplyForVerification = async () => {
-
+    setVerifyingTier(true);
+    try {
+      const res = await fetch('/api/worker/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          requestedTier: formData.tier,
+          verificationStatus: 'PENDING'
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setFormData(prev => ({ ...prev, verificationStatus: 'PENDING', requestedTier: formData.tier }));
+        alert('Sent for verification!');
+        window.dispatchEvent(new Event('profileUpdated'));
+      } else {
+        alert('Failed to submit for verification.');
+      }
+    } catch (e) {
+      alert('An error occurred submitting for verification.');
+    }
+    setVerifyingTier(false);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

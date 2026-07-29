@@ -123,6 +123,11 @@ export default function SettingsPage() {
       }
     } catch (err) {
       setPasswordStatus({ type: 'error', message: 'An unexpected error occurred' });
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   return (
     <div className="text-[#242424] max-w-4xl">
       <div className="mb-8">
