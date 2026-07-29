@@ -1,4 +1,5 @@
 'use client';
+// Force Vercel cache bust for useEffect bug
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
