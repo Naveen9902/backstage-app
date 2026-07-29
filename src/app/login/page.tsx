@@ -44,10 +44,10 @@ export default function Login() {
             return;
           }
 
-          if (role === 'ADMIN') window.location.href = '/admin';
-          else if (role === 'MANAGER') window.location.href = '/manager/dashboard';
-          else if (role === 'USER') window.location.href = '/user';
-          else window.location.href = '/worker';
+          if (role === 'ADMIN') router.replace('/admin');
+          else if (role === 'MANAGER') router.replace('/manager/dashboard');
+          else if (role === 'USER') router.replace('/user');
+          else router.replace('/worker');
         }
       })
       .catch(() => {});
@@ -78,13 +78,13 @@ export default function Login() {
         if (data.requires2FA) {
           setRequires2FA(true);
         } else if (data.role === 'ADMIN') {
-          window.location.href = '/admin';
+          router.replace('/admin');
         } else if (data.role === 'MANAGER') {
-          window.location.href = '/manager/dashboard';
+          router.replace('/manager/dashboard');
         } else if (data.role === 'USER') {
-          window.location.href = '/user';
+          router.replace('/user');
         } else {
-          window.location.href = '/worker';
+          router.replace('/worker');
         }
       } else {
         setError(data.error || 'Login failed');
@@ -122,10 +122,10 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
-        if (data.role === 'ADMIN') window.location.href = '/admin';
-        else if (data.role === 'MANAGER') window.location.href = '/manager/dashboard';
-        else if (data.role === 'USER') window.location.href = '/user';
-        else window.location.href = '/worker';
+        if (data.role === 'ADMIN') router.replace('/admin');
+        else if (data.role === 'MANAGER') router.replace('/manager/dashboard');
+        else if (data.role === 'USER') router.replace('/user');
+        else router.replace('/worker');
       } else {
         setError(data.error || 'Invalid 2FA code');
       }
@@ -279,7 +279,7 @@ export default function Login() {
                             });
                             const data = await res.json();
                             if (res.ok && data.success) {
-                              window.location.href = data.redirectUrl || '/user';
+                              router.replace(data.redirectUrl || '/user');
                             } else {
                               setError(data.error || 'Native Google Auth Failed');
                             }

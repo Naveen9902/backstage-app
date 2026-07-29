@@ -81,7 +81,7 @@ export default function AppGateway() {
   const handleSplashComplete = () => {
     // If the animation finishes and we have a redirect ready, go there!
     if (redirectUrl && !checkingAuth) {
-      window.location.href = redirectUrl;
+      router.replace(redirectUrl);
     } else if (!checkingAuth) {
       setShowSplash(false);
     }
@@ -92,7 +92,7 @@ export default function AppGateway() {
   useEffect(() => {
     // Edge case: Auth check took longer than the 5-second splash screen
     if (!showSplash && !checkingAuth && redirectUrl) {
-      window.location.href = redirectUrl;
+      router.replace(redirectUrl);
     }
   }, [showSplash, checkingAuth, redirectUrl]);
 
