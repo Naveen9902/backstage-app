@@ -11,16 +11,18 @@ export async function GET(req: Request) {
   const [action, roleStateStr] = rawState.includes('_') ? rawState.split('_') : ['login', rawState];
   const roleState = (roleStateStr as Role) || 'WORKER';
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
+
   if (!code) {
-    return NextResponse.redirect(`${url.origin}/login?error=NoCode`);
+    return NextResponse.redirect(`${baseUrl}/login?error=NoCode`);
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = `${url.origin}/api/auth/google/callback`;
+  const redirectUri = `${baseUrl}/api/auth/google/callback`;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(`${url.origin}/login?error=GoogleNotConfigured`);
+    return NextResponse.redirect(`${baseUrl}/login?error=GoogleNotConfigured`);
   }
 
   try {
@@ -171,9 +173,9 @@ export async function GET(req: Request) {
       'ADMIN': '/admin'
     };
 
-    return NextResponse.redirect(`${url.origin}${redirectMap[user.role] || '/'}`);
+    return NextResponse.redirect(`${baseUrl}${redirectMap[user.role] || '/'}`);
   } catch (error) {
     console.error('OAuth Callback Error:', error);
-    return NextResponse.redirect(`${url.origin}/login?error=OAuthFailed`);
+    return NextResponse.redirect(`${baseUrl}/login?error=OAuthFailed`);
   }
 }

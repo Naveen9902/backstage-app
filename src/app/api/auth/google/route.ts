@@ -8,7 +8,8 @@ export async function GET(req: Request) {
   const state = `${action}_${role}`;
   
   const clientId = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri = `${url.origin}/api/auth/google/callback`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
+  const redirectUri = `${baseUrl}/api/auth/google/callback`;
 
   if (!clientId) {
     return NextResponse.json({ error: 'Google Client ID is not configured' }, { status: 500 });
