@@ -58,7 +58,7 @@ export default function GlobalNotificationListener({ currentUser }: { currentUse
           "Please verify your phone number to secure your account and access all features.",
           999999
         );
-      }, 5000); // 5 seconds after load
+      }, 60000); // 5 seconds after load
     }
 
     // Prepare channels

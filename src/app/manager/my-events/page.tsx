@@ -45,7 +45,7 @@ export default function MyEvents() {
 
   useEffect(() => {
     fetchEvents();
-    const interval = setInterval(fetchEvents, 5000);
+    const interval = setInterval(fetchEvents, 60000);
     return () => clearInterval(interval);
   }, []);
 

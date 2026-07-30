@@ -3,28 +3,33 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { Clock, CheckCircle2 } from 'lucide-react';
 
 export default function ManagerDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [eventsData, setEventsData] = useState<any[]>([]);
   const [appsData, setAppsData] = useState<any[]>([]);
+  const [runnersData, setRunnersData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
-      const [profileRes, eventsRes, appsRes] = await Promise.all([
+      const [profileRes, eventsRes, appsRes, runnersRes] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`),
         fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`)
       ]);
 
       const profData = await profileRes.json();
       const evData = await eventsRes.json();
       const appData = await appsRes.json();
+      const runData = await runnersRes.json();
 
       setProfile(profData);
       if (Array.isArray(evData)) setEventsData(evData);
       if (Array.isArray(appData)) setAppsData(appData);
+      if (runData && Array.isArray(runData.dispatches)) setRunnersData(runData.dispatches);
     } catch (err) {
       console.error('Dashboard fetch error:', err);
     } finally {
@@ -34,7 +39,7 @@ export default function ManagerDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 5000); // Poll every 5s
+    const interval = setInterval(fetchDashboardData, 60000); // Poll every 5s
     return () => clearInterval(interval);
   }, []);
 
@@ -43,6 +48,7 @@ export default function ManagerDashboard() {
   const liveEvents = eventsData.filter(e => e.status === 'ONGOING');
   const completedEvents = eventsData.filter(e => e.status === 'COMPLETED').length;
   const upcomingEvents = eventsData.filter(e => !e.status || e.status === 'UPCOMING').length;
+  const completedRunnersTasks = runnersData.filter(d => d.status === 'Completed');
   const totalJobs = eventsData.reduce((sum, ev) =>
     sum + (Array.isArray(ev.staffingRequests) ? ev.staffingRequests.reduce((s: number, r: any) => s + (r.quantity || 0), 0) : 0), 0);
   const totalApps = appsData.length;
@@ -261,6 +267,100 @@ export default function ManagerDashboard() {
               </div>
             )}
           </div>
+
+          {/* Day-Wise Completed Tasks & Errand History */}
+          {completedRunnersTasks.length > 0 && (
+            <div className="mt-12 mb-8 bg-white rounded-3xl p-6 md:p-8 text-gray-900 shadow-xl border border-gray-200">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 flex-wrap gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <h2 className="text-xl md:text-2xl font-extrabold font-serif tracking-tight text-gray-900 flex items-center gap-2">
+                    📜 Completed Runner Tasks & Errand History
+                  </h2>
+                </div>
+                <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-mono">
+                  {completedRunnersTasks.length} Completed Total
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {Object.entries(
+                  completedRunnersTasks.reduce((acc: { [key: string]: any[] }, task: any) => {
+                    const dateStr = new Date(task.updatedAt || task.createdAt).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    });
+                    if (!acc[dateStr]) acc[dateStr] = [];
+                    acc[dateStr].push(task);
+                    return acc;
+                  }, {})
+                ).map(([dayLabel, dayTasks]) => (
+                  <div key={dayLabel} className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-extrabold text-gray-500 uppercase tracking-widest bg-gray-100 px-3.5 py-1.5 rounded-xl w-fit font-mono">
+                      <span>📅 {dayLabel}</span>
+                      <span className="text-gray-400">({(dayTasks as any[]).length})</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(dayTasks as any[]).map((task: any) => {
+                        const isExternalErrand = (task.price !== null && task.price !== undefined) || (task.task && task.task.startsWith('[EXTERNAL/ERRAND]'));
+                        const cleanTask = task.task ? task.task.replace('[EXTERNAL/ERRAND] ', '') : '';
+
+                        return (
+                          <div
+                            key={task.id}
+                            className="bg-gray-50 hover:bg-white rounded-2xl p-4.5 border border-gray-200 hover:border-[#CD7F32]/50 transition-all shadow-2xs hover:shadow-md flex flex-col justify-between"
+                          >
+                            <div>
+                              <div className="flex justify-between items-start mb-2 gap-2">
+                                <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                                  isExternalErrand ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {isExternalErrand ? '⚡ External Errand' : task.event?.title || 'Event Task'}
+                                </span>
+                                <span className="text-[11px] font-mono text-gray-400 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {new Date(task.updatedAt || task.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-extrabold text-gray-900 mb-2 line-clamp-2 leading-snug">{cleanTask}</h4>
+                            </div>
+
+                            <div className="pt-3 border-t border-gray-200/60 mt-2 flex items-center justify-between gap-2 flex-wrap">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-gray-500 font-medium">Runner:</span>
+                                <span className="text-[10px] font-bold bg-gray-200 text-gray-800 px-2 py-0.5 rounded">{task.runner?.name || 'Unknown'}</span>
+                              </div>
+                              {task.price !== null && task.price !== undefined ? (
+                                <div className="flex items-center gap-2">
+                                  {task.paymentStatus === 'CONFIRMED' ? (
+                                    <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md text-[10px] font-extrabold font-mono">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Paid ₹{task.price}
+                                    </span>
+                                  ) : task.paymentStatus === 'SENT' ? (
+                                    <span className="inline-flex items-center gap-1 bg-[#CD7F32]/10 text-[#CD7F32] border border-[#CD7F32]/30 px-2 py-0.5 rounded-md text-[10px] font-extrabold font-mono">
+                                      <CheckCircle2 className="w-3 h-3 text-[#CD7F32]" /> Payment Sent ₹{task.price}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                      Pending Pay ₹{task.price}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-gray-400">No fee specified</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

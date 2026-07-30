@@ -203,7 +203,7 @@ export default function LiveRunnersBoard() {
     // Fallback: poll every 5 seconds just in case Realtime isn't enabled on the table
     const pollInterval = setInterval(() => {
       fetchTasks();
-    }, 5000);
+    }, 60000);
 
     return () => {
       supabase.removeChannel(channel);

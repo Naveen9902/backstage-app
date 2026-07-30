@@ -79,7 +79,7 @@ export default function RunnersPage() {
     // Fallback: poll every 5 seconds just in case Realtime isn't enabled on the table
     const pollInterval = setInterval(() => {
       fetchDispatches();
-    }, 5000);
+    }, 60000);
 
     return () => {
       supabase.removeChannel(channel);

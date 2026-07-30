@@ -107,6 +107,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
         <div className="p-4 mt-auto border-t border-white/10">
           <button 
             onClick={async () => {
+              try { localStorage.removeItem('backstage_user_session'); } catch (e) {}
               await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
               window.location.href = '/';
             }}
@@ -154,6 +155,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
             <NotificationBell />
             <button
               onClick={async () => {
+                try { localStorage.removeItem('backstage_user_session'); } catch (e) {}
                 await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
                 window.location.href = '/';
               }}
