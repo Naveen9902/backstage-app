@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
   },
   turbopack: {},
   images: {
-    unoptimized: isCapacitor,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
