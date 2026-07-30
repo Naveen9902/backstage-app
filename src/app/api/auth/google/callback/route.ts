@@ -136,7 +136,7 @@ export async function GET(req: Request) {
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
+      sameSite: 'none' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 365 * 100,
       expires: new Date(2100, 0, 1)

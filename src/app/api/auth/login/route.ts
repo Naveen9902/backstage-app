@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       response.cookies.set('temp2faUserId', user.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: 'none',
         path: '/',
         maxAge: 300 // 5 minutes
       });
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
+        sameSite: 'none' as const,
         path: '/',
         maxAge: 60 * 60 * 24 * 365 * 100,
         expires: new Date(2100, 0, 1)
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
+      sameSite: 'none' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 365 * 100,
       expires: new Date(2100, 0, 1)
