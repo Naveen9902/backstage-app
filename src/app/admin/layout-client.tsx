@@ -7,8 +7,31 @@ import ThemeToggle from '@/components/ThemeToggle';
 import NotificationBell from '@/components/NotificationBell';
 import Logo from '@/components/Logo';
 
-export default function AdminLayoutClient({ children, user }: { children: React.ReactNode, user: any }) {
+import { useEffect, useState } from 'react';
+
+export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const sessionStr = localStorage.getItem('backstage_user_session');
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr);
+        if (session.role !== 'ADMIN') {
+          window.location.href = `/${session.role.toLowerCase()}`;
+        } else {
+          setUser(session);
+        }
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    } else {
+      window.location.href = '/login';
+    }
+  }, []);
+
+  if (!user) return <div className="min-h-screen bg-[var(--background)]"></div>;
 
   const menuItems = [
     { name: 'Overview', path: '/admin', icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> },

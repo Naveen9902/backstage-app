@@ -1,22 +1,21 @@
+'use client';
 import Navbar from '@/components/Navbar';
-import prisma from '@/lib/prisma';
 import EventsFilters from '@/components/EventsFilters';
+import { useState, useEffect } from 'react';
 
-export const dynamic = 'force-dynamic';
+export default function EventsPage() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function EventsPage() {
-  const events = await prisma.event.findMany({
-    orderBy: { date: 'asc' },
-    select: {
-      id: true,
-      title: true,
-      location: true,
-      status: true,
-      attendeeCategory: true,
-      tags: true,
-      coverImageUrl: true,
-    }
-  });
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/all`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setEvents(data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="font-sans">
@@ -25,7 +24,13 @@ export default async function EventsPage() {
       </div>
       
       {/* Client Component for Search, Filters, and Grid */}
-      <EventsFilters events={events} />
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="w-8 h-8 border-4 border-[#CD7F32] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : (
+        <EventsFilters events={events} />
+      )}
     </div>
   );
 }
