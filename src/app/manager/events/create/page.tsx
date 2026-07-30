@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Play, Film, Image as ImageIcon, Sparkles, MapPin, Calendar, Clock, Globe } from 'lucide-react';
+import { Play, Image as ImageIcon, Sparkles, MapPin, Calendar, Clock, Globe } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function CreateEvent() {
@@ -17,7 +17,6 @@ export default function CreateEvent() {
     location: '',
     description: '',
     coverImageUrl: '',
-    videoUrl: '',
     attendeeCategory: 'Music & entertainment',
     tags: '',
     language: 'English',
@@ -324,20 +323,6 @@ export default function CreateEvent() {
                     </div>
                   </div>
 
-                  {/* Video URL */}
-                  <div className="md:col-span-2">
-                    <label className={labelClasses}>Teaser Video (Past event video)</label>
-                    <div className="relative">
-                      <Film className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input 
-                        type="file" 
-                        accept="video/*"
-                        onChange={(e) => handleFileUpload(e, 'videoUrl')}
-                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
-                      />
-                    </div>
-                  </div>
-
                   {/* Social Link */}
                   <div className="md:col-span-2">
                     <label className={labelClasses}>Social Link</label>
@@ -474,24 +459,6 @@ export default function CreateEvent() {
                     <span className="line-clamp-1">{formData.location || 'Venue / City'}</span>
                   </div>
                 </div>
-
-                {/* Video Player Preview */}
-                {formData.videoUrl && (
-                  <div className="space-y-3">
-                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                      <Film className="w-3.5 h-3.5" /> Teaser Video
-                    </h4>
-                    <div className="aspect-[16/9] w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-md">
-                      <video 
-                        src={formData.videoUrl} 
-                        className="w-full h-full object-cover" 
-                        controls 
-                        muted
-                        key={formData.videoUrl} 
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Artists Preview */}
                 {formData.bands && (

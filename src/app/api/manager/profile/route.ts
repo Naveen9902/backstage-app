@@ -1,39 +1,17 @@
 import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    let isManager = false;
     const userId = await getAuthUserId();
-    if (userId) {
-      isManager = true;
-    } else {
-      userId = cookieStore.get('adminUserId')?.value;
-    }
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Enforce manager session concurrency limits
-    if (isManager) {
-      const sessionToken = cookieStore.get('managerSessionToken')?.value;
-      if (!sessionToken) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      const activeSession = await prisma.session.findUnique({
-        where: { token: sessionToken }
-      });
-      if (!activeSession || activeSession.userId !== userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    }
-
-    // Fetch user with their profile
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {

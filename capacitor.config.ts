@@ -6,6 +6,19 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     errorPath: 'index.html'
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
+    CapacitorCookies: {
+      enabled: true,
+    },
+    GoogleAuth: {
+      scopes: ["profile", "email"],
+      serverClientId: "785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com",
+      forceCodeForRefreshToken: true
+    }
   }
 };
 

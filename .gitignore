@@ -62,3 +62,6 @@ vercel-logs.txt
 # Local archive backups
 /archives/
 *.csv
+
+# Static export (bundled into APK, not needed in git)
+/out/
