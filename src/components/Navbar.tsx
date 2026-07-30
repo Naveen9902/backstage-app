@@ -13,7 +13,7 @@ export default function Navbar() {
   const [session, setSession] = useState<{loggedIn: boolean, user?: any}>({ loggedIn: false });
 
   useEffect(() => {
-    fetch('/api/auth/me', { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setSession(data))
       .catch(() => {});
@@ -68,7 +68,7 @@ export default function Navbar() {
               </Link>
               <button 
                 onClick={async () => {
-                  await fetch('/api/auth/logout', { method: 'POST' });
+                  await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
                   window.location.href = '/';
                 }}
                 className="text-red-400 hover:text-red-300 text-xs md:text-sm font-semibold transition-colors"

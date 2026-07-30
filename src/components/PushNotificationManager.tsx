@@ -92,7 +92,7 @@ export default function PushNotificationManager() {
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
       setSubscription(sub);
-      await fetch('/api/push/subscribe', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/push/subscribe`, {
         method: 'POST',
         body: JSON.stringify(sub)
       });

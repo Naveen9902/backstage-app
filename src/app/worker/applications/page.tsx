@@ -7,7 +7,7 @@ export default function MyApplications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/worker/applications', { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

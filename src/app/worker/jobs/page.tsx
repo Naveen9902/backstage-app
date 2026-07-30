@@ -24,8 +24,8 @@ export default function FindJobs() {
   const fetchJobs = async () => {
     try {
       const [jobsRes, profileRes] = await Promise.all([
-        fetch('/api/worker/jobs'),
-        fetch('/api/worker/profile')
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/jobs`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
       ]);
       const data = await jobsRes.json();
       const profileData = await profileRes.json();
@@ -52,7 +52,7 @@ export default function FindJobs() {
   const handleApply = async (staffingRequestId: string, customAnswers: string[] = []) => {
     setApplyingTo(staffingRequestId);
     try {
-      const res = await fetch('/api/worker/applications', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ staffingRequestId, answers: customAnswers })

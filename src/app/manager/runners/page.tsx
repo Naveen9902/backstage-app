@@ -43,7 +43,7 @@ export default function RunnersPage() {
   const [submittingDispute, setSubmittingDispute] = useState(false);
 
   const fetchDispatches = () => {
-    fetch('/api/manager/runners').then(res => res.json()).then(data => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`).then(res => res.json()).then(data => {
       if (data) {
         setDispatches(data.dispatches || []);
         setHiredStaff(data.hiredStaff || []);
@@ -53,7 +53,7 @@ export default function RunnersPage() {
   };
 
   useEffect(() => {
-    fetch('/api/manager/events').then(res => res.json()).then(data => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
       if (Array.isArray(data)) {
         const activeEvents = data.filter(ev => ev.status !== 'CANCELLED');
         setEvents(activeEvents);
@@ -92,7 +92,7 @@ export default function RunnersPage() {
     if (!assignModal || !task) return;
     setAssigning(true);
     try {
-      const res = await fetch('/api/manager/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,7 +117,7 @@ export default function RunnersPage() {
 
   const handleSendPayment = async (dispatchId: string) => {
     try {
-      const res = await fetch('/api/manager/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'pay' })
@@ -139,7 +139,7 @@ export default function RunnersPage() {
     if (!reviewModal) return;
     setSubmittingReview(true);
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -170,7 +170,7 @@ export default function RunnersPage() {
     if (!disputeModal || !disputeDesc) return;
     setSubmittingDispute(true);
     try {
-      const res = await fetch('/api/disputes', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

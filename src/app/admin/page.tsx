@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [listLoading, setListLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/metrics', { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/metrics`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (!data.error) setMetrics(data);

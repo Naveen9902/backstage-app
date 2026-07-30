@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 import { withBetterStack } from "@logtail/next";
 
+const isCapacitor = process.env.CAPACITOR_BUILD === 'true';
+
 const nextConfig: NextConfig = {
+  output: isCapacitor ? 'export' : undefined,
   typescript: {
     // Ignore TypeScript errors during production build
     ignoreBuildErrors: true,
@@ -16,6 +19,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    unoptimized: isCapacitor,
     remotePatterns: [
       {
         protocol: 'https',

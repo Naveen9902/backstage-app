@@ -9,7 +9,7 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/user/community')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/community`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

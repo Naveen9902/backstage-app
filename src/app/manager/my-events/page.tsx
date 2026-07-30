@@ -27,12 +27,12 @@ export default function MyEvents() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch('/api/manager/events');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`);
       if (res.ok) {
         const data = await res.json();
         setEvents(data);
       }
-      const reviewsRes = await fetch('/api/reviews?type=given');
+      const reviewsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`);
       if (reviewsRes.ok) {
         const reviewsData = await reviewsRes.json();
         setReviews(reviewsData);
@@ -54,7 +54,7 @@ export default function MyEvents() {
     const newStatus = isLive ? 'UPCOMING' : 'ONGOING';
     setToggling(event.id + '_live');
     try {
-      const res = await fetch('/api/manager/events', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: event.id, status: newStatus })
@@ -70,7 +70,7 @@ export default function MyEvents() {
     if (!confirm(`Close "${event.title}"? This marks it as COMPLETED and workers will be notified.`)) return;
     setToggling(event.id + '_close');
     try {
-      const res = await fetch('/api/manager/events', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: event.id, status: 'COMPLETED' })
@@ -84,7 +84,7 @@ export default function MyEvents() {
 
   const openRatingModal = async (eventId: string) => {
     try {
-      const res = await fetch(`/api/manager/events/${eventId}/staffing`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
       if (res.ok) {
         const reqs = await res.json();
         const workers: any[] = [];
@@ -122,7 +122,7 @@ export default function MyEvents() {
     
     setSubmittingRating(true);
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -430,7 +430,7 @@ export default function MyEvents() {
                             <button
                               disabled={!worker.checkOutTime}
                               onClick={() => {
-                                fetch(`/api/manager/applications/${worker.applicationId}/status`, {
+                                fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${worker.applicationId}/status`, {
                                   method: 'PATCH',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ status: 'PAID' })

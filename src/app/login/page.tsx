@@ -23,7 +23,7 @@ export default function Login() {
     }
   }, []);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start loading as true to check session first
   const [error, setError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +31,23 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
 
   useEffect(() => {
-    fetch('/api/auth/me', { cache: 'no-store' })
+    // Quick synchronous check
+    if (typeof window !== 'undefined') {
+      try {
+        const session = localStorage.getItem('backstage_user_session');
+        if (session) {
+          const parsed = JSON.parse(session);
+          if (parsed && parsed.role) {
+            if (parsed.role === 'ADMIN') router.replace('/admin');
+            else if (parsed.role === 'MANAGER') router.replace('/manager/dashboard');
+            else if (parsed.role === 'USER') router.replace('/user');
+            else router.replace('/worker');
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {
@@ -39,7 +55,7 @@ export default function Login() {
           
           // Block Fan (USER) from accessing OPS App
           if (appFlavor === 'OPS' && role === 'USER') {
-            fetch('/api/auth/logout', { method: 'POST' });
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
             setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
             return;
           }
@@ -50,14 +66,15 @@ export default function Login() {
           else router.replace('/worker');
         }
       })
-      .catch(() => {});
-  }, [appFlavor]);
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [appFlavor, router]);
 
   const executeLoginWithEmail = async (emailToUse: string, passToUse: string) => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailToUse, password: passToUse })
@@ -66,7 +83,7 @@ export default function Login() {
       if (res.ok) {
         // Block Fan (USER) from accessing OPS App
         if (appFlavor === 'OPS' && data.role === 'USER') {
-          await fetch('/api/auth/logout', { method: 'POST' });
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
           setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
           setLoading(false);
           return;
@@ -115,7 +132,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/auth/login/verify-2fa', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login/verify-2fa`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: otpCode })
@@ -267,7 +284,7 @@ export default function Login() {
                           
                           const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                           if (result.authentication?.idToken) {
-                            const res = await fetch('/api/auth/google/native', {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ 

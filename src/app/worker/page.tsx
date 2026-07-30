@@ -134,10 +134,10 @@ export default function WorkerDashboard() {
   const fetchData = async () => {
     try {
       const [profRes, appsRes, liveRes, runnersRes] = await Promise.all([
-        fetch('/api/worker/profile', { cache: 'no-store' }),
-        fetch('/api/worker/applications', { cache: 'no-store' }),
-        fetch('/api/events/live', { cache: 'no-store' }),
-        fetch('/api/worker/runners', { cache: 'no-store' })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, { cache: 'no-store' }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/live`, { cache: 'no-store' }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, { cache: 'no-store' })
       ]);
       const profData = await profRes.json();
       const appsData = await appsRes.json();
@@ -166,7 +166,7 @@ export default function WorkerDashboard() {
   const handleToggleRunner = async (newVal: boolean) => {
     setTogglingRunner(true);
     try {
-      const res = await fetch('/api/worker/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRunnerAvailable: newVal })
@@ -189,7 +189,7 @@ export default function WorkerDashboard() {
   const handleAccept = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch('/api/worker/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'accept' })
@@ -209,7 +209,7 @@ export default function WorkerDashboard() {
   const handleComplete = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch('/api/worker/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'complete' })
@@ -229,7 +229,7 @@ export default function WorkerDashboard() {
   const handleConfirmPayment = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch('/api/worker/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'confirm_payment' })

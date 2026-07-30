@@ -31,7 +31,7 @@ export default function CreateEvent() {
 
   useEffect(() => {
     // Check if manager is verified
-    fetch('/api/manager/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error && data.managerProfile) {
@@ -49,7 +49,7 @@ export default function CreateEvent() {
     setError('');
 
     try {
-      const res = await fetch('/api/manager/events', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

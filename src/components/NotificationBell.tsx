@@ -13,7 +13,7 @@ export default function NotificationBell() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('/api/notifications');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/notifications`);
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);
@@ -22,7 +22,7 @@ export default function NotificationBell() {
           setUserId(data[0].userId);
         } else {
           // If no notifications, try to fetch current user to get ID for realtime filtering
-          const meRes = await fetch('/api/auth/me', { cache: 'no-store' });
+          const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' });
           if (meRes.ok) {
             const meData = await meRes.json();
             if (meData.user?.id) setUserId(meData.user.id);
@@ -86,7 +86,7 @@ export default function NotificationBell() {
     if (unreadIds.length === 0) return;
 
     try {
-      await fetch('/api/notifications', {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/notifications`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationIds: unreadIds })

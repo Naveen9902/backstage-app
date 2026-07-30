@@ -21,8 +21,8 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
     const fetchData = async () => {
       try {
         const [eventRes, profileRes] = await Promise.all([
-          fetch(`/api/user/events/${eventId}`),
-          fetch('/api/worker/profile')
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
         ]);
         
         if (!eventRes.ok) throw new Error('Failed to fetch event');
@@ -67,7 +67,7 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
   const handleApply = async (staffingRequestId: string, customAnswers: string[] = []) => {
     setApplyingTo(staffingRequestId);
     try {
-      const res = await fetch('/api/worker/applications', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ staffingRequestId, answers: customAnswers })

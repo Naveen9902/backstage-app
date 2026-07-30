@@ -9,7 +9,7 @@ export default function AppUpdateBanner() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    fetch('/api/version')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/version`)
       .then(res => res.json())
       .then(data => {
         if (data && data.build) {

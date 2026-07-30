@@ -14,7 +14,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   const [profile, setProfile] = useState<any>(null);
 
   const fetchProfile = () => {
-    fetch('/api/user/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -98,7 +98,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         <div className="p-4 mt-auto border-t border-white/10">
           <button 
             onClick={async () => {
-              await fetch('/api/auth/logout', { method: 'POST' });
+              await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
               window.location.href = '/';
             }}
             className="flex w-full items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-white/60 hover:text-red-400 hover:bg-red-400/10"
@@ -138,7 +138,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
               <NotificationBell />
               <button
                 onClick={async () => {
-                  await fetch('/api/auth/logout', { method: 'POST' });
+                  await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
                   window.location.href = '/';
                 }}
                 className="md:hidden text-gray-500 hover:text-red-500 p-2"

@@ -45,7 +45,7 @@ export default function UserDashboardEvents() {
 
   useEffect(() => {
     // 1. Fetch current logged in user profile first to restrict saved & joined events to this account only!
-    fetch('/api/user/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(profile => {
         if (profile && profile.id) {
@@ -76,7 +76,7 @@ export default function UserDashboardEvents() {
       .catch(console.error);
 
     // Fetch all events
-    fetch('/api/user/events')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -138,7 +138,7 @@ export default function UserDashboardEvents() {
 
     // Trigger API call in background
     try {
-      await fetch(`/api/user/events/${eventId}/join`, { method: 'POST' });
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
     } catch (err) {
       console.error(err);
     }

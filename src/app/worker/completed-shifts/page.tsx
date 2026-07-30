@@ -23,8 +23,8 @@ export default function WorkerCompletedShifts() {
   const fetchData = async () => {
     try {
       const [appsRes, reviewsRes] = await Promise.all([
-        fetch('/api/worker/applications', { cache: 'no-store' }),
-        fetch('/api/reviews?type=given', { cache: 'no-store' })
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`, { cache: 'no-store' })
       ]);
       
       const appsData = await appsRes.json();
@@ -70,7 +70,7 @@ export default function WorkerCompletedShifts() {
     
     setSubmittingRating(app.id);
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -91,7 +91,7 @@ export default function WorkerCompletedShifts() {
     if (!disputeTarget || !disputeData.reason || !disputeData.description) return;
     setSubmittingDispute(true);
     try {
-      const res = await fetch('/api/disputes', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -117,7 +117,7 @@ export default function WorkerCompletedShifts() {
 
   const handleConfirmPayment = async (appId: string) => {
     try {
-      await fetch(`/api/worker/applications/${appId}/status`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${appId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'PAID' })

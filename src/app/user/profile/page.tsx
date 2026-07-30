@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   useEffect(() => {
-    fetch('/api/user/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(data => {
         if (!data.error) {
@@ -34,7 +34,7 @@ export default function ProfilePage() {
     setSaving(true);
     setMessage('');
     try {
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -62,7 +62,7 @@ export default function ProfilePage() {
     }
     setVerifyingOtp(true);
     try {
-      const res = await fetch('/api/auth/phone/send-otp', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: formData.mobile })
@@ -92,7 +92,7 @@ export default function ProfilePage() {
     }
     setVerifyingOtp(true);
     try {
-      const res = await fetch('/api/auth/phone/verify-otp', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: formData.mobile, code: otpCode })

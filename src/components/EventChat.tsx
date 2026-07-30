@@ -26,7 +26,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`/api/chat/${eventId}?channel=staff-chat`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chat/${eventId}?channel=staff-chat`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -85,7 +85,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
-      const res = await fetch(`/api/chat/${eventId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chat/${eventId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: messageText, channel: 'staff-chat' })

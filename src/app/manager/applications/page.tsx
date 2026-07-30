@@ -10,7 +10,7 @@ export default function ApplicationsPage() {
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/manager/applications')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setApplications(data);
@@ -20,7 +20,7 @@ export default function ApplicationsPage() {
 
   const handleUpdateStatus = async (appId: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/manager/applications/${appId}/status`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${appId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

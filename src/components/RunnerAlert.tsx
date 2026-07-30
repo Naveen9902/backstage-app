@@ -16,7 +16,7 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
 
     const fetchTasks = async () => {
       try {
-        const res = await fetch('/api/worker/runners', { cache: 'no-store' });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setPendingTasks(data.pending || []);
@@ -66,7 +66,7 @@ export default function RunnerAlert({ isRunnerAvailable }: { isRunnerAvailable: 
   const handleAccept = async (dispatchId: string) => {
     setProcessingId(dispatchId);
     try {
-      const res = await fetch('/api/worker/runners', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'accept' })

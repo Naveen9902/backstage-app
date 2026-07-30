@@ -8,7 +8,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/user/notifications')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/notifications`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

@@ -53,7 +53,7 @@ export default function AppGateway() {
     }).catch(() => {});
 
     // 1. Auth Check - Store redirect URL instead of redirecting instantly
-    fetch('/api/auth/me', { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {
@@ -69,8 +69,8 @@ export default function AppGateway() {
 
     // 2. Fetch Events for Web Application Landing Page
     Promise.all([
-      fetch('/api/events/top').then(res => res.json()),
-      fetch('/api/events/live').then(res => res.json())
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/top`).then(res => res.json()),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/live`).then(res => res.json())
     ]).then(([topData, liveData]) => {
       if (Array.isArray(topData)) setTopEvents(topData);
       if (Array.isArray(liveData)) setLiveEvents(liveData);

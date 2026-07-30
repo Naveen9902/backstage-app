@@ -16,7 +16,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
 
   useEffect(() => {
     // 1. Fetch user profile to scope saved events to the current logged-in account
-    fetch('/api/user/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(profile => {
         if (profile && profile.id) {
@@ -44,7 +44,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
       })
       .catch(console.error);
 
-    fetch(`/api/user/events/${eventId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`)
       .then(res => res.json())
       .then(eventData => {
         if (!eventData.error) {
@@ -82,7 +82,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
     }
     setIsJoining(true);
     try {
-      await fetch(`/api/user/events/${eventId}/join`, { method: 'POST' });
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
       setHasJoined(true);
       setIsSaved(true);
       if (typeof window !== 'undefined') {

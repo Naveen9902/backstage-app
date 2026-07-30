@@ -86,7 +86,7 @@ export default function MySchedule() {
   };
 
   const fetchSchedule = () => {
-    fetch('/api/worker/applications', { cache: 'no-store' })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -98,7 +98,7 @@ export default function MySchedule() {
       })
       .catch(() => setLoading(false));
       
-    fetch('/api/reviews?type=given')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setReviews(data);
@@ -115,7 +115,7 @@ export default function MySchedule() {
     if (!ratingTarget || ratingTarget.rating === 0) return;
     setSubmittingRating(true);
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -404,7 +404,7 @@ export default function MySchedule() {
                             {app.status !== 'PAID' ? (
                               <button
                                 onClick={() => {
-                                  fetch(`/api/worker/applications/${app.id}/status`, {
+                                  fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${app.id}/status`, {
                                     method: 'PATCH',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ status: 'PAID' })
@@ -549,7 +549,7 @@ export default function MySchedule() {
                     {showPassModal.status !== 'PAID' ? (
                       <button
                         onClick={() => {
-                          fetch(`/api/worker/applications/${showPassModal.id}/status`, {
+                          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${showPassModal.id}/status`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ status: 'PAID' })

@@ -18,7 +18,7 @@ export default function UserEvents() {
 
   useEffect(() => {
     // 1. Fetch user profile to scope saved events to the current logged-in account
-    fetch('/api/user/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(profile => {
         if (profile && profile.id) {
@@ -46,7 +46,7 @@ export default function UserEvents() {
       })
       .catch(console.error);
 
-    fetch('/api/user/events')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -99,7 +99,7 @@ export default function UserEvents() {
     });
 
     try {
-      await fetch(`/api/user/events/${eventId}/join`, { method: 'POST' });
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
     } catch (err) {}
   };
 

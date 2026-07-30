@@ -2,16 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Eye, EyeOff } from 'lucide-react';
 import F1Background from '@/components/F1Background';
 import { motion } from 'framer-motion';
 
 export default function Register() {
+  const router = useRouter();
   const [appFlavor, setAppFlavor] = useState<string>('USER');
   const [role, setRole] = useState<'WORKER' | 'MANAGER' | 'ADMIN' | 'USER'>('WORKER');
   
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const session = localStorage.getItem('backstage_user_session');
+        if (session) {
+          const parsed = JSON.parse(session);
+          if (parsed && parsed.role) {
+            if (parsed.role === 'ADMIN') router.replace('/admin');
+            else if (parsed.role === 'MANAGER') router.replace('/manager/dashboard');
+            else if (parsed.role === 'USER') router.replace('/user');
+            else router.replace('/worker');
+            return;
+          }
+        }
+      } catch (e) {}
+    }
     let flavor = localStorage.getItem('appFlavor') || process.env.NEXT_PUBLIC_APP_FLAVOR || 'WEB';
     if (typeof window !== 'undefined') {
       const ua = navigator.userAgent;
@@ -54,7 +71,7 @@ export default function Register() {
     setLoading(true);
     try {
       const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email: formData.email, password: formData.password, role, skill: workerSkills.join(', ') })
@@ -268,7 +285,7 @@ export default function Register() {
                     
                     const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                     if (result.authentication?.idToken) {
-                      const res = await fetch('/api/auth/google/native', {
+                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
@@ -291,12 +308,8 @@ export default function Register() {
                   }
                   setLoading(false);
                 } else {
-                  // Web fallback ONLY if we are truly in a desktop browser (or normal web app)
-                  if (typeof window !== 'undefined' && !window.navigator.userAgent.includes('Mobile')) {
-                    window.location.href = `/api/auth/google?role=${role}&action=register`;
-                  } else {
-                    setError('Native Plugin not ready. Please try again.');
-                  }
+                  // Web fallback
+                  window.location.href = `/api/auth/google?role=${role}&action=register`;
                 }
               }}
               className="w-full bg-white text-[#242424] rounded-xl py-3.5 font-bold shadow-lg flex items-center justify-center gap-3 hover:bg-gray-100 hover:scale-[1.02] active:scale-[0.98] transition-all"

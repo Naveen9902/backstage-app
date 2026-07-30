@@ -13,9 +13,9 @@ export default function ManagerDashboard() {
   const fetchDashboardData = async () => {
     try {
       const [profileRes, eventsRes, appsRes] = await Promise.all([
-        fetch('/api/manager/profile'),
-        fetch('/api/manager/events'),
-        fetch('/api/manager/applications')
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`)
       ]);
 
       const profData = await profileRes.json();

@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [myEvents, setMyEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/manager/profile')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -46,13 +46,13 @@ export default function ProfilePage() {
       })
       .catch(() => setLoading(false));
 
-    fetch('/api/reviews?type=received')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=received`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setReviews(data);
       });
 
-    fetch('/api/manager/events')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setMyEvents(data);
@@ -65,7 +65,7 @@ export default function ProfilePage() {
     setMessage('');
     
     try {
-      const res = await fetch('/api/manager/profile', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -88,7 +88,7 @@ export default function ProfilePage() {
     
     try {
       // Step 1: Save the profile first to ensure all latest fields are in DB
-      const saveRes = await fetch('/api/manager/profile', {
+      const saveRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -101,7 +101,7 @@ export default function ProfilePage() {
       }
 
       // Step 2: Request verification
-      const res = await fetch('/api/manager/profile/verify', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile/verify`, {
         method: 'POST'
       });
       const data = await res.json();

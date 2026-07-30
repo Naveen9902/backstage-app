@@ -19,7 +19,7 @@ export default function SearchTalentModal({ eventId, staffingRequestId, roleName
   const fetchTalent = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/manager/events/${eventId}/search-talent?role=${roleName}&tier=${tierFilter}&distance=${distance}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/search-talent?role=${roleName}&tier=${tierFilter}&distance=${distance}`);
       if (res.ok) {
         const data = await res.json();
         setWorkers(data);
@@ -37,7 +37,7 @@ export default function SearchTalentModal({ eventId, staffingRequestId, roleName
 
   const sendInvite = async (workerProfileId: string) => {
     try {
-      const res = await fetch(`/api/manager/events/${eventId}/invite`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerProfileId, staffingRequestId })

@@ -13,7 +13,7 @@ export default function AllDispatchBoardsPage() {
   const [boardHistoryTab, setBoardHistoryTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
 
   const fetchDispatches = () => {
-    fetch('/api/manager/runners').then(res => res.json()).then(data => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`).then(res => res.json()).then(data => {
       if (data) {
         setDispatches(data.dispatches || []);
       }
@@ -21,7 +21,7 @@ export default function AllDispatchBoardsPage() {
   };
 
   useEffect(() => {
-    fetch('/api/manager/events').then(res => res.json()).then(data => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
       if (Array.isArray(data)) {
         setEvents(data.filter(ev => ev.status !== 'CANCELLED'));
       }
