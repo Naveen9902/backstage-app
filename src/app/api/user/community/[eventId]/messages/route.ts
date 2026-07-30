@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -6,11 +7,7 @@ import prisma from '@/lib/prisma';
 // Helper to get userId from cookies
 async function getUserId() {
   const cookieStore = await cookies();
-  let userId = cookieStore.get('fanUserId')?.value;
-  if (!userId) userId = cookieStore.get('managerUserId')?.value;
-  if (!userId) userId = cookieStore.get('workerUserId')?.value;
-  if (!userId) userId = cookieStore.get('adminUserId')?.value;
-  if (!userId) userId = cookieStore.get('userId')?.value;
+  const userId = await getAuthUserId();
   return userId;
 }
 

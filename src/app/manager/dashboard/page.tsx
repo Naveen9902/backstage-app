@@ -39,7 +39,7 @@ export default function ManagerDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 60000); // Poll every 5s
+
     return () => clearInterval(interval);
   }, []);
 
@@ -366,3 +366,4 @@ export default function ManagerDashboard() {
     </div>
   );
 }
+

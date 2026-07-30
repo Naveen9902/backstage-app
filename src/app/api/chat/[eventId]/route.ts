@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -5,10 +6,7 @@ import prisma from '@/lib/prisma';
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
-  let userId = cookieStore.get('adminUserId')?.value;
-  if (!userId) userId = cookieStore.get('managerUserId')?.value;
-  if (!userId) userId = cookieStore.get('workerUserId')?.value;
-  if (!userId) userId = cookieStore.get('userId')?.value;
+  const userId = await getAuthUserId();
 
   if (!userId) return null;
   return await prisma.user.findUnique({ where: { id: userId } });

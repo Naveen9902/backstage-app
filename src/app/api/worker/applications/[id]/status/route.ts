@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
@@ -8,7 +9,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const { status } = await request.json(); // e.g. ACCEPTED or REJECTED
     
     const cookieStore = await cookies();
-    let userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

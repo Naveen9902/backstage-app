@@ -2,7 +2,9 @@ import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
-const connectionString = process.env.DATABASE_URL
+// Use DIRECT_URL (port 5432) so the postgres superuser role bypasses RLS.
+// PgBouncer (port 6543) intercepts connections and causes DatabaseAccessDenied (P1010).
+const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL
 
 declare global {
   var prismaGlobal13: undefined | PrismaClient

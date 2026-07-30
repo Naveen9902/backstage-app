@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { redis } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -51,44 +52,21 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Active sessions limit reached. Please log out from other devices.' }, { status: 401 });
       }
 
-      // Generate session token
-      const sessionToken = crypto.randomUUID();
       await prisma.session.create({
         data: {
           userId: user.id,
-          token: sessionToken
+          token: crypto.randomUUID() // keep for postgres limits
         }
       });
-
-      const response = NextResponse.json(user, { status: 200 });
-      
-      // Clear old cookies to prevent split-brain if user switches roles in another tab
-      response.cookies.delete('adminUserId');
-      response.cookies.delete('managerUserId');
-      response.cookies.delete('workerUserId');
-      response.cookies.delete('fanUserId');
-      response.cookies.delete('userId');
-
-      const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none' as const,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365 * 100,
-        expires: new Date(2100, 0, 1)
-      };
-
-      response.cookies.set('managerUserId', user.id, cookieOptions);
-      response.cookies.set('userId', user.id, cookieOptions);
-      response.cookies.set('managerSessionToken', sessionToken, cookieOptions);
-
-      return response;
     }
 
+    const sessionToken = crypto.randomUUID();
+    // 7 days in seconds
+    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+
     const response = NextResponse.json(user, { status: 200 });
-    const cookieName = user.role === 'ADMIN' ? 'adminUserId' : user.role === 'USER' ? 'fanUserId' : 'workerUserId';
     
-    // Clear old cookies
+    // Clear old insecure cookies
     response.cookies.delete('adminUserId');
     response.cookies.delete('managerUserId');
     response.cookies.delete('workerUserId');
@@ -98,15 +76,13 @@ export async function POST(req: Request) {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none' as const,
+      secure: true,
+      sameSite: 'none' as const, // Required for Capacitor
       path: '/',
-      maxAge: 60 * 60 * 24 * 365 * 100,
-      expires: new Date(2100, 0, 1)
+      maxAge: 604800, // 7 days
     };
 
-    response.cookies.set(cookieName, user.id, cookieOptions);
-    response.cookies.set('userId', user.id, cookieOptions);
+    response.cookies.set('sessionToken', sessionToken, cookieOptions);
 
     return response;
   } catch (error) {

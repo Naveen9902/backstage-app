@@ -91,18 +91,20 @@ export default function CreateEvent() {
     setLoading(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `event_${field}_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('folder', 'events');
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from('worker-verifications')
-        .upload(filePath, file);
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to upload file');
 
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('worker-verifications').getPublicUrl(filePath);
-      setFormData(prev => ({ ...prev, [field]: data.publicUrl }));
+      setFormData(prev => ({ ...prev, [field]: data.url }));
     } catch (err: any) {
       console.error('Upload error:', err);
       setError(`Failed to upload file for ${field}: ${err.message}. Please try again.`);

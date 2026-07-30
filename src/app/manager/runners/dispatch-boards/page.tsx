@@ -36,7 +36,6 @@ export default function AllDispatchBoardsPage() {
         () => fetchDispatches()
       ).subscribe();
 
-    const pollInterval = setInterval(() => fetchDispatches(), 60000);
 
     return () => {
       supabase.removeChannel(channel);
@@ -240,3 +239,4 @@ export default function AllDispatchBoardsPage() {
     </div>
   );
 }
+

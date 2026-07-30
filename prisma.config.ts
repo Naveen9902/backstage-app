@@ -5,6 +5,7 @@ config();
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
-    url: process.env.DATABASE_URL,
+    // DIRECT_URL bypasses PgBouncer — required for schema push/migrate
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
   },
 });

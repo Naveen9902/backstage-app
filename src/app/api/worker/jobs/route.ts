@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -6,7 +7,7 @@ import prisma from '@/lib/prisma';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -7,7 +8,7 @@ import { sendNotification } from '@/lib/notifications';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('managerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -81,7 +82,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('managerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -165,7 +166,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('managerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

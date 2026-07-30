@@ -315,21 +315,30 @@ export default function WorkerProfile() {
 
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${formData.email || 'user'}_${field}_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+      
+      if (!cloudName || !uploadPreset) throw new Error("Cloudinary not configured");
 
-      const { error: uploadError } = await supabase.storage
-        .from('worker-verifications')
-        .upload(filePath, file);
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('upload_preset', uploadPreset);
+      
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
 
-      if (uploadError) throw uploadError;
+      const res = await fetch(url, {
+        method: 'POST',
+        body: uploadData,
+      });
 
-      const { data } = supabase.storage.from('worker-verifications').getPublicUrl(filePath);
-      setFormData({ ...formData, [field]: data.publicUrl });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error?.message || 'Failed to upload to Cloudinary');
+
+      setFormData({ ...formData, [field]: data.secure_url });
     } catch (error: any) {
       console.error('Error uploading file:', error.message);
-      alert('Error uploading file. Make sure your Supabase keys are set and the worker-verifications bucket exists.');
+      alert('Error uploading file. Please check your internet connection and try again.');
     } finally {
       setUploading(prev => ({ ...prev, [field]: false }));
     }

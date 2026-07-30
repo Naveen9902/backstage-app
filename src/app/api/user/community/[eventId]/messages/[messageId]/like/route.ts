@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -8,11 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
     const { eventId, messageId } = await params;
     
     const cookieStore = await cookies();
-    let userId = cookieStore.get('fanUserId')?.value;
-    if (!userId) userId = cookieStore.get('managerUserId')?.value;
-    if (!userId) userId = cookieStore.get('workerUserId')?.value;
-    if (!userId) userId = cookieStore.get('adminUserId')?.value;
-    if (!userId) userId = cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

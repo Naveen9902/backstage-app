@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -6,10 +7,7 @@ import prisma from '@/lib/prisma'; // force recompile
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    let userId = cookieStore.get('workerUserId')?.value;
-    if (!userId) userId = cookieStore.get('managerUserId')?.value;
-    if (!userId) userId = cookieStore.get('adminUserId')?.value;
-    if (!userId) userId = cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -33,7 +31,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('workerUserId')?.value || cookieStore.get('userId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

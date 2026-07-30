@@ -248,7 +248,7 @@ export default function WorkerDashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Poll every 5s
+
 
     const channel = supabase.channel('worker_dashboard_dispatches')
       .on(
@@ -844,3 +844,4 @@ export default function WorkerDashboard() {
     </div>
   );
 }
+

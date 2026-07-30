@@ -107,7 +107,7 @@ export default function MySchedule() {
 
   useEffect(() => {
     fetchSchedule();
-    const interval = setInterval(fetchSchedule, 60000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -602,3 +602,4 @@ export default function MySchedule() {
     </div>
   );
 }
+

@@ -1,3 +1,4 @@
+import { getAuthUserId } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
@@ -7,7 +8,7 @@ import { sendNotification } from '@/lib/notifications';
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    const userId = cookieStore.get('managerUserId')?.value || cookieStore.get('workerUserId')?.value || cookieStore.get('adminUserId')?.value || cookieStore.get('fanUserId')?.value;
+    const userId = await getAuthUserId();
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

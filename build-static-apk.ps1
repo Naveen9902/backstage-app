@@ -3,7 +3,7 @@ Write-Host "Starting offline APK build process..."
 # 1. Backup next.config.ts and capacitor.config.ts
 Copy-Item next.config.ts next.config.ts.bak
 Copy-Item capacitor.config.ts capacitor.config.ts.bak
-if (Test-Path src/middleware.ts) { Rename-Item src/middleware.ts src/middleware.ts.bak }
+if (Test-Path src/middleware.ts) { Rename-Item src/middleware.ts middleware.ts.bak }
 
 # 2. Rewrite next.config.ts to support output: 'export'
 $exportConfig = @"
@@ -39,7 +39,7 @@ Get-ChildItem -Path src/app/api -Filter "route.js.bak" -Recurse | Rename-Item -N
 
 Copy-Item next.config.ts.bak next.config.ts -Force
 Remove-Item next.config.ts.bak
-if (Test-Path src/middleware.ts.bak) { Rename-Item src/middleware.ts.bak src/middleware.ts }
+if (Test-Path src/middleware.ts.bak) { Rename-Item src/middleware.ts.bak middleware.ts }
 
 # 6. Configure Capacitor to use local 'out' folder
 Write-Host "Configuring Capacitor..."
@@ -52,6 +52,19 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     errorPath: 'index.html'
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
+    CapacitorCookies: {
+      enabled: true,
+    },
+    GoogleAuth: {
+      scopes: ["profile", "email"],
+      serverClientId: "785362046928-cqn0aq549nljsk7d5hndlla62i81t090.apps.googleusercontent.com",
+      forceCodeForRefreshToken: true
+    }
   }
 };
 
