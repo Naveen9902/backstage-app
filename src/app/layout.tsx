@@ -81,6 +81,18 @@ export default function RootLayout({
             `,
           }}
         />
+        <script dangerouslySetInnerHTML={{ __html: 
+              const originalFetch = window.fetch;
+              window.fetch = function() {
+                let args = arguments;
+                if (args[1]) {
+                  args[1].credentials = args[1].credentials || 'include';
+                } else {
+                  args[1] = { credentials: 'include' };
+                }
+                return originalFetch.apply(this, args);
+              };
+ }} />
         <CapacitorAppLogic />
         <Suspense fallback={null}>
           <FlavorSetter />
