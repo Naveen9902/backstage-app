@@ -744,7 +744,6 @@ export default function WorkerDashboard() {
           </div>
         </div>
       )}
-    </div>
       {/* Day-Wise Completed Tasks & Errand History */}
       {completedMyTasks.length > 0 && (
         <div className="bg-white rounded-3xl p-6 md:p-8 text-gray-900 shadow-xl border border-gray-200 mb-10">
@@ -842,5 +841,6 @@ export default function WorkerDashboard() {
           </div>
         </div>
       )}
+    </div>
   );
 }
