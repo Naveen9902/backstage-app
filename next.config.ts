@@ -15,15 +15,13 @@ const nextConfig: NextConfig = {
     // Ignore TypeScript errors during production build
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   serverExternalPackages: [],
   experimental: {
     serverActions: {
       bodySizeLimit: '60mb',
     },
   },
+  turbopack: {},
   images: {
     unoptimized: isCapacitor,
     remotePatterns: [

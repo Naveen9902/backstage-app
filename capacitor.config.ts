@@ -6,8 +6,14 @@ const config: CapacitorConfig = {
   backgroundColor: '#111111',
   server: {
     url: 'https://backstage-app-git-main-naveenpagadekalla-3177s-projects.vercel.app',
-    cleartext: false,
-    allowNavigation: ["*.vercel.app", "backstage-app-git-main-naveenpagadekalla-3177s-projects.vercel.app", "backstage-app.vercel.app"]
+    cleartext: true,
+    allowNavigation: [
+      "*",
+      "*.vercel.app", 
+      "*.*.vercel.app",
+      "backstage-app-git-main-naveenpagadekalla-3177s-projects.vercel.app", 
+      "backstage-app.vercel.app"
+    ]
   },
   plugins: {
     GoogleAuth: {
