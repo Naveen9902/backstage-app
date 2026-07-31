@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { redis } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
 
@@ -113,9 +114,25 @@ export async function GET(req: Request) {
       }
     }
 
-    // 4. Set cookies exactly like /api/auth/login
+    // 4. Set unified session token in Redis
     const cookieStore = await cookies();
+    const sessionToken = crypto.randomUUID();
+    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
     
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none' as const,
+      path: '/',
+      maxAge: 604800, // 7 days
+    };
+
+    cookieStore.set({
+      name: 'sessionToken',
+      value: sessionToken,
+      ...cookieOptions
+    });
+
     // Clear old cookies just in case
     cookieStore.delete('workerUserId');
     cookieStore.delete('managerUserId');
@@ -123,47 +140,6 @@ export async function GET(req: Request) {
     cookieStore.delete('adminUserId');
     cookieStore.delete('userId');
     cookieStore.delete('managerSessionToken');
-
-    const roleMap: Record<string, string> = {
-      'WORKER': 'workerUserId',
-      'MANAGER': 'managerUserId',
-      'USER': 'fanUserId',
-      'ADMIN': 'adminUserId'
-    };
-
-    const cookieName = roleMap[user.role] || 'fanUserId';
-    
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none' as const,
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365 * 100,
-      expires: new Date(2100, 0, 1)
-    };
-
-    cookieStore.set({
-      name: cookieName,
-      value: user.id,
-      ...cookieOptions
-    });
-
-    cookieStore.set({
-      name: 'userId',
-      value: user.id,
-      ...cookieOptions
-    });
-
-    if (user.role === 'MANAGER') {
-      const sessionToken = crypto.randomUUID();
-      await prisma.session.create({
-        data: {
-          userId: user.id,
-          token: sessionToken
-        }
-      });
-      cookieStore.set({ name: 'managerSessionToken', value: sessionToken, ...cookieOptions });
-    }
 
     // 5. Redirect to appropriate dashboard
     const redirectMap: Record<string, string> = {
