@@ -84,11 +84,21 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
               const originalFetch = window.fetch;
               window.fetch = function() {
-                let args = arguments;
+                let args = Array.from(arguments);
+                const token = localStorage.getItem('sessionToken');
+                if (token) {
+                  args[1] = args[1] || {};
+                  
+                  // Handle case where headers is a Headers instance vs plain object
+                  if (args[1].headers instanceof Headers) {
+                    args[1].headers.set('Authorization', 'Bearer ' + token);
+                  } else {
+                    args[1].headers = args[1].headers || {};
+                    args[1].headers['Authorization'] = 'Bearer ' + token;
+                  }
+                }
                 if (args[1]) {
                   args[1].credentials = args[1].credentials || 'include';
-                } else {
-                  args[1] = { credentials: 'include' };
                 }
                 return originalFetch.apply(this, args);
               };
