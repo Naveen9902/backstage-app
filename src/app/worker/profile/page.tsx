@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
@@ -76,7 +78,7 @@ export default function WorkerProfile() {
   const [verifyingTier, setVerifyingTier] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -119,19 +121,19 @@ export default function WorkerProfile() {
       })
       .catch(() => setLoading(false));
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=received`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=received`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setReviews(data);
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setApplications(data);
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`)
       .then(res => res.json())
       .then(data => {
         if (data.notificationsEnabled !== undefined) {
@@ -145,7 +147,7 @@ export default function WorkerProfile() {
     const newVal = !inAppNotifs;
     setInAppNotifs(newVal);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`, {
+      await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationsEnabled: newVal })
@@ -164,10 +166,10 @@ export default function WorkerProfile() {
       // Actually, the API can figure it out from the session token! 
       // Let's modify our Razorpay API to use cookies instead if possible. 
       // But we passed workerProfileId to it... let's check.
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`);
       const profileData = await res.json();
       
-      const rzpRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/onboard?workerProfileId=${profileData.workerProfile.id}`, { method: 'POST' });
+      const rzpRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/onboard?workerProfileId=${profileData.workerProfile.id}`, { method: 'POST' });
       const data = await rzpRes.json();
       if (data.url) {
         window.location.href = data.url;
@@ -194,7 +196,7 @@ export default function WorkerProfile() {
     }
     setVerifyingOtp(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/send-otp`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: formData.mobile })
@@ -224,7 +226,7 @@ export default function WorkerProfile() {
     }
     setVerifyingOtp(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/verify-otp`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/phone/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: formData.mobile, code: otpCode })
@@ -247,7 +249,7 @@ export default function WorkerProfile() {
   const handleApplyForVerification = async () => {
     setVerifyingTier(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -275,7 +277,7 @@ export default function WorkerProfile() {
     setMessage('');
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -24,8 +26,8 @@ export default function FindJobs() {
   const fetchJobs = async () => {
     try {
       const [jobsRes, profileRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/jobs`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/jobs`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
       ]);
       const data = await jobsRes.json();
       const profileData = await profileRes.json();
@@ -52,7 +54,7 @@ export default function FindJobs() {
   const handleApply = async (staffingRequestId: string, customAnswers: string[] = []) => {
     setApplyingTo(staffingRequestId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ staffingRequestId, answers: customAnswers })

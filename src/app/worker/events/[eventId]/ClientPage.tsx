@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
@@ -21,8 +23,8 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
     const fetchData = async () => {
       try {
         const [eventRes, profileRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
         ]);
         
         if (!eventRes.ok) throw new Error('Failed to fetch event');
@@ -67,7 +69,7 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
   const handleApply = async (staffingRequestId: string, customAnswers: string[] = []) => {
     setApplyingTo(staffingRequestId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ staffingRequestId, answers: customAnswers })

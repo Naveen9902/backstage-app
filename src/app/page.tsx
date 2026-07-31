@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -53,7 +55,7 @@ export default function AppGateway() {
     }).catch(() => {});
 
     // 1. Auth Check - Store redirect URL instead of redirecting instantly
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && data.user) {
@@ -69,8 +71,8 @@ export default function AppGateway() {
 
     // 2. Fetch Events for Web Application Landing Page
     Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/top`).then(res => res.json()),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/live`).then(res => res.json())
+      apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/top`).then(res => res.json()),
+      apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/live`).then(res => res.json())
     ]).then(([topData, liveData]) => {
       if (Array.isArray(topData)) setTopEvents(topData);
       if (Array.isArray(liveData)) setLiveEvents(liveData);

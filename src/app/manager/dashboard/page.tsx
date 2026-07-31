@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -15,10 +17,10 @@ export default function ManagerDashboard() {
   const fetchDashboardData = async () => {
     try {
       const [profileRes, eventsRes, appsRes, runnersRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`)
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`)
       ]);
 
       const profData = await profileRes.json();

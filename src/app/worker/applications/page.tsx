@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -7,7 +9,7 @@ export default function MyApplications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

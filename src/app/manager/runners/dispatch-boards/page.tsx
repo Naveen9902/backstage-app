@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -13,7 +15,7 @@ export default function AllDispatchBoardsPage() {
   const [boardHistoryTab, setBoardHistoryTab] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
 
   const fetchDispatches = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`).then(res => res.json()).then(data => {
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/runners`).then(res => res.json()).then(data => {
       if (data) {
         setDispatches(data.dispatches || []);
       }
@@ -21,7 +23,7 @@ export default function AllDispatchBoardsPage() {
   };
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
       if (Array.isArray(data)) {
         setEvents(data.filter(ev => ev.status !== 'CANCELLED'));
       }

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,7 +16,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   const [profile, setProfile] = useState<any>(null);
 
   const fetchProfile = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) {
@@ -99,7 +101,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
           <button 
             onClick={async () => {
               try { localStorage.removeItem('backstage_user_session'); } catch (e) {}
-              await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+              await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
               window.location.href = '/';
             }}
             className="flex w-full items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-white/60 hover:text-red-400 hover:bg-red-400/10"
@@ -140,7 +142,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
               <button
                 onClick={async () => {
                   try { localStorage.removeItem('backstage_user_session'); } catch (e) {}
-                  await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+                  await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
                   window.location.href = '/';
                 }}
                 className="md:hidden text-gray-500 hover:text-red-500 p-2"

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
@@ -17,7 +19,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     async function fetchAnalytics() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/analytics`);
+        const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/analytics`);
         if (res.ok) {
           const data = await res.json();
           setMetrics({

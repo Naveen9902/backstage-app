@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
@@ -132,8 +134,8 @@ export default function LiveRunnersBoard() {
   const fetchTasks = async () => {
     try {
       const [res, profileRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
       ]);
       
       if (profileRes.ok) {
@@ -160,7 +162,7 @@ export default function LiveRunnersBoard() {
   const handleToggleRunner = async (newVal: boolean) => {
     setTogglingRunner(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRunnerAvailable: newVal })
@@ -214,7 +216,7 @@ export default function LiveRunnersBoard() {
   const handleAccept = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'accept' })
@@ -234,7 +236,7 @@ export default function LiveRunnersBoard() {
   const handleComplete = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'complete' })
@@ -254,7 +256,7 @@ export default function LiveRunnersBoard() {
   const handleConfirmPayment = async (dispatchId: string) => {
     setLoadingAction(dispatchId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/runners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dispatchId, action: 'confirm_payment' })

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
@@ -16,7 +18,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
 
   useEffect(() => {
     // 1. Fetch user profile to scope saved events to the current logged-in account
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
       .then(res => res.json())
       .then(profile => {
         if (profile && profile.id) {
@@ -44,7 +46,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
       })
       .catch(console.error);
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`)
       .then(res => res.json())
       .then(eventData => {
         if (!eventData.error) {
@@ -82,7 +84,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
     }
     setIsJoining(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
+      await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
       setHasJoined(true);
       setIsSaved(true);
       if (typeof window !== 'undefined') {

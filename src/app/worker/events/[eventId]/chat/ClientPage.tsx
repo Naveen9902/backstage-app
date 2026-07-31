@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import EventChat from '@/components/EventChat';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
@@ -34,8 +36,8 @@ export default function WorkerEventChatPage({ params }: { params: Promise<{ even
     const fetchAll = async () => {
       try {
         const [eventRes, scheduleRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/schedule`, {
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/schedule`, {
             headers: { 'Cookie': `workerUserId=${session.id}; userId=${session.id}` }
           })
         ]);

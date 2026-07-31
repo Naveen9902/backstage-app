@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -12,7 +14,7 @@ export default function DeleteAccountPage() {
     setDeleting(true);
     setError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`, { method: 'DELETE' });
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`, { method: 'DELETE' });
       if (res.ok) {
         alert("Your account has been deleted.");
         window.location.href = '/';

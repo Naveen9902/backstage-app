@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,7 +33,7 @@ export default function AdminEventsPanel() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/events`, { cache: 'no-store' });
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/events`, { cache: 'no-store' });
       const data = await res.json();
       if (Array.isArray(data)) {
         setEvents(data);

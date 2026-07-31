@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -32,7 +34,7 @@ export default function UserCommunityChatPage() {
     // 1. Fetch current logged-in user profile
     const loadProfile = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`);
+        const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`);
         if (res.ok) {
           const data = await res.json();
           if (data && !data.error && data.id) {
@@ -52,7 +54,7 @@ export default function UserCommunityChatPage() {
     // 2. Fetch event details for this eventId and all communities for switcher
     const loadEvent = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events`);
+        const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events`);
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
@@ -67,7 +69,7 @@ export default function UserCommunityChatPage() {
       }
 
       try {
-        const resComm = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/community`);
+        const resComm = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/community`);
         if (resComm.ok) {
           const dataComm = await resComm.json();
           if (Array.isArray(dataComm)) {

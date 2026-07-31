@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -8,7 +10,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/notifications`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/notifications`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

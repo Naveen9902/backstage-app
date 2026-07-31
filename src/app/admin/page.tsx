@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { 
@@ -17,7 +19,7 @@ export default function AdminDashboard() {
   const [listLoading, setListLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/metrics`, { cache: 'no-store' })
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/metrics`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (!data.error) setMetrics(data);

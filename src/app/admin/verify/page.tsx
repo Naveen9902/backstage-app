@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect, Fragment } from 'react';
 import { motion } from 'framer-motion';
@@ -80,7 +82,7 @@ export default function VerifyTalents() {
   const fetchWorkers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/workers?status=${statusFilter}`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/workers?status=${statusFilter}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setWorkers(data);
@@ -97,7 +99,7 @@ export default function VerifyTalents() {
   const fetchManagers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/managers?status=${statusFilter}`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/managers?status=${statusFilter}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setManagers(data);
@@ -113,7 +115,7 @@ export default function VerifyTalents() {
 
   const updateWorker = async (id: string, action: 'APPROVE' | 'REJECT') => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/workers`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/workers`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerProfileId: id, action })
@@ -132,7 +134,7 @@ export default function VerifyTalents() {
 
   const updateManager = async (id: string, action: 'APPROVE' | 'REJECT') => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/managers`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/managers`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ managerProfileId: id, action })

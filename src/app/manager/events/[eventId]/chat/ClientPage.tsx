@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { redirect } from 'next/navigation';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
 import React, { useState, useEffect } from 'react';
@@ -46,8 +48,8 @@ export default function ManagerEventChatPage({
     const fetchAll = async () => {
       try {
         const [eventRes, managerEventsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
+          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
             headers: { 'Cookie': `managerUserId=${session.id}; userId=${session.id}` }
           })
         ]);

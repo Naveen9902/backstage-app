@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -33,7 +35,7 @@ export default function EventDetailsPage({ params }: Props) {
     }
 
     // Fetch Event
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${id}`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data && !data.error) setEvent(data);
@@ -43,7 +45,7 @@ export default function EventDetailsPage({ params }: Props) {
       .finally(() => setLoading(false));
 
     // Fetch related events
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/all`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/all`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

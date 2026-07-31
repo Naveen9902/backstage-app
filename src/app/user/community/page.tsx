@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -9,7 +11,7 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/community`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/community`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

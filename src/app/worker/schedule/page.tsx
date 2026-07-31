@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -86,7 +88,7 @@ export default function MySchedule() {
   };
 
   const fetchSchedule = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -98,7 +100,7 @@ export default function MySchedule() {
       })
       .catch(() => setLoading(false));
       
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setReviews(data);
@@ -115,7 +117,7 @@ export default function MySchedule() {
     if (!ratingTarget || ratingTarget.rating === 0) return;
     setSubmittingRating(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -404,7 +406,7 @@ export default function MySchedule() {
                             {app.status !== 'PAID' ? (
                               <button
                                 onClick={() => {
-                                  fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${app.id}/status`, {
+                                  apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${app.id}/status`, {
                                     method: 'PATCH',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ status: 'PAID' })
@@ -549,7 +551,7 @@ export default function MySchedule() {
                     {showPassModal.status !== 'PAID' ? (
                       <button
                         onClick={() => {
-                          fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${showPassModal.id}/status`, {
+                          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/applications/${showPassModal.id}/status`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ status: 'PAID' })

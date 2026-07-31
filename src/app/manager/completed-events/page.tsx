@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -33,13 +35,13 @@ export default function CompletedEvents() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`);
       if (res.ok) {
         const data = await res.json();
         // ONLY keep completed events
         setEvents(data.filter((e: Event) => e.status === 'COMPLETED'));
       }
-      const reviewsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`);
+      const reviewsRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews?type=given`);
       if (reviewsRes.ok) {
         const reviewsData = await reviewsRes.json();
         setReviews(reviewsData);
@@ -65,7 +67,7 @@ export default function CompletedEvents() {
     setExpandedEventId(eventId);
     setEventWorkers([]);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
       if (res.ok) {
         const reqs = await res.json();
         const workers: any[] = [];
@@ -101,7 +103,7 @@ export default function CompletedEvents() {
     
     setSubmittingRating(revieweeId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,7 +124,7 @@ export default function CompletedEvents() {
     if (!disputeTarget || !disputeData.reason || !disputeData.description) return;
     setSubmittingDispute(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -274,7 +276,7 @@ export default function CompletedEvents() {
                                             <button
                                               disabled={!worker.checkOutTime}
                                               onClick={() => {
-                                                fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${worker.applicationId}/status`, {
+                                                apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${worker.applicationId}/status`, {
                                                   method: 'PATCH',
                                                   headers: { 'Content-Type': 'application/json' },
                                                   body: JSON.stringify({ status: 'PAID' })

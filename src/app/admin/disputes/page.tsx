@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +42,7 @@ export default function DisputesPanel() {
 
   const fetchDisputes = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/disputes?status=OPEN`);
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/disputes?status=OPEN`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setDisputes(data);
@@ -57,7 +59,7 @@ export default function DisputesPanel() {
   const resolveDispute = async (id: string) => {
     if (!resolutionText) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/disputes`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/disputes`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ disputeId: id, resolution: resolutionText })

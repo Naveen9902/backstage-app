@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import Navbar from '@/components/Navbar';
 import EventsFilters from '@/components/EventsFilters';
 import { useState, useEffect } from 'react';
@@ -8,7 +10,7 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/all`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/events/all`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setEvents(data);

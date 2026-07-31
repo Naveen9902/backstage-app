@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -12,7 +14,7 @@ export default function SettingsPage() {
   const [inAppNotifs, setInAppNotifs] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`)
       .then(res => res.json())
       .then(data => {
         if (data.notificationsEnabled !== undefined) {
@@ -29,7 +31,7 @@ export default function SettingsPage() {
     const newVal = !inAppNotifs;
     setInAppNotifs(newVal);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`, {
+      await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/settings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationsEnabled: newVal })
@@ -59,7 +61,7 @@ export default function SettingsPage() {
   const handleGenerate2FA = async () => {
     setGenerating2Fa(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/2fa/generate`, { method: 'POST' });
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/2fa/generate`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setQrCodeUrl(data.qrCodeUrl);
@@ -77,7 +79,7 @@ export default function SettingsPage() {
     setVerifying2Fa(true);
     setSetup2FaStatus(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/2fa/verify`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/2fa/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: setupOtp })
@@ -107,7 +109,7 @@ export default function SettingsPage() {
     setPasswordStatus(null);
     
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/password`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword })

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -71,7 +73,7 @@ export default function Register() {
     setLoading(true);
     try {
       const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/register`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email: formData.email, password: formData.password, role, skill: workerSkills.join(', ') })
@@ -285,7 +287,7 @@ export default function Register() {
                     
                     const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                     if (result.authentication?.idToken) {
-                      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
+                      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 

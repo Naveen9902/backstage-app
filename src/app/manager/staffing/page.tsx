@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -59,14 +61,14 @@ function StaffingContent() {
   }, [formData.tierTarget]);
 
   const fetchEvents = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`).then(res => res.json()).then(data => {
       if (Array.isArray(data)) setEvents(data);
     });
   };
 
   const fetchRequests = () => {
     if (selectedEventId) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${selectedEventId}/staffing`)
+      apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${selectedEventId}/staffing`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setRequests(data);
@@ -85,7 +87,7 @@ function StaffingContent() {
     if (!selectedEventId) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${selectedEventId}/staffing`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${selectedEventId}/staffing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -105,7 +107,7 @@ function StaffingContent() {
 
   const handleStatusUpdate = async (applicationId: string, status: 'ACCEPTED' | 'REJECTED') => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${applicationId}/status`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${applicationId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -125,7 +127,7 @@ function StaffingContent() {
   const handlePaymentCheckout = async (application: any) => {
     try {
       // 1. Create order
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/checkout`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId: application.id })
@@ -147,7 +149,7 @@ function StaffingContent() {
         order_id: data.orderId,
         handler: async function (response: any) {
           // 3. Verify payment
-          const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/verify`, {
+          const verifyRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -198,7 +200,7 @@ function StaffingContent() {
     if (!disputeModal || !selectedEventId) return;
     setSubmittingDispute(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/disputes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

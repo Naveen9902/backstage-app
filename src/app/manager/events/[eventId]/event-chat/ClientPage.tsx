@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 import EventChat from '@/components/EventChat';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
@@ -30,7 +32,7 @@ export default function ManagerEventChatSimplePage({ params }: { params: Promise
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`)
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`)
       .then(res => res.json())
       .then(data => {
         if (!data.error) setEvent(data);

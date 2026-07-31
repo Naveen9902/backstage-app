@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -19,12 +21,12 @@ export default function EventWorkersPage() {
 
   const fetchEventData = async () => {
     try {
-      const eventRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`);
+      const eventRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`);
       if (eventRes.ok) {
         setEvent(await eventRes.json());
       }
       
-      const staffingRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
+      const staffingRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
       if (staffingRes.ok) {
         const requests = await staffingRes.json();
         const extractedWorkers: any[] = [];

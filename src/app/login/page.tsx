@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/apiFetch';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -47,7 +49,7 @@ export default function Login() {
         }
       } catch (e) {}
     }
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data && (data.user || data.role)) {
@@ -58,7 +60,7 @@ export default function Login() {
           
           // Block Fan (USER) from accessing OPS App
           if (appFlavor === 'OPS' && role === 'USER') {
-            fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+            apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
             setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
             return;
           }
@@ -77,7 +79,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailToUse, password: passToUse })
@@ -86,7 +88,7 @@ export default function Login() {
       if (res.ok) {
         // Block Fan (USER) from accessing OPS App
         if (appFlavor === 'OPS' && data.role === 'USER') {
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+          await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
           setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
           setLoading(false);
           return;
@@ -140,7 +142,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login/verify-2fa`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login/verify-2fa`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: otpCode })
@@ -292,7 +294,7 @@ export default function Login() {
                           
                           const result = await (window as any).Capacitor.Plugins.GoogleAuth.signIn();
                           if (result.authentication?.idToken) {
-                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
+                            const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/google/native`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ 
