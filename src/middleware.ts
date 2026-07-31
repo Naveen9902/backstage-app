@@ -26,6 +26,11 @@ export function middleware(request: NextRequest) {
     response.headers.set('Access-Control-Allow-Credentials', 'true');
     return response;
   }
+
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith('/user') || pathname.startsWith('/worker') || pathname.startsWith('/manager')) {
+    return NextResponse.json({ error: 'This server only acts as an API backend. Please use the mobile app.' }, { status: 403 });
+  }
   // Allow access to frontend pages and static assets
   const response = NextResponse.next();
   // Apply CORS headers to everything just in case, though mainly needed for API
