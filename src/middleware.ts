@@ -29,7 +29,12 @@ export function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/user') || pathname.startsWith('/worker') || pathname.startsWith('/manager')) {
-    return NextResponse.json({ error: 'This server only acts as an API backend. Please use the mobile app.' }, { status: 403 });
+    const userAgent = request.headers.get('user-agent') || '';
+    const isMobileApp = userAgent.includes('Capacitor') || userAgent.includes('BackstageFlavor') || userAgent.includes('wv');
+    
+    if (!isMobileApp) {
+      return NextResponse.json({ error: 'This server only acts as an API backend. Please use the mobile app.' }, { status: 403 });
+    }
   }
   // Allow access to frontend pages and static assets
   const response = NextResponse.next();
