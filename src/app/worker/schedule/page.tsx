@@ -109,8 +109,6 @@ export default function MySchedule() {
 
   useEffect(() => {
     fetchSchedule();
-
-    return () => clearInterval(interval);
   }, []);
 
   const submitReview = async (eventId: string, managerId: string) => {

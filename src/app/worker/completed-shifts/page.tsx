@@ -51,8 +51,6 @@ export default function WorkerCompletedShifts() {
 
   useEffect(() => {
     fetchData();
-
-    return () => clearInterval(interval);
   }, []);
 
   const toggleExpandApp = (appId: string) => {
