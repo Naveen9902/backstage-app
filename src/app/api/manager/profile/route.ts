@@ -32,7 +32,6 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const cookieStore = await cookies();
     const userId = await getAuthUserId();
 
     if (!userId) {

@@ -30,7 +30,6 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const cookieStore = await cookies();
     const userId = await getAuthUserId();
 
     if (!userId) {
@@ -45,6 +44,14 @@ export async function PUT(req: Request) {
       socialMediaUrl, referenceEvent, referenceContact, tier, requestedTier, location
     } = body;
 
+    let parsedDob: Date | null = null;
+    if (dateOfBirth) {
+      const d = new Date(dateOfBirth);
+      if (!isNaN(d.getTime())) {
+        parsedDob = d;
+      }
+    }
+
     // Update user details
     const user = await prisma.user.update({
       where: { id: userId },
@@ -53,7 +60,7 @@ export async function PUT(req: Request) {
         email, 
         mobile, 
         avatarUrl,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: parsedDob,
         emergencyContact,
         isPhoneVerified: Boolean(isPhoneVerified)
       }
