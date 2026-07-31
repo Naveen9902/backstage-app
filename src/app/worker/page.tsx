@@ -269,7 +269,6 @@ export default function WorkerDashboard() {
       .subscribe();
 
     return () => {
-      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, []);
