@@ -47,8 +47,6 @@ export default function MyEvents() {
 
   useEffect(() => {
     fetchEvents();
-
-    return () => clearInterval(interval);
   }, []);
 
   const toggleLive = async (event: Event) => {

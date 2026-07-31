@@ -51,11 +51,8 @@ export default function CompletedEvents() {
     }
     setLoading(false);
   };
-
   useEffect(() => {
     fetchEvents();
-
-    return () => clearInterval(interval);
   }, []);
 
   const toggleExpandEvent = async (eventId: string) => {
