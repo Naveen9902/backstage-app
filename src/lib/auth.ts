@@ -4,12 +4,13 @@ import { Redis } from '@upstash/redis';
 export const redis = Redis.fromEnv();
 
 export async function getAuthUserId(): Promise<string | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   let sessionToken = cookieStore.get('sessionToken')?.value;
   
   if (!sessionToken) {
     const { headers } = await import('next/headers');
-    const authHeader = headers().get('authorization');
+    const headersList = await headers();
+    const authHeader = headersList.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       sessionToken = authHeader.substring(7);
     }
