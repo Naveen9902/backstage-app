@@ -143,6 +143,32 @@ export default function WorkerProfile() {
       .catch(err => console.error('Failed to load settings', err));
   }, []);
 
+  // Poll for verification approval
+  useEffect(() => {
+    if (formData.verificationStatus === 'PENDING') {
+      const intervalId = setInterval(() => {
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error && data.workerProfile) {
+              if (data.workerProfile.verificationStatus !== 'PENDING') {
+                setFormData(prev => ({
+                  ...prev,
+                  verificationStatus: data.workerProfile.verificationStatus,
+                  isVerified: data.workerProfile.isVerified,
+                  tier: data.workerProfile.tier
+                }));
+                if (data.workerProfile.verificationStatus === 'APPROVED') {
+                  alert('🎉 Your profile has been verified!');
+                }
+              }
+            }
+          }).catch(() => {});
+      }, 3000);
+      return () => clearInterval(intervalId);
+    }
+  }, [formData.verificationStatus]);
+
   const handleToggleInApp = async () => {
     const newVal = !inAppNotifs;
     setInAppNotifs(newVal);
@@ -324,8 +350,27 @@ export default function WorkerProfile() {
       
       if (!cloudName || !uploadPreset) throw new Error("Cloudinary not configured");
 
+      let fileToUpload: File | Blob = file;
+      if (file.type.startsWith('image/')) {
+        const imageCompression = (await import('browser-image-compression')).default;
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        fileToUpload = await imageCompression(file, options);
+      }
+
+      // Convert to base64 to avoid CapacitorHttp Blob bugs on Android
+      const base64File = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(fileToUpload);
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+
       const uploadData = new FormData();
-      uploadData.append('file', file);
+      uploadData.append('file', base64File);
       uploadData.append('upload_preset', uploadPreset);
       
       const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
