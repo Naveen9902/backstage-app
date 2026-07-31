@@ -317,8 +317,8 @@ export default function WorkerProfile() {
 
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "zzfkegyd";
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default";
       
       if (!cloudName || !uploadPreset) throw new Error("Cloudinary not configured");
 
@@ -340,7 +340,7 @@ export default function WorkerProfile() {
       setFormData({ ...formData, [field]: data.secure_url });
     } catch (error: any) {
       console.error('Error uploading file:', error.message);
-      alert('Error uploading file. Please check your internet connection and try again.');
+      alert(`Error uploading file: ${error.message}. Please check your internet connection and try again.`);
     } finally {
       setUploading(prev => ({ ...prev, [field]: false }));
     }

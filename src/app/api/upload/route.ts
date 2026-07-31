@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     // Upload to Cloudinary using unsigned preset via Fetch
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "zzfkegyd";
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
     const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
     
