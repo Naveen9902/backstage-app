@@ -85,8 +85,11 @@ export default function RootLayout({
               const originalFetch = window.fetch;
               window.fetch = function() {
                 let args = Array.from(arguments);
+                const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+                const isCloudinary = url.includes('api.cloudinary.com');
+                
                 const token = localStorage.getItem('sessionToken');
-                if (token) {
+                if (token && !isCloudinary) {
                   args[1] = args[1] || {};
                   
                   // Handle case where headers is a Headers instance vs plain object
@@ -97,7 +100,7 @@ export default function RootLayout({
                     args[1].headers['Authorization'] = 'Bearer ' + token;
                   }
                 }
-                if (args[1]) {
+                if (args[1] && !isCloudinary) {
                   args[1].credentials = args[1].credentials || 'include';
                 }
                 return originalFetch.apply(this, args);
