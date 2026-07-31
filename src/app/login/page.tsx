@@ -50,8 +50,11 @@ export default function Login() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        if (data && data.user) {
-          const role = data.user.role || data.role;
+        if (data && (data.user || data.role)) {
+          if (data.sessionToken) {
+            localStorage.setItem('sessionToken', data.sessionToken);
+          }
+          const role = data.user ? data.user.role : data.role;
           
           // Block Fan (USER) from accessing OPS App
           if (appFlavor === 'OPS' && role === 'USER') {
@@ -90,7 +93,12 @@ export default function Login() {
         }
 
         if (typeof window !== 'undefined') {
-          try { localStorage.setItem('backstage_user_session', JSON.stringify(data)); } catch(e){}
+          try { 
+            localStorage.setItem('backstage_user_session', JSON.stringify(data)); 
+            if (data.sessionToken) {
+              localStorage.setItem('sessionToken', data.sessionToken);
+            }
+          } catch(e){}
         }
         if (data.requires2FA) {
           setRequires2FA(true);
@@ -296,14 +304,18 @@ export default function Login() {
                             });
                             const data = await res.json();
                             if (res.ok && data.success) {
+                              if (data.sessionToken) {
+                                localStorage.setItem('sessionToken', data.sessionToken);
+                              }
                               router.replace(data.redirectUrl || '/user');
                             } else {
                               setError(data.error || 'Native Google Auth Failed');
                             }
                           }
                         } catch (err: any) {
-                          console.error(err);
-                          setError('Google Sign-in failed or was cancelled.');
+                          console.error('Google Auth Error:', err);
+                          const errMsg = err?.message || err?.error || JSON.stringify(err);
+                          setError(`Google Auth Error: ${errMsg}`);
                         }
                         setLoading(false);
                       } else {

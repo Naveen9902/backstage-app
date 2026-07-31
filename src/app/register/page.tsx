@@ -297,14 +297,18 @@ export default function Register() {
                       });
                       const data = await res.json();
                       if (res.ok && data.success) {
+                        if (data.sessionToken) {
+                          localStorage.setItem('sessionToken', data.sessionToken);
+                        }
                         window.location.href = data.redirectUrl || '/user';
                       } else {
                         setError(data.error || 'Native Google Auth Failed');
                       }
                     }
                   } catch (err: any) {
-                    console.error(err);
-                    setError('Google Sign-in failed or was cancelled.');
+                    console.error('Google Auth Error:', err);
+                    const errMsg = err?.message || err?.error || JSON.stringify(err);
+                    setError(`Google Auth Error: ${errMsg}`);
                   }
                   setLoading(false);
                 } else {

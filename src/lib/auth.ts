@@ -5,7 +5,15 @@ export const redis = Redis.fromEnv();
 
 export async function getAuthUserId(): Promise<string | null> {
   const cookieStore = cookies();
-  const sessionToken = cookieStore.get('sessionToken')?.value;
+  let sessionToken = cookieStore.get('sessionToken')?.value;
+  
+  if (!sessionToken) {
+    const { headers } = await import('next/headers');
+    const authHeader = headers().get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      sessionToken = authHeader.substring(7);
+    }
+  }
   
   if (!sessionToken) {
     return null;

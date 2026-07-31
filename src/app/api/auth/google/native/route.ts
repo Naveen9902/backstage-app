@@ -116,7 +116,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      redirectUrl: redirectMap[user.role] || '/' 
+      redirectUrl: redirectMap[user.role] || '/',
+      sessionToken
     });
 
   } catch (error) {

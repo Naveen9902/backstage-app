@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     // 7 days in seconds
     await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
 
-    const response = NextResponse.json(user, { status: 200 });
+    const response = NextResponse.json({ ...user, sessionToken }, { status: 200 });
     
     // Clear old insecure cookies
     response.cookies.delete('adminUserId');
