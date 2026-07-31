@@ -85,18 +85,33 @@ export default function AppGateway() {
     if (redirectUrl && !checkingAuth) {
       router.replace(redirectUrl);
     } else if (!checkingAuth) {
-      setShowSplash(false);
+      const isMobileBrowser = window.innerWidth < 768;
+      const ua = navigator.userAgent;
+      const isMobileEnv = isNativeApp || isMobileBrowser || ua.includes('BackstageFlavor') || ua.includes('Capacitor') || ua.includes('wv');
+      
+      if (isMobileEnv) {
+        router.replace('/login');
+      } else {
+        setShowSplash(false);
+      }
     }
-    // If still checking auth when splash ends, we wait.
-    // We handle the edge case in a useEffect below.
   };
 
   useEffect(() => {
     // Edge case: Auth check took longer than the 5-second splash screen
-    if (!showSplash && !checkingAuth && redirectUrl) {
-      router.replace(redirectUrl);
+    if (!showSplash && !checkingAuth) {
+      if (redirectUrl) {
+        router.replace(redirectUrl);
+      } else {
+        const isMobileBrowser = window.innerWidth < 768;
+        const ua = navigator.userAgent;
+        const isMobileEnv = isNativeApp || isMobileBrowser || ua.includes('BackstageFlavor') || ua.includes('Capacitor') || ua.includes('wv');
+        if (isMobileEnv) {
+          router.replace('/login');
+        }
+      }
     }
-  }, [showSplash, checkingAuth, redirectUrl]);
+  }, [showSplash, checkingAuth, redirectUrl, isNativeApp, router]);
 
   if (showSplash || checkingAuth) {
     return <AnimatedSplash onComplete={handleSplashComplete} appFlavor={appFlavor} />;
@@ -106,77 +121,11 @@ export default function AppGateway() {
     <div className="min-h-screen bg-[#121212] font-sans selection:bg-[#CD7F32]/30 text-white relative overflow-hidden">
       
       {/* =========================================================================
-          1. MOBILE / NATIVE APK DIRECT DUAL-APP PORTAL
-          Visible on mobile/tablet (< 768px) OR when running inside Capacitor APK.
-          Shows: Attractive Welcome Screen -> Login -> Launch.
-         ========================================================================= */}
-      <div className={isNativeApp ? "block w-full min-h-screen flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden" : "md:hidden w-full min-h-screen flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden"}>
-        <F1Background />
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#CD7F32]/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
-
-        {/* Top Header */}
-        <header className="relative z-10 flex flex-col gap-3 py-2">
-          <div className="flex items-center justify-between">
-            <Logo size="md" showText={true} />
-            <Link href="/login" className="text-xs font-bold text-white bg-white/10 px-4 py-2 rounded-full border border-white/20 transition-all hover:bg-white/20">
-              Sign In
-            </Link>
-          </div>
-        </header>
-
-        {/* Attractive Welcome Screen */}
-        <main className="relative z-10 flex flex-col items-center justify-center flex-1 w-full text-center mt-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="w-full max-w-sm flex flex-col items-center"
-          >
-            <div className="w-24 h-24 rounded-full bg-[#CD7F32]/10 flex items-center justify-center border border-[#CD7F32]/30 mb-8 shadow-[0_0_50px_rgba(205,127,50,0.2)]">
-              <Sparkles className="w-10 h-10 text-[#CD7F32]" />
-            </div>
-            
-            <h1 className="text-4xl font-bold font-serif text-white tracking-tight leading-tight mb-4 drop-shadow-lg">
-              Experience Events <br /> Like Never Before
-            </h1>
-            
-            <p className="text-gray-400 text-sm mb-10 leading-relaxed px-4">
-              {activeAppMode === 'OPS' 
-                ? 'Join the premier network for event managers and ground staff. Manage your operations seamlessly.' 
-                : 'Get exclusive access to top cultural fests, concerts, and VIP communities instantly.'}
-            </p>
-
-            <div className="w-full flex flex-col gap-4">
-              <Link href="/register" className="w-full bg-gradient-to-r from-[#CD7F32] to-[#b06a29] text-white rounded-2xl py-4 font-bold shadow-[0_10px_30px_rgba(205,127,50,0.3)] transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-base">
-                <span>Get Started</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              
-              <Link href="/login" className="w-full bg-white/5 border border-white/10 text-white rounded-2xl py-4 font-bold transition-all hover:bg-white/10 active:scale-[0.98] text-base">
-                I already have an account
-              </Link>
-            </div>
-          </motion.div>
-        </main>
-
-        {/* Minimal Mobile Footer */}
-        <footer className="relative z-10 text-center py-2 border-t border-white/5 text-[11px] text-gray-500 flex flex-wrap justify-center gap-x-4 gap-y-1">
-          <span>&copy; {new Date().getFullYear()} BackStage Apps</span>
-          <Link href="/terms" className="hover:text-gray-400">Terms</Link>
-          <Link href="/privacy" className="hover:text-gray-400">Privacy</Link>
-          <Link href="/support" className="hover:text-gray-400">Support</Link>
-        </footer>
-      </div>
-
-
-      {/* =========================================================================
-          2. DESKTOP / WEB APPLICATION MARKETING HOME PAGE
+          DESKTOP / WEB APPLICATION MARKETING HOME PAGE
           Visible only on large desktop screens (>= 768px) and non-native web.
           Shows: Full Marketing Home Page with Hero, Events, Features, Pricing.
          ========================================================================= */}
-      <div className={isNativeApp ? "hidden" : "hidden md:block w-full bg-[#242424] text-white selection:bg-[#CD7F32]/30"}>
+      <div className={"hidden md:block w-full bg-[#242424] text-white selection:bg-[#CD7F32]/30"}>
         <div className="relative min-h-screen overflow-hidden">
           <F1Background />
           <Navbar />
