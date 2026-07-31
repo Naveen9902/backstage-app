@@ -96,6 +96,7 @@ export async function POST(req: Request) {
       maxAge: 604800, // 7 days
     };
 
+    const cookieStore = await cookies();
     cookieStore.set({ name: 'sessionToken', value: sessionToken, ...cookieOptions });
 
     // Clear legacy cookies just in case
