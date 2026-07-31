@@ -33,6 +33,19 @@ export default function ManagerDashboard() {
       if (Array.isArray(appData)) setAppsData(appData);
       if (runData && Array.isArray(runData.dispatches)) setRunnersData(runData.dispatches);
     } catch (err) {
+      console.error('Dashboard fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Derived stats
+  const totalEvents = eventsData.length;
+  const liveEvents = eventsData.filter(e => e.status === 'ONGOING');
   const completedEvents = eventsData.filter(e => e.status === 'COMPLETED').length;
   const upcomingEvents = eventsData.filter(e => !e.status || e.status === 'UPCOMING').length;
   const completedRunnersTasks = runnersData.filter(d => d.status === 'Completed');
