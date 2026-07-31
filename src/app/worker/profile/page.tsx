@@ -264,7 +264,8 @@ export default function WorkerProfile() {
         alert('Sent for verification!');
         window.dispatchEvent(new Event('profileUpdated'));
       } else {
-        alert('Failed to submit for verification.');
+        const errData = await res.json().catch(() => ({}));
+        alert(`Failed to submit for verification: ${errData.details || res.statusText}`);
       }
     } catch (e) {
       alert('An error occurred submitting for verification.');
@@ -291,7 +292,8 @@ export default function WorkerProfile() {
           alert('Profile updated successfully!');
           window.dispatchEvent(new Event('profileUpdated'));
         } else {
-          alert('Failed to update profile.');
+          const errData = await res.json().catch(() => ({}));
+          alert(`Failed to update profile: ${errData.details || res.statusText}`);
         }
     } catch (err) {
       setMessage('An error occurred.');

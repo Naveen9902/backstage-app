@@ -104,6 +104,7 @@ export async function PUT(req: Request) {
     return NextResponse.json({ user, workerProfile }, { status: 200 });
   } catch (error) {
     console.error("Profile Update Error:", error);
-    return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: 'Failed to update profile', details: errorMessage }, { status: 500 });
   }
 }
