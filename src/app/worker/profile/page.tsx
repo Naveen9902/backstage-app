@@ -456,8 +456,8 @@ export default function WorkerProfile() {
                   <input required type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-700">Email Address</label>
-                  <input required type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none" />
+                  <label className="text-sm font-bold text-gray-700">Email Address (Login Session)</label>
+                  <input required type="email" disabled readOnly value={formData.email} className="w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2 mt-1 text-gray-600 outline-none shadow-inner cursor-not-allowed" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-gray-700">Mobile Number</label>

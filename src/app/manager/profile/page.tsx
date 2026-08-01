@@ -261,9 +261,9 @@ export default function ProfilePage() {
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Full Name</label>
                   <input type="text" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner" placeholder="Your Name" />
                 </div>
-                <div className="space-y-1.5 group/input">
-                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Email Address</label>
-                  <input type="email" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full bg-[#f8f6f0] border-2 border-transparent focus:border-[#CD7F32]/30 focus:bg-white rounded-xl px-4 py-3.5 text-gray-900 font-semibold outline-none transition-all duration-300 shadow-inner" placeholder="name@example.com" />
+                <div className="space-y-1.5 group/input opacity-70">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest transition-colors">Email Address (Login Session)</label>
+                  <input type="email" disabled readOnly value={formData.email} className="w-full bg-gray-100 border-2 border-transparent rounded-xl px-4 py-3.5 text-gray-600 font-semibold outline-none shadow-inner cursor-not-allowed" placeholder="name@example.com" />
                 </div>
                 <div className="md:col-span-2 space-y-1.5 group/input">
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-focus-within/input:text-[#CD7F32] transition-colors">Company / Organization</label>

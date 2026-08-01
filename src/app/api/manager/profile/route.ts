@@ -38,13 +38,17 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Force route recompilation 2
-    const { name, email, company, bio, avatarUrl, location, socialLink } = await req.json();
+    // Force route recompilation 3
+    const { name, company, bio, avatarUrl, location, socialLink } = await req.json();
 
-    // Update user details
+    if (!name || name.trim() === '') {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    // Update user details (omitted email for security)
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email, avatarUrl }
+      data: { name, avatarUrl }
     });
 
     // Update or create manager profile

@@ -44,6 +44,10 @@ export async function PUT(req: Request) {
       socialMediaUrl, referenceEvent, referenceContact, tier, requestedTier, location
     } = body;
 
+    if (!name || name.trim() === '') {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
     let parsedDob: Date | null = null;
     if (dateOfBirth) {
       const d = new Date(dateOfBirth);
@@ -57,7 +61,6 @@ export async function PUT(req: Request) {
       where: { id: userId },
       data: { 
         name, 
-        email, 
         mobile, 
         avatarUrl,
         dateOfBirth: parsedDob,
