@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
-import { cookies } from 'next/headers';
+export const revalidate = 0;
 import prisma from '@/lib/prisma';
 import { redis } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
