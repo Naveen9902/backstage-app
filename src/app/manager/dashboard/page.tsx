@@ -4,10 +4,12 @@ import { apiFetch } from '@/lib/apiFetch';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Clock, CheckCircle2 } from 'lucide-react';
 
 export default function ManagerDashboard() {
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [eventsData, setEventsData] = useState<any[]>([]);
   const [appsData, setAppsData] = useState<any[]>([]);
@@ -42,6 +44,27 @@ export default function ManagerDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  // Poll for verification approval
+  useEffect(() => {
+    if (profile?.managerProfile?.verificationStatus === 'PENDING') {
+      const intervalId = setInterval(() => {
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error && data.managerProfile) {
+              if (data.managerProfile.verificationStatus !== 'PENDING') {
+                setProfile(data);
+                if (data.managerProfile.verificationStatus === 'APPROVED') {
+                  alert('🎉 Your manager profile has been verified!');
+                }
+              }
+            }
+          }).catch(() => {});
+      }, 3000);
+      return () => clearInterval(intervalId);
+    }
+  }, [profile?.managerProfile?.verificationStatus]);
 
   // Derived stats
   const totalEvents = eventsData.length;
@@ -89,16 +112,15 @@ export default function ManagerDashboard() {
             )}
           </div>
         </div>
-        <Link href="/manager/events/create" className="w-full sm:w-auto">
-          <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-[#CD7F32]/20"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-            Create Event
-          </motion.button>
-        </Link>
+        <motion.button
+          onClick={() => router.push('/manager/events/create')}
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full sm:w-auto flex justify-center items-center gap-2 bg-[#CD7F32] text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-[#CD7F32]/20"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+          Create Event
+        </motion.button>
       </div>
 
       {/* Live Event Alert */}
@@ -117,12 +139,10 @@ export default function ManagerDashboard() {
               <p className="text-green-600 text-xs sm:text-sm mt-0.5">Runners can be dispatched for these events.</p>
             </div>
           </div>
-          <Link href="/manager/runners" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              Dispatch Runners
-            </button>
-          </Link>
+          <button onClick={() => router.push('/manager/runners')} className="w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Dispatch Runners
+          </button>
         </motion.div>
       )}
 
@@ -175,11 +195,9 @@ export default function ManagerDashboard() {
                 <p className="text-gray-400 text-xs">Successfully closed and wrapped up</p>
               </div>
             </div>
-            <Link href="/manager/completed-events">
-              <button className="text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                View All Events
-              </button>
-            </Link>
+            <button onClick={() => router.push('/manager/completed-events')} className="text-sm font-semibold text-gray-500 hover:text-gray-800 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+              View All Events
+            </button>
           </motion.div>
 
           {/* Recent Active Events (exclude completed) */}
@@ -253,14 +271,13 @@ export default function ManagerDashboard() {
                     </div>
                     
                     <div className="flex flex-col gap-2 min-w-[200px] shrink-0 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-                      <Link href={`/manager/completed-events`}>
-                        <button
-                          className="bg-[#CD7F32] w-full justify-center hover:bg-[#b06a28] text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors shadow-sm hover:shadow-md"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                          Review & Pay Staff
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => router.push('/manager/completed-events')}
+                        className="bg-[#CD7F32] w-full justify-center hover:bg-[#b06a28] text-white px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors shadow-sm hover:shadow-md"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        Review & Pay Staff
+                      </button>
                     </div>
                   </motion.div>
                 ))}

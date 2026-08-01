@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { apiFetch } from '@/lib/apiFetch';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -17,8 +18,8 @@ export default function SearchPage() {
 
     const timer = setTimeout(() => {
       setLoading(true);
-      let url = `/api/user/search?q=${encodeURIComponent(query)}`;
-      fetch(url)
+      let url = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/search?q=${encodeURIComponent(query)}`;
+      apiFetch(url)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {

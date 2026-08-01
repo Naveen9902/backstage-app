@@ -26,6 +26,8 @@ export async function GET() {
     const hiredApplications = await prisma.application.findMany({
       where: {
         status: 'ACCEPTED',
+        checkInTime: { not: null },
+        checkOutTime: null,
         staffingRequest: {
           event: {
             managerId: userId,

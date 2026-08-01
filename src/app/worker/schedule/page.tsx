@@ -4,10 +4,12 @@ import { apiFetch } from '@/lib/apiFetch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
 import Logo from '@/components/Logo';
 
 export default function MySchedule() {
+  const router = useRouter();
   const [schedule, setSchedule] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -381,19 +383,15 @@ export default function MySchedule() {
                             </button>
                             <div className="grid grid-cols-2 gap-2">
                               {isLive && (
-                                <Link href="/worker/runners">
-                                  <button className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-colors h-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                    <span className="text-[10px] uppercase tracking-wider">Runners</span>
-                                  </button>
-                                </Link>
-                              )}
-                              <Link href={`/worker/events/${app.staffingRequest.eventId}/chat`} className={isLive ? '' : 'col-span-2'}>
-                                <button className="w-full bg-white border border-gray-200 hover:border-[#CD7F32] hover:text-[#CD7F32] text-gray-700 px-4 py-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-colors h-full">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                  <span className="text-[10px] uppercase tracking-wider">Event Chat</span>
+                                <button onClick={() => router.push('/worker/runners')} className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-colors h-full">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                  <span className="text-[10px] uppercase tracking-wider">Runners</span>
                                 </button>
-                              </Link>
+                              )}
+                              <button onClick={() => router.push(`/worker/events/details/chat?id=${app.staffingRequest.eventId}`)} className={`w-full bg-white border border-gray-200 hover:border-[#CD7F32] hover:text-[#CD7F32] text-gray-700 px-4 py-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-colors h-full ${isLive ? '' : 'col-span-2'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <span className="text-[10px] uppercase tracking-wider">Event Chat</span>
+                              </button>
                             </div>
                           </>
                         )}

@@ -1,14 +1,12 @@
 'use client';
 import { apiFetch } from '@/lib/apiFetch';
-
-
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function EventWorkersPage() {
-  const params = useParams();
-  const eventId = params.eventId as string;
+function EventWorkersContent() {
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('id');
   const router = useRouter();
 
   const [event, setEvent] = useState<any>(null);
@@ -16,7 +14,7 @@ export default function EventWorkersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEventData();
+    if (eventId) fetchEventData();
   }, [eventId]);
 
   const fetchEventData = async () => {
@@ -76,12 +74,10 @@ export default function EventWorkersPage() {
               <p className="text-[#CD7F32] font-semibold mt-1 uppercase tracking-wider text-sm">Event Workers Roster</p>
             </div>
             
-            <Link href={`/manager/events/${eventId}/scan`}>
-              <button className="bg-gradient-to-r from-[#CD7F32] to-[#ffb163] text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/20 hover:shadow-[#CD7F32]/40 transition-all active:scale-95 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
-                Open QR Scanner
-              </button>
-            </Link>
+            <button onClick={() => router.push(`/manager/events/details/scan?id=${eventId}`)} className="bg-gradient-to-r from-[#CD7F32] to-[#ffb163] text-white px-6 py-3.5 rounded-xl font-bold shadow-lg shadow-[#CD7F32]/20 hover:shadow-[#CD7F32]/40 transition-all active:scale-95 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+              Open QR Scanner
+            </button>
           </div>
         </div>
       </div>
@@ -98,11 +94,9 @@ export default function EventWorkersPage() {
             </div>
             <h3 className="text-xl font-bold font-serif mb-2 text-gray-900">No Workers Yet</h3>
             <p className="text-gray-500 mb-6">You haven't hired any workers for this event.</p>
-            <Link href={`/manager/staffing?eventId=${eventId}`}>
-              <button className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm">
-                Go to Staffing
-              </button>
-            </Link>
+            <button onClick={() => router.push(`/manager/staffing?eventId=${eventId}`)} className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm">
+              Go to Staffing
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
@@ -145,12 +139,10 @@ export default function EventWorkersPage() {
                   
                   <div className="h-8 w-px bg-gray-200"></div>
                   
-                  <div className="flex items-center gap-4">
-                    <Link href={`/manager/events/${eventId}/chat?channel=dm_${[event?.managerId, worker.userId].sort().join('_')}`}>
-                      <button className="text-[#CD7F32] bg-[#CD7F32]/10 hover:bg-[#CD7F32]/20 p-2 rounded-full transition-colors" title="Message Worker">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      </button>
-                    </Link>
+                  <div className="flex gap-2">
+                    <button onClick={() => router.push(`/manager/events/details/chat?id=${eventId}&channel=dm_${[event?.managerId, worker.userId].sort().join('_')}`)} className="text-[#CD7F32] bg-[#CD7F32]/10 hover:bg-[#CD7F32]/20 p-2 rounded-full transition-colors relative" title="Message Worker">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
+                    </button>
                     
                     <div className="min-w-[80px] text-right">
                       {worker.status === 'PAID' ? (
@@ -183,5 +175,10 @@ export default function EventWorkersPage() {
   );
 }
 
-
-
+export default function EventWorkersPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><svg className="animate-spin h-8 w-8 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>}>
+      <EventWorkersContent />
+    </Suspense>
+  );
+}

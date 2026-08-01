@@ -38,7 +38,7 @@ type CommunityChatLayoutProps = {
   initialChannel?: string;
 };
 
-const ALL_CHANNELS = ['announcements', 'general', 'networking', 'q-and-a'];
+const ALL_CHANNELS = ['announcements', 'general', 'networking', 'q-and-a', 'staff-chat'];
 
 export default function CommunityChatLayout({ eventId, event, currentUser, otherEvents = [], returnHref = "/user/community", initialChannel }: CommunityChatLayoutProps) {
   const safeUser = currentUser || { id: 'guest', name: 'Member', role: 'USER', avatarUrl: null };
@@ -51,7 +51,6 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
   const [loading, setLoading] = useState(true);
   const [showSwitcher, setShowSwitcher] = useState(false);
   const [mobileView, setMobileView] = useState<'channels' | 'chat'>('chat');
-  const [showSplash, setShowSplash] = useState(true);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
@@ -69,13 +68,6 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       [msgId]: (prev[msgId] || 0) + (isLiked ? -1 : 1)
     }));
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
   
   const [selectedFile, setSelectedFile] = useState<{
     dataUrl: string;
@@ -124,7 +116,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
       
       return "@ Unknown User";
     }
-    return `# ${activeChannel}`;
+    return activeChannel;
   };
 
   const getDmChannelId = (otherUserId: string) => {
@@ -339,74 +331,6 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
     <div className="flex h-full w-full bg-white overflow-hidden text-[#242424] relative md:rounded-xl shadow-sm md:border border-gray-200 pt-safe">
       
       {/* ============================================================== */}
-      {/* ANIMATED SPLASH SCREEN OVERLAY */}
-      {/* ============================================================== */}
-      {showSplash && (
-        <motion.div 
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 z-50 bg-[#121215] flex flex-col items-center justify-center p-6 text-white text-center select-none"
-        >
-          {/* Ambient Glow Orbs */}
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#CD7F32]/25 rounded-full blur-[90px] pointer-events-none animate-pulse" />
-          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-56 h-56 bg-amber-500/15 rounded-full blur-[80px] pointer-events-none" />
-
-          {/* Center Card Content */}
-          <div className="relative z-10 flex flex-col items-center max-w-sm w-full space-y-6">
-            {/* Animated Event Avatar */}
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0, y: 15 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, type: 'spring', stiffness: 120 }}
-              className="relative"
-            >
-              <div className="w-24 h-24 rounded-3xl p-1 bg-gradient-to-tr from-[#CD7F32] via-amber-500 to-amber-200 shadow-2xl shadow-[#CD7F32]/40 relative">
-                <div className="w-full h-full bg-[#1a1a20] rounded-[22px] overflow-hidden flex items-center justify-center border border-white/20">
-                  {safeEvent.coverImageUrl ? (
-                    <img src={safeEvent.coverImageUrl} className="w-full h-full object-cover" alt={safeEvent.title} />
-                  ) : (
-                    <span className="text-3xl font-black font-serif text-[#CD7F32]">
-                      {safeEvent.title?.charAt(0) || "B"}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="absolute -inset-2 rounded-[32px] border border-[#CD7F32]/40 animate-ping pointer-events-none" />
-            </motion.div>
-
-            {/* Event Title */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-              className="space-y-2 px-4"
-            >
-              <span className="inline-block px-3 py-1 rounded-full bg-[#CD7F32]/20 border border-[#CD7F32]/40 text-[#CD7F32] text-[11px] font-black tracking-widest uppercase shadow-sm">
-                COMMUNITY HUB
-              </span>
-              <h2 className="text-2xl font-extrabold text-white font-serif drop-shadow-md leading-tight line-clamp-2">
-                {safeEvent.title || "Community Chat"}
-              </h2>
-              <p className="text-xs text-gray-400 font-medium">
-                Entering community chat &amp; connecting to live members...
-              </p>
-            </motion.div>
-
-            {/* Animated Loading Bar */}
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden relative border border-white/10"
-            >
-              <div className="h-full bg-gradient-to-r from-[#CD7F32] to-amber-400 rounded-full animate-pulse w-full origin-left duration-1000" />
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* ============================================================== */}
       {/* 1. Servers Sidebar (Far Left - Visible on Mobile & Desktop) */}
       {/* ============================================================== */}
       <div className="w-14 md:w-16 bg-[#2b2b2b] flex flex-col items-center py-4 gap-4 z-20 shrink-0 h-full">
@@ -558,7 +482,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                 </div>
               ) : (
                 otherEvents.map(ev => {
-                  const href = currentUser.role === 'MANAGER' ? `/manager/events/${ev.id}/chat` : `/user/community/${ev.id}`;
+                  const href = currentUser.role === 'MANAGER' ? `/manager/events/details/chat?id=${ev.id}&channel=general` : `/user/community/chat?id=${ev.id}`;
                   return (
                     <Link key={ev.id} href={href} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#2b2b2b] transition-all border border-transparent hover:border-[#3a3a3a] group cursor-pointer shadow-sm hover:shadow-md">
                       <div className="w-11 h-11 rounded-[12px] bg-[#CD7F32] overflow-hidden shrink-0 shadow-inner border border-white/10 relative">
@@ -570,7 +494,7 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
                       </div>
                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <h3 className="font-bold text-[15px] text-gray-100 truncate leading-tight mb-0.5 group-hover:text-white transition-colors">{ev.title}</h3>
-                        <p className="text-[11px] text-[#e0a66d] font-semibold uppercase tracking-wider group-hover:text-[#ffc58a] transition-colors">Join Chat</p>
+                        <p className="text-[11px] text-[#e0a66d] font-semibold uppercase tracking-wider group-hover:text-[#ffc58a] transition-colors">View Chat</p>
                       </div>
                     </Link>
                   );
@@ -596,58 +520,22 @@ export default function CommunityChatLayout({ eventId, event, currentUser, other
         {/* Chat Header */}
         <div className="h-16 flex items-center justify-between px-3 md:px-6 border-b border-[#e0dcd3] shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 bg-white md:bg-[#f4efe5] z-10 gap-2">
           <div className="flex items-center gap-2 text-gray-800 min-w-0 shrink-0">
-            <button 
-              className="md:hidden p-1.5 -ml-1 text-[#CD7F32] hover:bg-orange-50 rounded-full"
-              onClick={() => setMobileView(mobileView === 'chat' ? 'channels' : 'chat')}
-              title="Toggle Channels"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
             <div className="flex items-center gap-1.5 min-w-0">
               {!activeChannel.startsWith('dm_') && <Hash className="w-5 h-5 text-gray-400 shrink-0" />}
               <h2 className="font-bold text-[16px] md:text-lg font-serif truncate">{getChatTitle()}</h2>
             </div>
           </div>
 
-          {/* Quick Channel Pills for Instant 1-Tap Switching */}
-          <div className="flex items-center gap-1 overflow-x-auto py-1 max-w-[200px] md:max-w-none no-scrollbar">
-            {ALL_CHANNELS.filter(ch => !(ch === 'staff-chat' && safeUser.role === 'USER')).map(ch => (
-              <button
-                key={ch}
-                onClick={() => handleChannelSelect(ch)}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all whitespace-nowrap border shrink-0 ${
-                  activeChannel === ch 
-                    ? 'bg-[#CD7F32] text-white border-[#CD7F32] shadow-sm' 
-                    : 'bg-black/5 hover:bg-black/10 text-gray-700 border-transparent'
-                }`}
-              >
-                #{ch}
-              </button>
-            ))}
-          </div>
-
           <div className="flex items-center gap-2 text-[#CD7F32] md:text-gray-500 shrink-0">
-            {showSearchInput ? (
-              <div className="flex items-center bg-white px-3 py-1 rounded-full border border-gray-300 shadow-sm">
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search messages..."
-                  className="bg-transparent text-xs text-gray-800 outline-none w-28 md:w-40"
-                  autoFocus
-                />
-                <button onClick={() => { setSearchQuery(''); setShowSearchInput(false); }} className="text-gray-400 hover:text-gray-600 ml-1">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button onClick={() => setShowSearchInput(true)} className="p-1.5 hover:bg-black/5 rounded-full transition-colors">
-                <Search className="w-5 h-5 cursor-pointer hover:text-gray-800" />
-              </button>
-            )}
             <button onClick={() => setShowInfoModal(true)} className="p-1.5 hover:bg-black/5 rounded-full transition-colors" title="Event Info">
               <Info className="w-5 h-5 cursor-pointer hover:text-gray-800" />
+            </button>
+            <button 
+              className="md:hidden p-1.5 text-[#CD7F32] hover:bg-orange-50 rounded-full"
+              onClick={() => setMobileView(mobileView === 'chat' ? 'channels' : 'chat')}
+              title="Toggle Channels"
+            >
+              <Menu className="w-6 h-6" />
             </button>
           </div>
         </div>

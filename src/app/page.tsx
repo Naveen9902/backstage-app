@@ -81,19 +81,10 @@ export default function AppGateway() {
   }, []);
 
   const handleSplashComplete = () => {
-    // If the animation finishes and we have a redirect ready, go there!
     if (redirectUrl && !checkingAuth) {
       router.replace(redirectUrl);
     } else if (!checkingAuth) {
-      const isMobileBrowser = window.innerWidth < 768;
-      const ua = navigator.userAgent;
-      const isMobileEnv = isNativeApp || isMobileBrowser || ua.includes('BackstageFlavor') || ua.includes('Capacitor') || ua.includes('wv');
-      
-      if (isMobileEnv) {
-        router.replace('/login');
-      } else {
-        setShowSplash(false);
-      }
+      router.replace('/login');
     }
   };
 
@@ -103,19 +94,17 @@ export default function AppGateway() {
       if (redirectUrl) {
         router.replace(redirectUrl);
       } else {
-        const isMobileBrowser = window.innerWidth < 768;
-        const ua = navigator.userAgent;
-        const isMobileEnv = isNativeApp || isMobileBrowser || ua.includes('BackstageFlavor') || ua.includes('Capacitor') || ua.includes('wv');
-        if (isMobileEnv) {
-          router.replace('/login');
-        }
+        router.replace('/login');
       }
     }
-  }, [showSplash, checkingAuth, redirectUrl, isNativeApp, router]);
+  }, [showSplash, checkingAuth, redirectUrl, router]);
 
   if (showSplash || checkingAuth) {
     return <AnimatedSplash onComplete={handleSplashComplete} appFlavor={appFlavor} />;
   }
+
+  // We should never reach here because handleSplashComplete or the useEffect will redirect
+  return null;
 
   return (
     <div className="min-h-screen bg-[#121212] font-sans selection:bg-[#CD7F32]/30 text-white relative overflow-hidden">
@@ -286,7 +275,7 @@ export default function AppGateway() {
                     transition={{ delay: i * 0.1, duration: 0.5 }}
                     className="min-w-[320px] md:min-w-[420px] snap-start shrink-0"
                   >
-                    <Link href={`/events/${event.id}`} className="group block relative h-full">
+                    <Link href={`/events/details?id=${event.id}`} className="group block relative h-full">
                       <div className="bg-[#1a1a1a] border border-white/5 group-hover:border-[#CD7F32]/60 rounded-3xl overflow-hidden transition-all duration-500 relative h-full flex flex-col shadow-[0_10px_30px_rgba(0,0,0,0.5)] group-hover:shadow-[0_20px_50px_rgba(205,127,50,0.2)] group-hover:-translate-y-2">
                         
                         <div className="absolute top-5 left-5 z-20">
@@ -431,7 +420,7 @@ export default function AppGateway() {
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ delay: idx * 0.1, duration: 0.6 }}
                   >
-                    <Link href={`/events/${event.id}`} className="group cursor-pointer flex flex-col h-full bg-[#121212] rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_rgba(205,127,50,0.15)] border border-white/5 hover:border-[#CD7F32]/40 transition-all duration-500 hover:-translate-y-2">
+                    <Link href={`/events/details?id=${event.id}`} className="group cursor-pointer flex flex-col h-full bg-[#121212] rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_50px_rgba(205,127,50,0.15)] border border-white/5 hover:border-[#CD7F32]/40 transition-all duration-500 hover:-translate-y-2">
                       <div className="aspect-[4/3] overflow-hidden bg-black relative">
                         <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent z-10" />
                         <img 

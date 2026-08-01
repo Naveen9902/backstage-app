@@ -20,6 +20,7 @@ const triggerHaptic = async () => {
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isChatRoom = pathname ? (pathname.includes('/chat') || pathname.includes('/event-chat') || pathname.includes('/community-chat')) : false;
   const [profile, setProfile] = useState<any>(null);
 
   const fetchProfile = () => {
@@ -65,6 +66,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] via-[#f0eadd] to-[#e6d8b8] flex relative selection:bg-[#CD7F32]/30 selection:text-[#242424]">
       {/* Desktop Sidebar */}
+      {!isChatRoom && (
       <aside className="hidden md:flex w-64 bg-[#242424] text-white flex-col fixed h-full border-r-4 border-[#CD7F32] z-40">
         
         {/* Logo */}
@@ -123,8 +125,10 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
           </button>
         </div>
       </aside>
+      )}
 
       {/* Mobile Bottom Navigation */}
+      {!isChatRoom && (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] border-t border-gray-800 z-50 overflow-x-auto no-scrollbar pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-center h-16 px-2 gap-2 min-w-max">
           {menuItems.map((item) => {
@@ -146,9 +150,11 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
           })}
         </div>
       </nav>
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 mb-16 md:mb-0 min-h-screen flex flex-col overflow-x-hidden">
+      <main className={`flex-1 flex flex-col overflow-x-hidden ${isChatRoom ? 'h-[100dvh]' : 'md:ml-64 mb-16 md:mb-0 min-h-screen'}`}>
+        {!isChatRoom && (
         <header className="h-16 md:h-20 px-4 md:px-10 flex items-center justify-between md:justify-end bg-transparent">
           {/* Mobile Header Logo */}
           <Link href="/manager/dashboard" className="md:hidden flex items-center gap-2">
@@ -170,7 +176,8 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
             </button>
           </div>
         </header>
-        <div className="p-4 md:p-10 md:pt-0 flex-1 relative overflow-hidden">
+        )}
+        <div className={isChatRoom ? "flex-none h-[100dvh] md:h-screen p-0" : "p-4 md:p-10 md:pt-0 flex-1 relative overflow-hidden"}>
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

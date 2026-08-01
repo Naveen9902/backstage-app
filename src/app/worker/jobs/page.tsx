@@ -23,6 +23,8 @@ export default function FindJobs() {
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
 
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const fetchJobs = async () => {
     try {
       const [jobsRes, profileRes] = await Promise.all([
@@ -62,7 +64,9 @@ export default function FindJobs() {
       
       if (res.ok) {
         // Refresh jobs list to show 'Applied' status
+        setSuccessMessage('Application submitted successfully!');
         await fetchJobs();
+        setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         const error = await res.json();
         alert(error.error || 'Failed to apply');
@@ -129,6 +133,30 @@ export default function FindJobs() {
           <h1 className="text-4xl font-bold font-serif tracking-tight mb-2">Find Jobs</h1>
           <p className="text-lg text-gray-700">Discover and apply for open positions at upcoming events</p>
         </div>
+
+        {/* Success Modal */}
+        {successMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm pointer-events-auto">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="bg-[#1a1a20] rounded-3xl p-8 max-w-sm w-full text-center border border-white/10 shadow-[0_0_40px_rgba(205,127,50,0.3)]"
+            >
+              <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2 font-serif">Success!</h3>
+              <p className="text-gray-400 font-medium mb-6">{successMessage}</p>
+              <button 
+                onClick={() => setSuccessMessage(null)}
+                className="w-full bg-[#CD7F32] text-white font-bold py-3.5 rounded-xl active:scale-95 transition-transform"
+              >
+                Awesome
+              </button>
+            </motion.div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="relative w-full sm:w-80">
             <input 
@@ -269,7 +297,7 @@ export default function FindJobs() {
                 className="bg-white rounded-xl p-6 border border-gray-100 flex flex-col md:flex-row justify-between gap-6"
                 style={{ boxShadow: '-6px 6px 0px rgba(205, 127, 50, 0.9)' }}
               >
-                <Link href={`/worker/events/${job.event?.id}`} className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-1 hover:opacity-80 transition-opacity">
+                <Link href={`/worker/events/details?id=${job.event?.id}`} className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-1 hover:opacity-80 transition-opacity">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl flex-shrink-0 border border-gray-200 overflow-hidden relative">
                     {job.event?.coverImageUrl ? (
                       <img src={job.event.coverImageUrl} alt="Event Cover" className="w-full h-full object-cover" />

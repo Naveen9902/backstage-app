@@ -4,6 +4,7 @@ import { apiFetch } from '@/lib/apiFetch';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type Event = {
@@ -18,12 +19,13 @@ type Event = {
 };
 
 export default function MyEvents() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [ratingModalState, setRatingModalState] = useState<{eventId: string, workers: any[]} | null>(null);
-  const [ratingData, setRatingData] = useState<{[userId: string]: {rating: number, comment: string}}>({});
+  const [ratingModalState, setRatingModalState] = useState<{ eventId: string, workers: any[] } | null>(null);
+  const [ratingData, setRatingData] = useState<{ [userId: string]: { rating: number, comment: string } }>({});
   const [submittingRating, setSubmittingRating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -119,7 +121,7 @@ export default function MyEvents() {
     if (!ratingModalState) return;
     const data = ratingData[revieweeId];
     if (!data || data.rating === 0) return;
-    
+
     setSubmittingRating(true);
     try {
       const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/reviews`, {
@@ -143,7 +145,7 @@ export default function MyEvents() {
 
   // Sort and filter events
   const filteredEvents = events.filter(e => e.title.toLowerCase().includes(searchQuery.toLowerCase()) || e.location.toLowerCase().includes(searchQuery.toLowerCase()));
-  
+
   const liveEvents = filteredEvents.filter(e => e.status === 'ONGOING').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const upcomingEvents = filteredEvents.filter(e => e.status !== 'ONGOING' && e.status !== 'COMPLETED').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const completedEvents = filteredEvents.filter(e => e.status === 'COMPLETED').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -157,7 +159,7 @@ export default function MyEvents() {
 
       <div className="max-w-6xl mx-auto px-4 pt-10">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
@@ -172,7 +174,7 @@ export default function MyEvents() {
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-2 bg-gradient-to-r from-[#CD7F32] to-[#ffb163] text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="5" y2="19" /><line x1="5" x2="19" y1="12" y2="12" /></svg>
               Create New Event
             </motion.button>
           </Link>
@@ -182,7 +184,7 @@ export default function MyEvents() {
         <div className="mb-8">
           <div className="relative max-w-xl">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
             </div>
             <input
               type="text"
@@ -198,17 +200,17 @@ export default function MyEvents() {
         <div className="space-y-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-               <svg className="animate-spin h-10 w-10 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-               <p className="mt-4 text-gray-500 font-medium">Loading your events...</p>
+              <svg className="animate-spin h-10 w-10 text-[#CD7F32]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <p className="mt-4 text-gray-500 font-medium">Loading your events...</p>
             </div>
           ) : sortedEvents.length === 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white/80 backdrop-blur-xl p-12 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center max-w-2xl mx-auto"
             >
               <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#CD7F32]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
               </div>
               <h3 className="text-2xl font-bold font-serif mb-2">No Events Found</h3>
               <p className="text-gray-500 mb-8">You haven&apos;t created any events yet, or no events match your search.</p>
@@ -233,7 +235,7 @@ export default function MyEvents() {
                     <div className={`absolute top-0 left-0 w-1.5 h-full ${live ? 'bg-green-500' : completed ? 'bg-gray-300' : 'bg-gradient-to-b from-[#CD7F32] to-[#ffb163]'}`} />
 
                     {/* Left — Event Info */}
-                    <Link href={`/manager/events/${event.id}`} className="space-y-3 flex-1 pl-2 block hover:opacity-80 transition-opacity cursor-pointer">
+                    <Link href={`/manager/events/details?id=${event.id}`} className="space-y-3 flex-1 pl-2 block hover:opacity-80 transition-opacity cursor-pointer">
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center text-[#CD7F32] font-bold text-lg">
                           {event.coverImageUrl ? (
@@ -250,12 +252,12 @@ export default function MyEvents() {
                         )}
                         {completed && (
                           <span className="flex items-center gap-1.5 text-[10px] font-extrabold bg-gray-100 text-gray-500 px-3 py-1.5 rounded-md uppercase tracking-widest shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                             Closed
                           </span>
                         )}
                       </div>
-                      
+
                       <h3 className="text-xl font-bold font-serif text-gray-900 leading-tight group-hover:text-[#CD7F32] transition-colors flex items-center gap-2">
                         <span className="line-clamp-2">{event.title}</span>
                       </h3>
@@ -263,28 +265,28 @@ export default function MyEvents() {
                       <div className="flex flex-col text-[13px] font-medium text-gray-500 gap-2.5">
                         <span className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                           </div>
                           {new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
                         {event.startTime && (
                           <span className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                             </div>
                             {event.startTime}
                           </span>
                         )}
                         <span className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                           </div>
                           <span className="line-clamp-1">{event.location}</span>
                         </span>
-                        
+
                         <div className="mt-1">
                           <span className="inline-flex items-center gap-2 text-[#CD7F32] bg-[#CD7F32]/5 px-2.5 py-1 rounded-lg border border-[#CD7F32]/10 text-xs">
-                            <span className="font-bold">{event.staffingRequests?.length || 0}</span> 
+                            <span className="font-bold">{event.staffingRequests?.length || 0}</span>
                             <span className="uppercase tracking-wider font-bold">Staff Roles</span>
                           </span>
                         </div>
@@ -299,11 +301,10 @@ export default function MyEvents() {
                         <button
                           onClick={() => toggleLive(event)}
                           disabled={toggling === event.id + '_live' || toggling === event.id + '_close'}
-                          className={`relative w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 shadow-sm ${
-                            live
+                          className={`relative w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-300 border-2 shadow-sm ${live
                               ? 'bg-green-50 border-green-400 text-green-700 hover:bg-green-100'
                               : 'bg-white border-gray-200 text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] hover:shadow-md'
-                          } disabled:opacity-60 active:scale-95`}
+                            } disabled:opacity-60 active:scale-95`}
                         >
                           <span className="flex items-center gap-2">
                             {live ? (
@@ -328,7 +329,7 @@ export default function MyEvents() {
                           className="relative w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl font-bold text-sm border-2 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-300 disabled:opacity-60 shadow-sm active:scale-95"
                         >
                           <span className="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                             {toggling === event.id + '_close' ? 'Closing...' : 'Close Event'}
                           </span>
                         </button>
@@ -338,41 +339,33 @@ export default function MyEvents() {
                       {!completed ? (
                         <>
                           <div className="grid grid-cols-3 gap-2 mt-1">
-                            <Link href={`/manager/staffing?eventId=${event.id}`}>
-                              <button className="bg-[#242424] w-full justify-center hover:bg-black text-white px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                Staffing
-                              </button>
-                            </Link>
-
-                            <Link href={`/manager/events/${event.id}/event-chat`}>
-                              <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
-                                Event Chat
-                              </button>
-                            </Link>
-
-                            <Link href={`/manager/events/${event.id}/chat?channel=general`}>
-                              <button className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                                Community
-                              </button>
-                            </Link>
-                          </div>
-                          
-                          <Link href={`/manager/events/${event.id}`}>
-                            <button className="w-full bg-[#CD7F32] hover:bg-[#b06a28] text-white px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-colors shadow-sm hover:shadow-md mt-1">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                              View Workers
+                            <button onClick={() => router.push(`/manager/staffing?eventId=${event.id}`)} className="bg-[#242424] w-full justify-center hover:bg-black text-white px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                              Staffing
                             </button>
-                          </Link>
+
+                            <button onClick={() => router.push(`/manager/events/details/event-chat?id=${event.id}`)} className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z" /><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" /></svg>
+                              Event Chat
+                            </button>
+
+                            <button onClick={() => router.push(`/manager/events/details/community-chat?id=${event.id}`)} className="bg-white border-2 border-gray-100 w-full justify-center text-gray-600 hover:border-[#CD7F32] hover:text-[#CD7F32] px-2 py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-widest flex flex-col items-center gap-1 transition-colors shadow-sm hover:shadow-md h-full">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-0.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                              Community
+                            </button>
+                          </div>
+
+                          <button onClick={() => router.push(`/manager/events/details?id=${event.id}`)} className="w-full bg-[#CD7F32] hover:bg-[#b06a28] text-white px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-colors shadow-sm hover:shadow-md mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                            View Workers
+                          </button>
                         </>
                       ) : (
                         <button
                           onClick={() => openRatingModal(event.id)}
                           className="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-200 w-full justify-center text-yellow-700 hover:shadow-md px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                           Rate Workers
                         </button>
                       )}
@@ -395,10 +388,10 @@ export default function MyEvents() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold font-serif">Rate Event Staff</h2>
               <button onClick={() => setRatingModalState(null)} className="text-gray-400 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </button>
             </div>
-            
+
             {ratingModalState.workers.length === 0 ? (
               <p className="text-gray-500 italic text-center py-8">No accepted workers found for this event.</p>
             ) : (
@@ -406,7 +399,7 @@ export default function MyEvents() {
                 {ratingModalState.workers.map(worker => {
                   const hasReviewed = reviews.some(r => r.eventId === ratingModalState.eventId && r.revieweeId === worker.id);
                   const data = ratingData[worker.id] || { rating: 0, comment: '' };
-                  
+
                   return (
                     <div key={worker.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                       <div className="flex justify-between items-start mb-3">
@@ -416,14 +409,14 @@ export default function MyEvents() {
                         </div>
                         {hasReviewed && (
                           <span className="flex items-center gap-1 text-sm font-bold text-green-600 bg-green-100 px-2 py-1 rounded-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                             Reviewed
                           </span>
                         )}
                         <div className="flex gap-2">
                           {worker.applicationStatus === 'PAID' ? (
                             <span className="flex items-center gap-1 text-sm font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md shadow-sm">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
                               Paid
                             </span>
                           ) : (
@@ -439,7 +432,7 @@ export default function MyEvents() {
                                   if (ratingModalState) {
                                     setRatingModalState({
                                       ...ratingModalState,
-                                      workers: ratingModalState.workers.map((w: any) => 
+                                      workers: ratingModalState.workers.map((w: any) =>
                                         w.id === worker.id ? { ...w, applicationStatus: 'PAID' } : w
                                       )
                                     });
@@ -453,7 +446,7 @@ export default function MyEvents() {
                           )}
                         </div>
                       </div>
-                      
+
                       {!hasReviewed && (
                         <div className="space-y-3">
                           <div className="flex gap-1">
@@ -463,7 +456,7 @@ export default function MyEvents() {
                                 onClick={() => setRatingData({ ...ratingData, [worker.id]: { ...data, rating: star } })}
                                 className={`focus:outline-none transition-colors ${data.rating >= star ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-200'}`}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                               </button>
                             ))}
                           </div>

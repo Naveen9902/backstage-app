@@ -24,6 +24,7 @@ export default function CreateEvent() {
     language: 'English',
     duration: '2 Hours',
     bands: '',
+    artistAvatarUrl: '',
     socialLink: ''
   });
   const [loading, setLoading] = useState(false);
@@ -31,18 +32,28 @@ export default function CreateEvent() {
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if manager is verified
-    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && !data.error && data.managerProfile) {
-          setIsVerified(data.managerProfile.isVerified);
-        } else {
-          setIsVerified(false);
-        }
-      })
-      .catch(() => setIsVerified(false));
-  }, []);
+    const fetchStatus = () => {
+      apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error && data.managerProfile) {
+            setIsVerified(data.managerProfile.isVerified);
+          } else {
+            setIsVerified(false);
+          }
+        })
+        .catch(() => setIsVerified(false));
+    };
+
+    fetchStatus();
+    
+    let intervalId: NodeJS.Timeout;
+    if (isVerified === false || isVerified === null) {
+      intervalId = setInterval(fetchStatus, 3000);
+    }
+    
+    return () => clearInterval(intervalId);
+  }, [isVerified]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,13 +310,31 @@ export default function CreateEvent() {
                   <div>
                     <label className={labelClasses}>Ad Image</label>
                     <div className="relative">
-                      <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'artistAvatarUrl')}
-                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
-                      />
+                      {formData.artistAvatarUrl ? (
+                        <div className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200 group">
+                          <img src={formData.artistAvatarUrl} alt="Ad Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-white text-xs font-bold px-3 py-1.5 bg-black/50 rounded-full cursor-pointer" onClick={() => document.getElementById('adImageInput')?.click()}>Change Image</span>
+                          </div>
+                          <input 
+                            id="adImageInput"
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, 'artistAvatarUrl')}
+                            className="hidden" 
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, 'artistAvatarUrl')}
+                            className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -315,13 +344,31 @@ export default function CreateEvent() {
                   <div className="md:col-span-2">
                     <label className={labelClasses}>Event Poster / Cover Image</label>
                     <div className="relative">
-                      <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, 'coverImageUrl')}
-                        className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
-                      />
+                      {formData.coverImageUrl ? (
+                        <div className="relative w-full h-48 rounded-xl overflow-hidden border border-gray-200 group">
+                          <img src={formData.coverImageUrl} alt="Cover Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-white text-xs font-bold px-3 py-1.5 bg-black/50 rounded-full cursor-pointer" onClick={() => document.getElementById('coverImageInput')?.click()}>Change Poster</span>
+                          </div>
+                          <input 
+                            id="coverImageInput"
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, 'coverImageUrl')}
+                            className="hidden" 
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e, 'coverImageUrl')}
+                            className={inputClasses + " pl-12 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#CD7F32]/10 file:text-[#CD7F32] hover:file:bg-[#CD7F32]/20"} 
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
 

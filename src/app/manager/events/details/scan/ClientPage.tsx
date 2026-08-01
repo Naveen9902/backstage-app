@@ -3,13 +3,13 @@ import { apiFetch } from '@/lib/apiFetch';
 
 
 import { useEffect, useState, useRef } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { useParams, useRouter } from 'next/navigation';
+import type { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
-export default function QRScannerPage() {
-  const params = useParams();
-  const eventId = params.eventId as string;
+function QRScannerContent() {
+  const params = useSearchParams();
+  const eventId = params.get('id') as string;
   const router = useRouter();
   
   const [scanResult, setScanResult] = useState<string | null>(null);
@@ -24,32 +24,60 @@ export default function QRScannerPage() {
     // Start scanner on mount
     setStatus('scanning');
     
+    let mounted = true;
+    
     // Use Html5Qrcode directly to bypass injected UI and auto-start the camera
     import('html5-qrcode').then(({ Html5Qrcode }) => {
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      scannerRef.current = html5QrCode as any; // Store reference to pause/resume/clear later
-
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { 
-          fps: 15, 
-          qrbox: { width: 200, height: 200 }, 
-          aspectRatio: 1.0
-        },
-        onScanSuccess,
-        onScanFailure
-      ).catch(err => {
-        console.error("Error starting camera: ", err);
+      if (!mounted) return;
+      
+      const el = document.getElementById("qr-reader");
+      if (!el) {
         setStatus('error');
-        setMessage('Camera access denied or unavailable.');
-      });
+        setMessage('Scanner container not found in DOM.');
+        return;
+      }
+      
+      try {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        scannerRef.current = html5QrCode as any; // Store reference to pause/resume/clear later
+
+        html5QrCode.start(
+          { facingMode: "environment" },
+          { 
+            fps: 15, 
+            qrbox: { width: 200, height: 200 }, 
+            aspectRatio: 1.0
+          },
+          onScanSuccess,
+          onScanFailure
+        ).catch(err => {
+          console.error("Error starting camera: ", err);
+          setStatus('error');
+          setMessage(typeof err === 'string' ? err : err?.message || 'Camera access denied or unavailable.');
+        });
+      } catch (err: any) {
+        console.error("Error initializing Html5Qrcode: ", err);
+        setStatus('error');
+        setMessage(err?.message || 'Failed to initialize scanner. Check camera permissions.');
+      }
+    }).catch(err => {
+      console.error("Error importing html5-qrcode: ", err);
+      if (mounted) {
+        setStatus('error');
+        setMessage(err?.message || 'Failed to load scanner module.');
+      }
     });
 
     return () => {
+      mounted = false;
       if (scannerRef.current) {
-        (scannerRef.current as any).stop().then(() => {
-          (scannerRef.current as any).clear();
-        }).catch((err: any) => console.error("Failed to clear html5Qrcode. ", err));
+        try {
+          (scannerRef.current as any).stop().then(() => {
+            (scannerRef.current as any).clear();
+          }).catch((err: any) => console.error("Failed to clear html5Qrcode. ", err));
+        } catch (e) {
+          console.error("Error stopping scanner: ", e);
+        }
       }
     };
   }, []);
@@ -273,3 +301,9 @@ export default function QRScannerPage() {
 
 
 
+
+
+import { Suspense } from 'react';
+export default function QRScannerPage() {
+  return <Suspense><QRScannerContent /></Suspense>;
+}

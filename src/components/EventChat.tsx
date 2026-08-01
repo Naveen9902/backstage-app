@@ -18,7 +18,7 @@ type Message = {
   sender: User;
 };
 
-export default function EventChat({ eventId, currentUser }: { eventId: string, currentUser: any }) {
+export default function EventChat({ eventId, currentUser, channel = 'staff-chat' }: { eventId: string, currentUser: any, channel?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chat/${eventId}?channel=staff-chat`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/chat/${eventId}?channel=${channel}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -46,7 +46,7 @@ export default function EventChat({ eventId, currentUser }: { eventId: string, c
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'EventChatMessage', filter: `eventId=eq.${eventId}` },
         (payload) => {
-          if (payload.new.channel === 'staff-chat') {
+          if (payload.new.channel === channel) {
             fetchMessages();
           }
         }

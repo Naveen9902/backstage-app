@@ -76,6 +76,7 @@ export default function WorkerProfile() {
   const [otpCode, setOtpCode] = useState('');
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [verifyingTier, setVerifyingTier] = useState(false);
+  const [showTierForm, setShowTierForm] = useState(false);
 
   useEffect(() => {
     apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
@@ -331,7 +332,7 @@ export default function WorkerProfile() {
   
   const requiresTier1 = formData.tier === 'Tier 1';
   const isTier1Complete = agreements.infoAccurate && agreements.guidelines && agreements.bgCheck;
-  const isSaveDisabled = saving || loading || isUnderage || (!formData.isVerified && requiresTier1 && !isTier1Complete);
+  const isSaveDisabled = saving || loading || isUnderage || (!formData.isVerified && !isTier1Complete);
   const isTierUpgradeOrRoleChange = formData.tier !== formData.originalTier || (['Tier 2', 'Tier 3'].includes(formData.tier) && JSON.stringify(formData.categories) !== JSON.stringify(formData.originalCategories));
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -345,8 +346,8 @@ export default function WorkerProfile() {
 
     setUploading(prev => ({ ...prev, [field]: true }));
     try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "zzfkegyd";
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default";
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "yyfxsrjb";
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "zzfkegyd";
       
       if (!cloudName || !uploadPreset) throw new Error("Cloudinary not configured");
 
@@ -554,8 +555,29 @@ export default function WorkerProfile() {
             </div>
             
             <div className="space-y-6 pt-6 border-t border-gray-100">
-              {/* Role Selection */}
-              <div>
+              {!showTierForm ? (
+                <div className="flex justify-center py-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowTierForm(true)}
+                    className="bg-[#CD7F32] hover:bg-[#a86524] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md"
+                  >
+                    Apply for Tier Upgrade / Verification
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-end mb-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowTierForm(false)}
+                      className="text-sm font-bold text-gray-500 hover:text-gray-700 underline"
+                    >
+                      Hide Form
+                    </button>
+                  </div>
+                  {/* Role Selection */}
+                  <div>
                 <label className="text-sm font-bold text-gray-700 mb-2 block">Select Target Tier</label>
                 <select 
                   value={formData.tier} 
@@ -610,11 +632,10 @@ export default function WorkerProfile() {
               {/* Requirements Box */}
               {formData.tier && (
                 <div className="bg-[#fdfbf7] p-6 rounded-xl border border-[#e6decb] space-y-4">
-                  {formData.tier === 'Tier 1' && (
-                    <>
-                      <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Tier 1 Requirements (Basic Verification)</h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <>
+                    <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 text-[#8b6125]">Basic Verification (Required for all Tiers)</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-bold text-gray-700">Date of Birth</label>
                           <input type="date" value={formData.dateOfBirth} onChange={e=>setFormData({...formData, dateOfBirth: e.target.value})} className={`w-full bg-white border ${isUnderage ? 'border-red-500' : 'border-gray-200'} rounded-lg px-4 py-2 mt-1 focus:border-[#CD7F32] outline-none`} />
@@ -664,9 +685,8 @@ export default function WorkerProfile() {
                         </div>
                       </div>
                     </>
-                  )}
                   
-                  {/* Professional Requirements (Tier 2) */}
+                  {/* Professional Requirements (Tier 2/3) */}
                   {formData.tier === 'Tier 2' && (
                     <div className="pt-2">
                       <h3 className="font-bold text-lg border-b border-[#e6decb] pb-2 mb-4 text-[#8b6125]">Tier 2 Requirements (Professional Details)</h3>
@@ -756,15 +776,16 @@ export default function WorkerProfile() {
               <div className="flex justify-end pt-4 border-t border-gray-100">
                 <button 
                   onClick={handleApplyForVerification}
-                  disabled={verifyingTier || isUnderage || (formData.tier === 'Tier 1' && !isTier1Complete) || formData.categories.length === 0}
+                  disabled={verifyingTier || isUnderage || !isTier1Complete || formData.categories.length === 0}
                   className="bg-[#CD7F32] hover:bg-[#a86524] text-white px-8 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
                 >
                   {verifyingTier ? 'Submitting...' : 'Apply for Verification'}
                 </button>
               </div>
-            </div>
+            </>
+            )}
           </div>
-
+        </div>
 
           {/* Reviews Section */}
           <div className="pt-4">

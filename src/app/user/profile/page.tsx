@@ -14,6 +14,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   
+  const [isEditing, setIsEditing] = useState(false);
+  
   // OTP States
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');

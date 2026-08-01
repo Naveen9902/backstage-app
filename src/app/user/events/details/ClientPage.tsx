@@ -79,7 +79,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
 
   const handleJoinCommunity = async () => {
     if (hasJoined) {
-      router.push(`/user/community/${eventId}`);
+      router.push(`/user/community/chat?id=${eventId}`);
       return;
     }
     setIsJoining(true);
@@ -97,7 +97,7 @@ export default function UserEventDetails({ params }: { params: Promise<{ eventId
           if (!saved.includes(eventId)) localStorage.setItem(savedKey, JSON.stringify([...saved, eventId]));
         } catch (e) {}
       }
-      router.push(`/user/community/${eventId}`);
+      router.push(`/user/community/chat?id=${eventId}`);
     } catch (e) {
       console.error(e);
     } finally {

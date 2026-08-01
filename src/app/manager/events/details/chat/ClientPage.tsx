@@ -5,12 +5,11 @@ import { redirect } from 'next/navigation';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
 import React, { useState, useEffect } from 'react';
 
-export default function ManagerEventChatPage({ 
-  params
-}: {
-  params: Promise<{ eventId: string }>
-}) {
-  const { eventId } = React.use(params);
+import { useSearchParams } from 'next/navigation';
+
+function ManagerEventChatContent() {
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('id') || '';
   const [initialChannel, setInitialChannel] = useState('announcements');
   const [event, setEvent] = useState<any>(null);
   const [otherEvents, setOtherEvents] = useState<any[]>([]);
@@ -18,6 +17,8 @@ export default function ManagerEventChatPage({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!eventId) return;
+    
     // Client-side search params parsing
     if (typeof window !== 'undefined') {
       const search = new URLSearchParams(window.location.search);
@@ -25,32 +26,51 @@ export default function ManagerEventChatPage({
       if (ch) setInitialChannel(ch);
     }
 
-    // Check local storage for session
-    const sessionStr = localStorage.getItem('backstage_user_session');
-    if (!sessionStr) {
-      window.location.href = '/login';
-      return;
-    }
-    
-    let session;
-    try {
-      session = JSON.parse(sessionStr);
-      if (session.role !== 'MANAGER') {
-        window.location.href = '/login';
-        return;
-      }
-      setUser(session);
-    } catch (e) {
-      window.location.href = '/login';
-      return;
-    }
-
     const fetchAll = async () => {
+      let currentUser = user;
+      
+      if (!currentUser) {
+        const sessionStr = localStorage.getItem('backstage_user_session');
+        if (sessionStr) {
+          try {
+            const session = JSON.parse(sessionStr);
+            if (session.role === 'MANAGER') {
+              currentUser = session;
+              setUser(session);
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!currentUser) {
+        // Fallback: fetch from API if session not in local storage
+        try {
+          const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && !data.error && data.role === 'MANAGER') {
+              currentUser = data;
+              setUser(data);
+              localStorage.setItem('backstage_user_session', JSON.stringify(data));
+            } else {
+              window.location.href = '/login';
+              return;
+            }
+          } else {
+            window.location.href = '/login';
+            return;
+          }
+        } catch (err) {
+          window.location.href = '/login';
+          return;
+        }
+      }
+
       try {
         const [eventRes, managerEventsRes] = await Promise.all([
           apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
           apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events`, {
-            headers: { 'Cookie': `managerUserId=${session.id}; userId=${session.id}` }
+            headers: { 'Cookie': `managerUserId=${currentUser.id}; userId=${currentUser.id}` }
           })
         ]);
 
@@ -108,5 +128,10 @@ export default function ManagerEventChatPage({
   );
 }
 
-
-
+export default function ManagerEventChatPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading chat...</div>}>
+      <ManagerEventChatContent />
+    </React.Suspense>
+  );
+}

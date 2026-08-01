@@ -6,14 +6,12 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { Calendar, Clock, MapPin, Globe, Ticket, Lightbulb, ThumbsUp, Navigation, ChevronRight, Sparkles } from 'lucide-react';
 import EventMediaGallery from '@/components/EventMediaGallery';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
-
-export default function EventDetailsPage({ params }: Props) {
-  const { id } = React.use(params);
+function PublicEventContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   
   const [event, setEvent] = useState<any>(null);
   const [relatedEvents, setRelatedEvents] = useState<any[]>([]);
@@ -213,7 +211,7 @@ export default function EventDetailsPage({ params }: Props) {
                 </Link>
               ) : (
                 <div className="w-full space-y-3">
-                  <Link href={userId ? `/user/community/${id}` : `/login`} className="block w-full">
+                  <Link href={userId ? `/user/community/chat?id=${id}` : `/login`} className="block w-full">
                     <button className="w-full bg-[#242424] hover:bg-black text-[#CD7F32] border border-[#CD7F32]/40 px-6 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base">
                       👥 Join Community
                     </button>
@@ -263,6 +261,14 @@ export default function EventDetailsPage({ params }: Props) {
       </div>
 
     </div>
+  );
+}
+
+export default function PublicEventPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#121212] flex items-center justify-center text-white">Loading...</div>}>
+      <PublicEventContent />
+    </Suspense>
   );
 }
 

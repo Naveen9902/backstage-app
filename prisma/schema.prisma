@@ -157,7 +157,7 @@ model Event {
 model StaffingRequest {
   id           String        @id @default(uuid())
   eventId      String
-  event        Event         @relation(fields: [eventId], references: [id])
+  event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   roleName     String
   quantity     Int
   payRate      Float
@@ -172,9 +172,9 @@ model StaffingRequest {
 model Application {
   id                String            @id @default(uuid())
   workerProfileId   String
-  workerProfile     WorkerProfile     @relation(fields: [workerProfileId], references: [id])
+  workerProfile     WorkerProfile     @relation(fields: [workerProfileId], references: [id], onDelete: Cascade)
   staffingRequestId String
-  staffingRequest   StaffingRequest   @relation(fields: [staffingRequestId], references: [id])
+  staffingRequest   StaffingRequest   @relation(fields: [staffingRequestId], references: [id], onDelete: Cascade)
   status            ApplicationStatus @default(PENDING)
   createdAt         DateTime          @default(now())
   checkInTime       DateTime?
@@ -189,7 +189,7 @@ model Application {
 model RunnerDispatch {
   id        String   @id @default(uuid())
   eventId   String
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   managerId String
   task          String
   urgency       String
@@ -290,7 +290,7 @@ model Notification {
 model PaymentTransaction {
   id                    String   @id @default(uuid())
   applicationId         String
-  application           Application @relation(fields: [applicationId], references: [id])
+  application           Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   managerId             String
   workerId              String
   amountTotal           Float

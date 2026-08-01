@@ -8,13 +8,14 @@ export default function AppUpdateBanner() {
   const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
 
+  const APP_BUILD_VERSION = 20260801;
+
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/version`)
       .then(res => res.json())
       .then(data => {
         if (data && data.build) {
-          const storedBuild = localStorage.getItem('userAppBuildVersion');
-          if (!storedBuild || parseInt(storedBuild) < data.build) {
+          if (APP_BUILD_VERSION < data.build) {
             setUpdateInfo(data);
             setShowModal(true);
           }

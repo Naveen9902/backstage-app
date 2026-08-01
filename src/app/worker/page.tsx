@@ -3,6 +3,7 @@ import { apiFetch } from '@/lib/apiFetch';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, AlertTriangle, MapPin, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -124,6 +125,8 @@ const triggerTopUpNotification = (title: string, body: string) => {
 };
 
 export default function WorkerDashboard() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [applications, setApplications] = useState<any[]>([]);
@@ -272,6 +275,28 @@ export default function WorkerDashboard() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Poll for verification approval
+  useEffect(() => {
+    if (profile?.workerProfile?.verificationStatus === 'PENDING') {
+      const intervalId = setInterval(() => {
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error && data.workerProfile) {
+              if (data.workerProfile.verificationStatus !== 'PENDING') {
+                setProfile(data);
+                if (data.workerProfile.verificationStatus === 'APPROVED') {
+                  triggerTopUpNotification('🎉 You are Verified!', 'Your profile has been approved! You can now accept tasks.');
+                }
+              }
+            }
+          }).catch(() => {});
+      }, 3000);
+      return () => clearInterval(intervalId);
+    }
+  }, [profile?.workerProfile?.verificationStatus]);
+
 
   const acceptedApps = applications.filter(app => app.status === 'ACCEPTED');
   const pendingApps = applications.filter(app => app.status === 'PENDING').length;
@@ -531,18 +556,14 @@ export default function WorkerDashboard() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 flex-shrink-0 w-full sm:w-auto">
-            <Link href="/worker/runners" className="flex-1 sm:flex-none">
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Runner Tasks
-              </button>
-            </Link>
-            <Link href={`/worker/events/${liveShifts[0]?.staffingRequest?.eventId}/chat`} className="flex-1 sm:flex-none">
-              <button className="w-full bg-white border border-green-400 text-green-700 hover:bg-green-50 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Event Chat
-              </button>
-            </Link>
+            <button onClick={() => router.push('/worker/runners')} className="flex-1 sm:flex-none w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Runner Tasks
+            </button>
+            <button onClick={() => router.push(`/worker/events/details/chat?id=${liveShifts[0]?.staffingRequest?.eventId}`)} className="flex-1 sm:flex-none w-full bg-white border border-green-400 text-green-700 hover:bg-green-50 font-bold text-xs px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Event Chat
+            </button>
           </div>
         </motion.div>
       )}
@@ -708,7 +729,7 @@ export default function WorkerDashboard() {
 
           <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-4 snap-x hide-scrollbar">
             {platformLiveEvents.map((event, i) => (
-              <Link href={`/worker/events/${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
+              <Link href={`/worker/events/details?id=${event.id}`} key={event.id} className="min-w-[280px] md:min-w-[320px] snap-start shrink-0 group">
                 <div className="bg-white border border-gray-200 hover:border-[#CD7F32] rounded-xl overflow-hidden transition-all duration-300 relative h-full flex flex-col shadow-sm hover:shadow-md">
                   <div className="absolute top-3 left-3 z-10">
                     <span className="bg-white/90 backdrop-blur-md border border-gray-200 text-gray-800 text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm">

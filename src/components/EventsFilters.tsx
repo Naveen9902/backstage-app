@@ -241,7 +241,7 @@ export default function EventsFilters({ events }: { events: any[] }) {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredEvents.map(event => (
-                <Link href={`/events/${event.id}`} key={event.id} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgba(205,127,50,0.15)] hover:-translate-y-1 border border-gray-100 hover:border-[#CD7F32]/30 transition-all duration-300">
+                <Link href={`/events/details?id=${event.id}`} key={event.id} className="group cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgba(205,127,50,0.15)] hover:-translate-y-1 border border-gray-100 hover:border-[#CD7F32]/30 transition-all duration-300">
                   <div className="aspect-[4/5] overflow-hidden bg-gray-100 relative">
                     <img 
                       src={event.coverImageUrl || "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1000&auto=format&fit=crop"} 

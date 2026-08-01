@@ -16,20 +16,43 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const sessionStr = localStorage.getItem('backstage_user_session');
-    if (sessionStr) {
-      try {
+    let sessionFoundAndValid = false;
+    try {
+      const sessionStr = localStorage.getItem('backstage_user_session');
+      if (sessionStr) {
         const session = JSON.parse(sessionStr);
-        if (session.role !== 'ADMIN') {
-          window.location.href = `/${session.role.toLowerCase()}`;
-        } else {
+        if (session.role === 'ADMIN') {
           setUser(session);
+          sessionFoundAndValid = true;
+        } else {
+          window.location.href = `/${(session.role || 'USER').toLowerCase()}`;
+          return;
         }
-      } catch (e) {
-        window.location.href = '/login';
       }
-    } else {
-      window.location.href = '/login';
+    } catch (e) {}
+
+    if (!sessionFoundAndValid) {
+      // Fallback to API check
+      apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/me`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && (data.user || data.role)) {
+            const role = data.user ? data.user.role : data.role;
+            if (role === 'ADMIN') {
+              setUser(data.user || data);
+              try {
+                localStorage.setItem('backstage_user_session', JSON.stringify(data.user || data));
+              } catch (e) {}
+            } else {
+              window.location.href = `/${(role || 'USER').toLowerCase()}`;
+            }
+          } else {
+            window.location.href = '/login';
+          }
+        })
+        .catch(() => {
+          window.location.href = '/login';
+        });
     }
   }, []);
 

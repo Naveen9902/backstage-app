@@ -40,10 +40,10 @@ export default function Login() {
         if (session) {
           const parsed = JSON.parse(session);
           if (parsed && parsed.role) {
-            if (parsed.role === 'ADMIN') router.replace('/admin');
-            else if (parsed.role === 'MANAGER') router.replace('/manager/dashboard');
-            else if (parsed.role === 'USER') router.replace('/user');
-            else router.replace('/worker');
+            if (parsed.role === 'ADMIN') window.location.href = '/admin';
+            else if (parsed.role === 'MANAGER') window.location.href = '/manager/dashboard';
+            else if (parsed.role === 'USER') window.location.href = '/user';
+            else window.location.href = '/worker';
             return;
           }
         }
@@ -65,10 +65,23 @@ export default function Login() {
             return;
           }
 
-          if (role === 'ADMIN') router.replace('/admin');
-          else if (role === 'MANAGER') router.replace('/manager/dashboard');
-          else if (role === 'USER') router.replace('/user');
-          else router.replace('/worker');
+          // Block Staff (MANAGER/WORKER) from accessing Fan App, but allow ADMIN
+          if (appFlavor === 'USER' && role !== 'USER' && role !== 'ADMIN') {
+            apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+            setError('Access Denied: This app is strictly for fans. Please use the Backstage Pro app.');
+            return;
+          }
+
+          if (typeof window !== 'undefined') {
+            try { 
+              localStorage.setItem('backstage_user_session', JSON.stringify(data.user ? data.user : data)); 
+            } catch(e){}
+          }
+
+          if (role === 'ADMIN') window.location.href = '/admin';
+          else if (role === 'MANAGER') window.location.href = '/manager/dashboard';
+          else if (role === 'USER') window.location.href = '/user';
+          else window.location.href = '/worker';
         }
       })
       .catch(() => {})
@@ -78,23 +91,31 @@ export default function Login() {
   const executeLoginWithEmail = async (emailToUse: string, passToUse: string) => {
     setLoading(true);
     setError('');
-    try {
-      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailToUse, password: passToUse })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Block Fan (USER) from accessing OPS App
-        if (appFlavor === 'OPS' && data.role === 'USER') {
-          await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
-          setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
-          setLoading(false);
-          return;
-        }
+      try {
+        const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailToUse, password: passToUse })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          // Block Fan (USER) from accessing OPS App
+          if (appFlavor === 'OPS' && data.role === 'USER') {
+            await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+            setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
+            setLoading(false);
+            return;
+          }
 
-        if (typeof window !== 'undefined') {
+          // Block Staff (MANAGER/WORKER) from accessing Fan App, but allow ADMIN everywhere
+          if (appFlavor === 'USER' && data.role !== 'USER' && data.role !== 'ADMIN') {
+            await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+            setError('Access Denied: This app is strictly for fans. Please use the Backstage Pro app.');
+            setLoading(false);
+            return;
+          }
+
+          if (typeof window !== 'undefined') {
           try { 
             localStorage.setItem('backstage_user_session', JSON.stringify(data)); 
             if (data.sessionToken) {
@@ -105,13 +126,13 @@ export default function Login() {
         if (data.requires2FA) {
           setRequires2FA(true);
         } else if (data.role === 'ADMIN') {
-          router.replace('/admin');
+          window.location.href = '/admin';
         } else if (data.role === 'MANAGER') {
-          router.replace('/manager/dashboard');
+          window.location.href = '/manager/dashboard';
         } else if (data.role === 'USER') {
-          router.replace('/user');
+          window.location.href = '/user';
         } else {
-          router.replace('/worker');
+          window.location.href = '/worker';
         }
       } else {
         setError(data.error || 'Login failed');
@@ -149,10 +170,10 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
-        if (data.role === 'ADMIN') router.replace('/admin');
-        else if (data.role === 'MANAGER') router.replace('/manager/dashboard');
-        else if (data.role === 'USER') router.replace('/user');
-        else router.replace('/worker');
+        if (data.role === 'ADMIN') window.location.href = '/admin';
+        else if (data.role === 'MANAGER') window.location.href = '/manager/dashboard';
+        else if (data.role === 'USER') window.location.href = '/user';
+        else window.location.href = '/worker';
       } else {
         setError(data.error || 'Invalid 2FA code');
       }
@@ -306,6 +327,22 @@ export default function Login() {
                             });
                             const data = await res.json();
                             if (res.ok && data.success) {
+                              // Block Fan (USER) from accessing OPS App
+                              if (appFlavor === 'OPS' && data.user?.role === 'USER') {
+                                await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+                                setError('Access Denied: This app is strictly for operations staff. Please use the Backstage Fan app.');
+                                setLoading(false);
+                                return;
+                              }
+
+                              // Block Staff (MANAGER/WORKER) from accessing Fan App
+                              if (appFlavor === 'USER' && data.user?.role !== 'USER') {
+                                await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
+                                setError('Access Denied: This app is strictly for fans. Please use the Backstage Pro app.');
+                                setLoading(false);
+                                return;
+                              }
+
                               if (data.sessionToken) {
                                 localStorage.setItem('sessionToken', data.sessionToken);
                               }

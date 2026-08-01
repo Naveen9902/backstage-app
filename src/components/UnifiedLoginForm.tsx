@@ -21,6 +21,22 @@ export default function UnifiedLoginForm() {
       });
       const data = await res.json();
       if (res.ok) {
+        const ua = navigator.userAgent;
+        const isFanApk = ua.includes('BackstageFlavor/User');
+        const isOpsApk = ua.includes('BackstageFlavor/Ops');
+
+        if (isFanApk && data.role !== 'USER') {
+          setError('This app is for Fans only. Please download the Backstage Pro app to login as a Manager or Worker.');
+          setLoading(false);
+          return;
+        }
+
+        if (isOpsApk && data.role !== 'MANAGER' && data.role !== 'WORKER' && data.role !== 'ADMIN') {
+          setError('This app is for Staff only. Please download the Backstage Fan app to login as a Fan.');
+          setLoading(false);
+          return;
+        }
+
         if (typeof window !== 'undefined') {
           try { localStorage.setItem('backstage_user_session', JSON.stringify(data)); } catch(e){}
         }

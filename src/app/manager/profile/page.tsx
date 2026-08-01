@@ -61,6 +61,31 @@ export default function ProfilePage() {
       });
   }, []);
 
+  // Poll for verification approval
+  useEffect(() => {
+    if (formData.verificationStatus === 'PENDING') {
+      const intervalId = setInterval(() => {
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/profile`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error && data.managerProfile) {
+              if (data.managerProfile.verificationStatus !== 'PENDING') {
+                setFormData(prev => ({
+                  ...prev,
+                  verificationStatus: data.managerProfile.verificationStatus,
+                  isVerified: data.managerProfile.isVerified
+                }));
+                if (data.managerProfile.verificationStatus === 'APPROVED') {
+                  alert('🎉 Your manager profile has been verified!');
+                }
+              }
+            }
+          }).catch(() => {});
+      }, 3000);
+      return () => clearInterval(intervalId);
+    }
+  }, [formData.verificationStatus]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

@@ -1,14 +1,13 @@
 'use client';
 import { apiFetch } from '@/lib/apiFetch';
-
-
-import { useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import CommunityChatLayout from '@/components/CommunityChatLayout';
+import CommunitySplash from '@/components/CommunitySplash';
 
 export default function UserCommunityChatPage() {
-  const params = useParams();
-  const eventId = (params?.eventId as string) || 'default';
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('id') || 'default';
 
   const [eventData, setEventData] = useState<any>({
     id: eventId,
@@ -29,6 +28,7 @@ export default function UserCommunityChatPage() {
   });
 
   const [otherEvents, setOtherEvents] = useState<any[]>([]);
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     // 1. Fetch current logged-in user profile
@@ -85,6 +85,10 @@ export default function UserCommunityChatPage() {
     loadProfile();
     loadEvent();
   }, [eventId]);
+
+  if (showSplash) {
+    return <CommunitySplash onComplete={() => setShowSplash(false)} appFlavor="USER" />;
+  }
 
   return (
     <div className="w-full h-full bg-[#f3efe5] flex flex-col">

@@ -95,7 +95,7 @@ export default function CommunityPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
               {communities.map((event, i) => (
-                <Link key={event.id} href={`/user/community/${event.id}`}>
+                <Link key={event.id} href={`/user/community/chat?id=${event.id}`}>
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}

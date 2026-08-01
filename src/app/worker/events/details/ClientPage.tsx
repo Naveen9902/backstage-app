@@ -2,11 +2,13 @@
 import { apiFetch } from '@/lib/apiFetch';
 
 import { motion } from 'framer-motion';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function EventDetailsPage({ params }: { params: Promise<{ eventId: string }> }) {
-  const { eventId } = use(params);
+function EventDetailsContent() {
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('id');
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,30 +21,53 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
   const [activeJobForQuestions, setActiveJobForQuestions] = useState<any | null>(null);
   const [answers, setAnswers] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [eventRes, profileRes] = await Promise.all([
-          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
-          apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
-        ]);
-        
-        if (!eventRes.ok) throw new Error('Failed to fetch event');
-        const eventData = await eventRes.json();
-        setEvent(eventData);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          setWorkerProfile(profileData.workerProfile);
-        }
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
-      } finally {
-        setLoading(false);
+  const fetchEventData = async () => {
+    try {
+      const [eventRes, profileRes] = await Promise.all([
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}`),
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`)
+      ]);
+      
+      if (!eventRes.ok) throw new Error('Failed to fetch event');
+      const eventData = await eventRes.json();
+      setEvent(eventData);
+
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        setWorkerProfile(profileData.workerProfile);
       }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (eventId) {
+      fetchEventData();
+    }
+    
+    let intervalId: NodeJS.Timeout;
+    if (eventId && (!workerProfile || !workerProfile.isVerified)) {
+      intervalId = setInterval(() => {
+        apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/worker/profile`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error && data.workerProfile) {
+              setWorkerProfile(data.workerProfile);
+            }
+          })
+          .catch(() => {});
+      }, 3000);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
     };
-    fetchData();
-  }, [eventId]);
+  }, [eventId, workerProfile?.isVerified]);
 
   const getTierLevel = (tier?: string) => {
     if (!tier) return 0;
@@ -75,8 +100,9 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
         body: JSON.stringify({ staffingRequestId, answers: customAnswers })
       });
       if (res.ok) {
-        alert('Applied successfully!');
-        window.location.reload();
+        setSuccessMessage('Application submitted successfully!');
+        fetchEventData();
+        setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         const err = await res.json();
         alert(err.error || 'Failed to apply');
@@ -100,6 +126,29 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
           Back to Jobs
         </Link>
       </div>
+
+      {/* Success Modal */}
+      {successMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm pointer-events-auto">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-[#1a1a20] rounded-3xl p-8 max-w-sm w-full text-center border border-white/10 shadow-[0_0_40px_rgba(205,127,50,0.3)]"
+          >
+            <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2 font-serif">Success!</h3>
+            <p className="text-gray-400 font-medium mb-6">{successMessage}</p>
+            <button 
+              onClick={() => setSuccessMessage(null)}
+              className="w-full bg-[#CD7F32] text-white font-bold py-3.5 rounded-xl active:scale-95 transition-transform"
+            >
+              Awesome
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 mb-8">
         <div className="w-full h-64 md:h-80 bg-gray-200 relative">
@@ -256,22 +305,22 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
                   />
                 </div>
               ))}
-            </div>
-
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setActiveJobForQuestions(null)}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => handleApply(activeJobForQuestions.id, answers)}
-                disabled={applyingTo === activeJobForQuestions.id}
-                className="flex-1 bg-gradient-to-r from-[#242424] to-[#1a1a1a] hover:from-[#CD7F32] hover:to-[#a86524] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-              >
-                {applyingTo === activeJobForQuestions.id ? 'Submitting...' : 'Submit Answers'}
-              </button>
+              
+              <div className="flex justify-end gap-3 mt-8">
+                <button 
+                  onClick={() => setActiveJobForQuestions(null)}
+                  className="px-6 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleApply(activeJobForQuestions.id, answers)}
+                  disabled={applyingTo === activeJobForQuestions.id || answers.some(a => !a.trim())}
+                  className="px-6 py-2.5 rounded-xl font-bold text-white bg-[#CD7F32] hover:bg-[#a86524] transition-colors disabled:opacity-50"
+                >
+                  {applyingTo === activeJobForQuestions.id ? 'Submitting...' : 'Submit Application'}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -280,5 +329,10 @@ export default function EventDetailsPage({ params }: { params: Promise<{ eventId
   );
 }
 
-
-
+export default function EventDetailsPage() {
+  return (
+    <Suspense fallback={<div className="p-10 font-medium text-gray-500">Loading...</div>}>
+      <EventDetailsContent />
+    </Suspense>
+  );
+}

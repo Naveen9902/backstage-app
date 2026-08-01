@@ -62,8 +62,8 @@ export async function POST(req: Request) {
       where: { managerId: userId, status: { in: ['UPCOMING', 'ONGOING'] } }
     });
 
-    if (manager?.managerProfile?.subscriptionTier === 'FREE' && activeEventsCount >= 2) {
-      return NextResponse.json({ error: 'Upgrade to PRO to create more than 2 events.' }, { status: 403 });
+    if (manager?.managerProfile?.subscriptionTier === 'FREE' && activeEventsCount >= 10) {
+      return NextResponse.json({ error: 'Upgrade to PRO to create more than 10 events.' }, { status: 403 });
     }
 
     // Combine date + startTime into a single DateTime if both provided
