@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/apiFetch';
+import UserEventDetailView from '@/components/UserEventDetailView';
+import { AnimatePresence } from 'framer-motion';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -12,9 +14,42 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [locationFilter, setLocationFilter] = useState('');
   
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [joinedIds, setJoinedIds] = useState<string[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  
   const popularSearches = ['Concert', 'Festival', 'Live Music', 'Weekend'];
 
   useEffect(() => {
+    // Fetch user profile for saved/joined
+    apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/profile`)
+      .then(res => res.json())
+      .then(profile => {
+        if (profile && profile.id) {
+          setCurrentUser(profile);
+          const savedKey = `backstage_saved_events_${profile.id}`;
+          const joinedKey = `backstage_joined_communities_${profile.id}`;
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem(savedKey) || '[]');
+              const joined = JSON.parse(localStorage.getItem(joinedKey) || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {}
+          }
+        } else {
+          if (typeof window !== 'undefined') {
+            try {
+              const saved = JSON.parse(localStorage.getItem('backstage_saved_events_guest') || '[]');
+              const joined = JSON.parse(localStorage.getItem('backstage_joined_communities_guest') || '[]');
+              if (Array.isArray(saved)) setSavedIds(saved);
+              if (Array.isArray(joined)) setJoinedIds(joined);
+            } catch (e) {}
+          }
+        }
+      })
+      .catch(console.error);
 
     const timer = setTimeout(() => {
       setLoading(true);
@@ -35,7 +70,47 @@ export default function SearchPage() {
     }, 500); // debounce
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, locationFilter]);
+
+  const toggleSaveEvent = (eventId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSavedIds(prev => {
+      const exists = prev.includes(eventId);
+      const next = exists ? prev.filter(id => id !== eventId) : [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+        localStorage.setItem(savedKey, JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  const handleJoinCommunity = async (eventId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setJoinedIds(prev => {
+      if (prev.includes(eventId)) return prev;
+      const next = [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        const joinedKey = currentUser ? `backstage_joined_communities_${currentUser.id}` : 'backstage_joined_communities_guest';
+        localStorage.setItem(joinedKey, JSON.stringify(next));
+      }
+      return next;
+    });
+
+    setSavedIds(prev => {
+      if (prev.includes(eventId)) return prev;
+      const next = [...prev, eventId];
+      if (typeof window !== 'undefined') {
+        const savedKey = currentUser ? `backstage_saved_events_${currentUser.id}` : 'backstage_saved_events_guest';
+        localStorage.setItem(savedKey, JSON.stringify(next));
+      }
+      return next;
+    });
+
+    try {
+      await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/events/${eventId}/join`, { method: 'POST' });
+    } catch (err) {}
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 text-[#242424] font-sans">
@@ -165,7 +240,7 @@ export default function SearchPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <Link href={`/user/events/${event.id}`} className="block bg-white border border-[#EAE6DF] rounded-2xl p-4 flex gap-4 hover:border-[#CD7F32] transition-colors shadow-sm group">
+              <div onClick={() => setSelectedEvent(event)} className="block bg-white border border-[#EAE6DF] rounded-2xl p-4 flex gap-4 hover:border-[#CD7F32] transition-colors shadow-sm group cursor-pointer">
                 <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden shrink-0">
                   {event.coverImageUrl ? (
                     <img src={event.coverImageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={event.title} />
@@ -185,11 +260,24 @@ export default function SearchPage() {
                   <p className="text-sm text-gray-500 mb-2 truncate">{event.location}</p>
                   <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{event.description}</p>
                 </div>
-              </Link>
+              </div>
             </motion.div>
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <UserEventDetailView
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            isSaved={savedIds.includes(selectedEvent.id)}
+            hasJoined={joinedIds.includes(selectedEvent.id)}
+            onToggleSave={() => toggleSaveEvent(selectedEvent.id)}
+            onJoinCommunity={() => handleJoinCommunity(selectedEvent.id)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

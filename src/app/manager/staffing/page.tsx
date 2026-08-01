@@ -125,69 +125,20 @@ function StaffingContent() {
   };
 
   const handlePaymentCheckout = async (application: any) => {
+    // Simulate a successful payment by instantly marking as PAID
     try {
-      // 1. Create order
-      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/checkout`, {
-        method: 'POST',
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/applications/${application.id}/status`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: application.id })
+        body: JSON.stringify({ status: 'PAID' })
       });
       const data = await res.json();
       
-      if (!res.ok) {
-        alert(data.error || 'Checkout failed');
-        return;
-      }
-
-      // 2. Open Razorpay modal
-      const options = {
-        key: data.key,
-        amount: data.amount,
-        currency: "INR",
-        name: "Back Stage",
-        description: `Payment for ${application.workerProfile.user.name}`,
-        order_id: data.orderId,
-        handler: async function (response: any) {
-          // 3. Verify payment
-          const verifyRes = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/razorpay/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            })
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            alert('Payment Successful!');
-            fetchRequests(); // Refresh UI
-          } else {
-            alert('Payment Verification Failed!');
-          }
-        },
-        prefill: {
-          name: "Manager",
-          email: "manager@example.com",
-        },
-        theme: {
-          color: "#CD7F32"
-        }
-      };
-
-      if ((window as any).Razorpay) {
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on('payment.failed', function (response: any){
-          alert("Payment Failed: " + response.error.description);
-        });
-        rzp.open();
+      if (res.ok) {
+        alert('Payment Simulation Successful!');
+        fetchRequests();
       } else {
-        // Mock fallback if sdk not loaded or mock order
-        if (data.orderId.startsWith('order_mock_')) {
-           options.handler({ razorpay_order_id: data.orderId, razorpay_payment_id: 'mock_pay_123', razorpay_signature: 'mock' });
-        } else {
-           alert('Razorpay SDK failed to load.');
-        }
+        alert(data.error || 'Checkout failed');
       }
     } catch (err) {
       console.error(err);

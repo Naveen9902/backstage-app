@@ -59,6 +59,7 @@ export async function GET() {
     const nearbyWorkerProfiles = await prisma.workerProfile.findMany({
       where: {
         isVerified: true,
+        isRunnerAvailable: true,
         userId: { notIn: hiredUserIds }
       },
       include: {

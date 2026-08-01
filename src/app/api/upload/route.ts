@@ -10,34 +10,53 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    const folder = formData.get('folder') as string || 'uploads';
+    const contentType = req.headers.get('content-type') || '';
+    
+    let fileObj: any;
+    let folder = 'uploads';
+    let fileType = '';
+    let fileSize = 0;
 
-    if (!file) {
+    if (contentType.includes('application/json')) {
+      const body = await req.json();
+      fileObj = body.file; // base64 string
+      folder = body.folder || 'uploads';
+      fileType = body.mimeType || 'image/jpeg';
+      // Approximate base64 size: length * 0.75
+      fileSize = fileObj ? fileObj.length * 0.75 : 0;
+    } else {
+      const formData = await req.formData();
+      const f = formData.get('file') as File;
+      fileObj = f;
+      folder = formData.get('folder') as string || 'uploads';
+      fileType = f?.type || 'image/jpeg';
+      fileSize = f?.size || 0;
+    }
+
+    if (!fileObj) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     // Server-side validation
     const MAX_SIZE_MB = 10;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    if (fileSize > MAX_SIZE_MB * 1024 * 1024) {
       return NextResponse.json({ error: `File exceeds maximum size of ${MAX_SIZE_MB}MB` }, { status: 400 });
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(fileType)) {
       return NextResponse.json({ error: 'Invalid file type. Only JPG, PNG, WEBP, and MP4 are allowed.' }, { status: 400 });
     }
 
     // Upload to Cloudinary using unsigned preset via Fetch
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "yyfxsrjb";
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'zzfkegyd';
-    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+    const resourceType = fileType.startsWith('video/') ? 'video' : 'image';
     
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
     
     const cloudinaryData = new FormData();
-    cloudinaryData.append('file', file);
+    cloudinaryData.append('file', fileObj);
     cloudinaryData.append('upload_preset', uploadPreset);
     cloudinaryData.append('folder', folder);
 

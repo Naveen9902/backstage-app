@@ -84,6 +84,25 @@ export default function MyEvents() {
     setToggling(null);
   };
 
+  const deleteEvent = async (event: Event) => {
+    if (!confirm(`Are you sure you want to permanently delete "${event.title}"? This cannot be undone.`)) return;
+    setToggling(event.id + '_delete');
+    try {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${event.id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        fetchEvents();
+      } else {
+        alert('Failed to delete event');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while deleting the event');
+    }
+    setToggling(null);
+  };
+
   const openRatingModal = async (eventId: string) => {
     try {
       const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventId}/staffing`);
@@ -369,6 +388,16 @@ export default function MyEvents() {
                           Rate Workers
                         </button>
                       )}
+
+                      {/* Delete Event Button */}
+                      <button
+                        onClick={() => deleteEvent(event)}
+                        disabled={toggling === event.id + '_delete'}
+                        className="mt-1 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors border border-transparent hover:border-red-100"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        {toggling === event.id + '_delete' ? 'Deleting...' : 'Delete Event'}
+                      </button>
                     </div>
                   </motion.div>
                 );

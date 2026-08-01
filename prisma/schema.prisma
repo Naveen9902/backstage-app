@@ -68,7 +68,6 @@ model ManagerProfile {
   company          String?
   bio              String?
   subscriptionTier String  @default("FREE") // FREE | PRO | ENTERPRISE
-  razorpayCustomerId String? // To save payment methods
   rating           Float   @default(0.0)
 
   // Verification fields
@@ -113,8 +112,6 @@ model WorkerProfile {
   location          String?
 
   applications Application[]
-  razorpayAccountId     String?  // Razorpay Route Account ID for payouts
-  razorpayAccountStatus String   @default("PENDING") // PENDING, ACTIVE, RESTRICTED
 
   @@index([userId])
 }
@@ -296,8 +293,6 @@ model PaymentTransaction {
   amountTotal           Float
   platformFee           Float
   workerPayout          Float
-  razorpayOrderId       String?  @unique
-  razorpayPaymentId     String?  @unique
   status                String   @default("PENDING") // PENDING, HELD, PAID_OUT, REFUNDED
   createdAt             DateTime @default(now())
 

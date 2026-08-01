@@ -103,24 +103,46 @@ export default function CreateEvent() {
     setLoading(true);
 
     try {
-      const uploadData = new FormData();
-      uploadData.append('file', file);
-      uploadData.append('folder', 'events');
-      
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadData,
-      });
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64data = reader.result;
+          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "yyfxsrjb";
+          const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "zzfkegyd";
+          const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+          const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
 
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || 'Failed to upload file');
+          const res = await fetch(cloudinaryUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              file: base64data,
+              upload_preset: uploadPreset,
+              folder: 'events'
+            }),
+          });
 
-      setFormData(prev => ({ ...prev, [field]: data.url }));
+          const data = await res.json();
+          
+          if (!res.ok) throw new Error(data.error?.message || 'Failed to upload file');
+          
+          setFormData(prev => ({
+            ...prev,
+            [field]: data.secure_url
+          }));
+        } catch (err: any) {
+          console.error('Upload error:', err);
+          alert(`Failed to upload file for ${field}: ${err.message}. Please try again.`);
+        } finally {
+          setLoading(false);
+        }
+      };
+      reader.readAsDataURL(file);
     } catch (err: any) {
-      console.error('Upload error:', err);
-      setError(`Failed to upload file for ${field}: ${err.message}. Please try again.`);
-    } finally {
+      console.error('File read error:', err);
+      setError(`Failed to process file: ${err.message}. Please try again.`);
       setLoading(false);
     }
   };
