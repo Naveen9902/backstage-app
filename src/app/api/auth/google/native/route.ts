@@ -86,7 +86,20 @@ export async function POST(req: Request) {
 
     // Set unified session token in Redis
     const sessionToken = crypto.randomUUID();
-    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    
+    try {
+      await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    } catch (redisError) {
+      console.error("Redis session set error during google native auth:", redisError);
+    }
+
+    // Persist session to database as fallback
+    await prisma.session.create({
+      data: {
+        token: sessionToken,
+        userId: user.id
+      }
+    });
 
     const cookieOptions = {
       httpOnly: true,

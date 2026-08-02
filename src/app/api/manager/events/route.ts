@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendNotification } from '@/lib/notifications';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -25,10 +26,13 @@ export async function GET() {
 
     return NextResponse.json(events, { status: 200 });
   } catch (error: any) {
-    console.error("GET EVENTS ERROR:", error);
+    logger.error("GET EVENTS ERROR", error, { userId: await getAuthUserId() });
     return NextResponse.json({ error: 'Failed to fetch events', details: error.message }, { status: 500 });
   }
 }
+
+import { eventCreationSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 export async function POST(req: Request) {
   try {
@@ -45,12 +49,18 @@ export async function POST(req: Request) {
     } catch (parseErr) {
       return NextResponse.json({ error: 'Invalid request body. The cover image may be too large. Try a smaller image.' }, { status: 400 });
     }
-
-    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl, socialLink } = body;
-
-    if (!title || !description || !date || !location) {
-      return NextResponse.json({ error: 'Title, description, date, and location are required.' }, { status: 400 });
+    
+    let validatedData;
+    try {
+      validatedData = eventCreationSchema.parse(body);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json({ error: 'Validation failed', details: validationError.errors }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
+
+    const { title, description, date, startTime, location, coverImageUrl, videoUrl, attendeeCategory, tags, language, duration, bands, artistAvatarUrl, socialLink } = validatedData;
 
     // Check manager subscription tier limits (visual/simple count check)
     const manager = await prisma.user.findUnique({
@@ -116,12 +126,14 @@ export async function POST(req: Request) {
         );
       }
     } catch (notifErr) {
-      console.error('Notification send failed (non-blocking):', notifErr);
+      logger.error('Notification send failed (non-blocking)', notifErr, { eventId: event.id });
     }
+
+    logger.info("Event created successfully", { eventId: event.id, managerId: userId, title });
 
     return NextResponse.json(event, { status: 201 });
   } catch (error: any) {
-    console.error('CREATE EVENT ERROR:', error);
+    logger.error('CREATE EVENT ERROR', error, { userId: await getAuthUserId() });
     const message = error?.message || 'Failed to create event';
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -160,7 +172,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json(updated, { status: 200 });
   } catch (error) {
-    console.error('UPDATE EVENT STATUS ERROR:', error);
+    logger.error('UPDATE EVENT STATUS ERROR', error, { userId: await getAuthUserId() });
     return NextResponse.json({ error: 'Failed to update event status' }, { status: 500 });
   }
 }

@@ -3,16 +3,33 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { redis } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
+import { logger } from '@/lib/logger';
+
+import { registerSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name, role, skill } = await req.json();
+    const body = await req.json();
+    
+    let validatedData;
+    try {
+      validatedData = registerSchema.parse(body);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json({ error: 'Validation failed', details: validationError.errors }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    }
+
+    const { email, password, name, role, skill } = validatedData;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
+      logger.warn('Registration failed: User already exists', { email });
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
     }
 
@@ -46,7 +63,21 @@ export async function POST(req: Request) {
 
     const sessionToken = crypto.randomUUID();
     // 7 days in seconds
-    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    try {
+      await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    } catch (redisError) {
+      logger.error("Redis session set error during register", redisError, { userId: user.id });
+    }
+
+    // Persist session to database as fallback
+    await prisma.session.create({
+      data: {
+        token: sessionToken,
+        userId: user.id
+      }
+    });
+
+    logger.info("User registered successfully", { userId: user.id, role: user.role });
 
     const response = NextResponse.json({ ...user, sessionToken }, { status: 201 });
     
@@ -69,7 +100,9 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error: any) {
-    console.error("REGISTER ERROR:", error);
+    logger.error("REGISTER ERROR", error, { 
+      email: req.clone().json().then((b:any)=>b.email).catch(()=>'unknown') 
+    });
     return NextResponse.json({ error: 'Failed to create user', details: error.message }, { status: 500 });
   }
 }

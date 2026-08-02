@@ -20,11 +20,32 @@ export async function getAuthUserId(): Promise<string | null> {
     return null;
   }
 
+  let userId: string | null = null;
   try {
-    const userId = await redis.get(`session:${sessionToken}`);
-    return userId as string | null;
+    userId = await redis.get(`session:${sessionToken}`);
   } catch (error) {
-    console.error("Redis session fetch error:", error);
-    return null;
+    console.error("Redis session fetch error, falling back to DB:", error);
   }
+
+  // Fallback to database if Redis lookup fails or returns null
+  if (!userId) {
+    try {
+      const prisma = (await import('@/lib/prisma')).default;
+      const session = await prisma.session.findUnique({
+        where: { token: sessionToken }
+      });
+      
+      if (session) {
+        userId = session.userId;
+        // Self-heal Redis asynchronously
+        redis.set(`session:${sessionToken}`, userId, { ex: 604800 }).catch(e => {
+          console.error("Failed to self-heal Redis session:", e);
+        });
+      }
+    } catch (dbError) {
+      console.error("DB session fallback error:", dbError);
+    }
+  }
+
+  return userId as string | null;
 }

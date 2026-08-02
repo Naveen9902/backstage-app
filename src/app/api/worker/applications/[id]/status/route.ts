@@ -1,9 +1,10 @@
-export const dynamic = 'force-static';
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export async function generateStaticParams() { return []; }
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { getAuthUserId } from '@/lib/auth';
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   try {

@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendNotification } from '@/lib/notifications';
+import { applicationSchema } from '@/lib/validations';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export async function GET() {
@@ -66,7 +68,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { staffingRequestId, answers } = await req.json();
+    const body = await req.json();
+    
+    let validatedData;
+    try {
+      validatedData = applicationSchema.parse(body);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json({ error: 'Validation failed', details: validationError.errors }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    }
+
+    const { staffingRequestId, answers } = validatedData;
 
     if (!staffingRequestId) {
       return NextResponse.json({ error: 'Missing staffing request ID' }, { status: 400 });

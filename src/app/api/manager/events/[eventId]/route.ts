@@ -3,6 +3,7 @@ export const revalidate = 0;
 export async function generateStaticParams() { return []; }
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthUserId } from '@/lib/auth';
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ eventId: string }> | { eventId: string } }) {
   try {

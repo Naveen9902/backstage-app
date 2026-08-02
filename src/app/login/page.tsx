@@ -268,10 +268,11 @@ export default function Login() {
                   />
                   <button
                     type="button"
+                    onPointerDown={(e) => { e.preventDefault(); setShowPassword(!showPassword); }}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none z-10 p-2"
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <EyeOff size={20} className="pointer-events-none" /> : <Eye size={20} className="pointer-events-none" />}
                   </button>
                 </div>
               </div>
@@ -335,8 +336,8 @@ export default function Login() {
                                 return;
                               }
 
-                              // Block Staff (MANAGER/WORKER) from accessing Fan App
-                              if (appFlavor === 'USER' && data.user?.role !== 'USER') {
+                              // Block Staff (MANAGER/WORKER) from accessing Fan App, but allow ADMIN
+                              if (appFlavor === 'USER' && data.user?.role !== 'USER' && data.user?.role !== 'ADMIN') {
                                 await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/auth/logout`, { method: 'POST' });
                                 setError('Access Denied: This app is strictly for fans. Please use the Backstage Pro app.');
                                 setLoading(false);

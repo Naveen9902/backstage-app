@@ -104,7 +104,8 @@ export default function FindJobs() {
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.roleName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           job.event?.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTierFilter = tierFilter === 'All' || job.tier === tierFilter;
+    const jobTier = job.tier || 'Tier 1';
+    const matchesTierFilter = tierFilter === 'All' || jobTier === tierFilter;
     const matchesRoleFilter = roleFilter === 'All' || job.roleName === roleFilter;
     const matchesEventTypeFilter = eventTypeFilter === 'All' || job.event?.attendeeCategory === eventTypeFilter;
     
@@ -123,7 +124,7 @@ export default function FindJobs() {
     const hasSufficientTier = workerLevel >= jobTierLevel;
     const hasSpecificRole = jobTierLevel > 1 ? workerCategories.includes(job.roleName) : true;
     
-    return matchesSearch && matchesTierFilter && matchesRoleFilter && matchesEventTypeFilter && matchesDateFilter && hasSufficientTier && hasSpecificRole;
+    return matchesSearch && matchesTierFilter && matchesRoleFilter && matchesEventTypeFilter && matchesDateFilter;
   });
 
   return (
@@ -358,7 +359,7 @@ export default function FindJobs() {
                     <div className="flex flex-col items-center">
                       <button 
                         onClick={() => initiateApply(job)}
-                        disabled={applyingTo === job.id || !isVerified || workerLevel < getTierLevel(job.tier)}
+                        disabled={applyingTo === job.id || !isVerified || workerLevel < getTierLevel(job.tier) || (getTierLevel(job.tier) > 1 && !workerCategories.includes(job.roleName))}
                         className="w-full bg-[#242424] hover:bg-black text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {applyingTo === job.id ? 'Applying...' : 'Apply Now'}
@@ -367,6 +368,8 @@ export default function FindJobs() {
                         <p className="text-[10px] text-red-500 font-bold uppercase mt-2">Verification Required</p>
                       ) : workerLevel < getTierLevel(job.tier) ? (
                         <p className="text-[10px] text-red-500 font-bold uppercase mt-2">Requires {job.tier}</p>
+                      ) : (getTierLevel(job.tier) > 1 && !workerCategories.includes(job.roleName)) ? (
+                        <p className="text-[10px] text-red-500 font-bold uppercase mt-2">Requires {job.roleName} Specialization</p>
                       ) : null}
                     </div>
                   )}

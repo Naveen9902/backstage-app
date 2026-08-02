@@ -73,6 +73,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
   }
 }
 
+import { chatLimiter } from '@/lib/rateLimit';
+
 // Post a new message
 export async function POST(req: Request, { params }: { params: Promise<{ eventId: string }> }) {
   try {
@@ -89,6 +91,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
     }
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { success } = await chatLimiter.limit(userId);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many messages. Please wait.' }, { status: 429 });
+    }
 
     const channel = body.channel || 'announcements';
 

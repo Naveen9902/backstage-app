@@ -97,31 +97,32 @@ export async function GET(req: Request) {
         });
       }
     } else {
-      // User exists, but they might be registering with a different role
+      // User exists. We intentionally DO NOT update their role here.
+      // 1 email = 1 account = 1 role. 
+      // If a MANAGER tries to "register" as a WORKER with the same email,
+      // we just seamlessly log them in to their existing MANAGER account.
       if (action === 'register' && user.role !== roleState) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { role: roleState }
-        });
-        
-        if (roleState === 'WORKER') {
-          const existingProfile = await prisma.workerProfile.findUnique({ where: { userId: user.id } });
-          if (!existingProfile) {
-            await prisma.workerProfile.create({ data: { userId: user.id, skills: '', experience: '' } });
-          }
-        } else if (roleState === 'MANAGER') {
-          const existingProfile = await prisma.managerProfile.findUnique({ where: { userId: user.id } });
-          if (!existingProfile) {
-            await prisma.managerProfile.create({ data: { userId: user.id, company: '' } });
-          }
-        }
+        console.log(`User ${user.email} attempted to register as ${roleState} but is already a ${user.role}. Seamlessly logging in to existing role.`);
       }
     }
 
     // 4. Set unified session token in Redis
     const cookieStore = await cookies();
     const sessionToken = randomUUID();
-    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    
+    try {
+      await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    } catch (redisError) {
+      console.error("Redis session set error during google callback:", redisError);
+    }
+
+    // Persist session to database as fallback
+    await prisma.session.create({
+      data: {
+        token: sessionToken,
+        userId: user.id
+      }
+    });
     
     const cookieOptions = {
       httpOnly: true,

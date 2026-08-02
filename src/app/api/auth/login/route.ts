@@ -3,15 +3,32 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { redis } from '@/lib/auth';
 
+import { loginSchema } from '@/lib/validations';
+import { z } from 'zod';
+import { logger } from '@/lib/logger';
+
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    
+    let validatedData;
+    try {
+      validatedData = loginSchema.parse(body);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json({ error: 'Validation failed', details: validationError.errors }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+    }
+
+    const { email, password } = validatedData;
 
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
+      logger.warn('Login failed: Invalid credentials (user not found)', { email });
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
@@ -26,6 +43,7 @@ export async function POST(req: Request) {
     }
 
     if (!isMatch) {
+      logger.warn('Login failed: Invalid credentials (password mismatch)', { email, userId: user.id });
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
@@ -61,8 +79,22 @@ export async function POST(req: Request) {
     }
 
     const sessionToken = crypto.randomUUID();
-    // 7 days in seconds
-    await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    
+    try {
+      await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
+    } catch (redisError) {
+      logger.error("Redis session set error during login", redisError, { userId: user.id });
+    }
+
+    // Persist session to database as fallback
+    await prisma.session.create({
+      data: {
+        token: sessionToken,
+        userId: user.id
+      }
+    });
+
+    logger.info("User logged in successfully", { userId: user.id, role: user.role });
 
     const response = NextResponse.json({ ...user, sessionToken }, { status: 200 });
     
@@ -85,8 +117,10 @@ export async function POST(req: Request) {
     response.cookies.set('sessionToken', sessionToken, cookieOptions);
 
     return response;
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
+  } catch (error: any) {
+    logger.error("LOGIN ERROR", error, { 
+      email: req.clone().json().then((b:any)=>b.email).catch(()=>'unknown') 
+    });
     return NextResponse.json({ error: 'Login failed' }, { status: 500 });
   }
 }

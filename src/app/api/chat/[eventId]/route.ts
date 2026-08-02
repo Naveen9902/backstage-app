@@ -64,6 +64,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ eventId:
   }
 }
 
+import { chatLimiter } from '@/lib/rateLimit';
+
 export async function POST(req: Request, { params }: { params: Promise<{ eventId: string }> }) {
   try {
     const { eventId } = await params;
@@ -73,6 +75,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ eventId
     const user = await getAuthenticatedUser();
     
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { success } = await chatLimiter.limit(user.id);
+    if (!success) {
+      return NextResponse.json({ error: 'Too many messages. Please wait.' }, { status: 429 });
+    }
+
     if ((!text || !text.trim()) && !imageUrl) return NextResponse.json({ error: 'Empty message' }, { status: 400 });
 
     // Validate access
