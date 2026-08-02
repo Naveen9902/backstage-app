@@ -25,6 +25,7 @@ export default function MyEvents() {
   const [toggling, setToggling] = useState<string | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [ratingModalState, setRatingModalState] = useState<{ eventId: string, workers: any[] } | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
   const [ratingData, setRatingData] = useState<{ [userId: string]: { rating: number, comment: string } }>({});
   const [submittingRating, setSubmittingRating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,10 +86,15 @@ export default function MyEvents() {
   };
 
   const deleteEvent = async (event: Event) => {
-    if (!confirm(`Are you sure you want to permanently delete "${event.title}"? This cannot be undone.`)) return;
-    setToggling(event.id + '_delete');
+    // Open confirmation modal
+    setEventToDelete(event);
+  };
+
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
+    setToggling(eventToDelete.id + '_delete');
     try {
-      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${event.id}`, {
+      const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/manager/events/${eventToDelete.id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -101,6 +107,7 @@ export default function MyEvents() {
       alert('An error occurred while deleting the event');
     }
     setToggling(null);
+    setEventToDelete(null);
   };
 
   const openRatingModal = async (eventId: string) => {
@@ -391,7 +398,7 @@ export default function MyEvents() {
 
                       {/* Delete Event Button */}
                       <button
-                        onClick={() => deleteEvent(event)}
+                        onClick={() => setEventToDelete(event)}
                         disabled={toggling === event.id + '_delete'}
                         className="mt-1 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors border border-transparent hover:border-red-100"
                       >

@@ -1,6 +1,8 @@
+export const dynamic = 'force-static';
+export const revalidate = 0;
 import { MetadataRoute } from 'next';
 import prisma from '@/lib/prisma';
-export const dynamic = 'force-dynamic';
+
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base URL of your app

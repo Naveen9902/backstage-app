@@ -1,11 +1,15 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+import { randomUUID } from 'crypto';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
-import { redis } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
+
+import { redis } from '@/lib/auth';
 
 export async function GET(req: Request) {
+
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const rawState = url.searchParams.get('state') || 'login_WORKER';
@@ -116,7 +120,7 @@ export async function GET(req: Request) {
 
     // 4. Set unified session token in Redis
     const cookieStore = await cookies();
-    const sessionToken = crypto.randomUUID();
+    const sessionToken = randomUUID();
     await redis.set(`session:${sessionToken}`, user.id, { ex: 604800 });
     
     const cookieOptions = {

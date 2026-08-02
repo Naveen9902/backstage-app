@@ -1,3 +1,5 @@
+export const dynamic = 'force-static';
+export const revalidate = 0;
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
